@@ -1,6 +1,4 @@
-import { PrismaClient } from '@prisma/client/edge'
-
-const prisma = new PrismaClient();
+import { PrismaClient } from '@prisma/client'
 
 declare global {
   var prisma: PrismaClient | undefined;
