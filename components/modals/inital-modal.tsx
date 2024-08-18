@@ -48,7 +48,8 @@ const InitialModal = () => { //* component beginning
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      await axios.post("/api/server/", values);
+      console.log("Form values: ", values);
+      await axios.post("/api/servers", values);
       form.reset();
       router.refresh();
       window.location.reload();
@@ -115,7 +116,7 @@ const InitialModal = () => { //* component beginning
               />
             </div>
             <DialogFooter className="bg-gray-100 px-6 py-4 w-full">
-              <Button variant="primary" disabled={isLoading}>Create</Button>
+              <Button variant="primary" type="submit" disabled={isLoading}>Create</Button>
             </DialogFooter>
           </form>
         </FormProvider>

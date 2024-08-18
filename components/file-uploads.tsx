@@ -16,7 +16,6 @@ const FileUpload: React.FC<FileUploadProps> = ({
   onChange
 }) => {
   const fileType = value.split(".").pop();
-  console.log(value);
   //* check if it is pdf (or else it would be image only)
   if (fileType != "pdf" && value != "") {
     return (
