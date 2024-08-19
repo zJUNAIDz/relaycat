@@ -18,7 +18,7 @@ model Profile {
   updatedAt DateTime  @updatedAt
   servers   Server[]
   members   Member[]
-  Channel   Channel[]
+  channels   Channel[]
 }
 
 model Server {
