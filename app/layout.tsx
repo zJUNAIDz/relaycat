@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import { NextSSRPlugin } from "@uploadthing/react/next-ssr-plugin";
 import { extractRouterConfig } from "uploadthing/server";
 import { ourFileRouter } from "@/app/api/uploadthing/core";
+import { ModalProvider } from "@/components/providers/modal-provider";
 
 
 const inter = Inter({ subsets: ["latin"] });
@@ -41,6 +42,7 @@ export default function RootLayout({
             enableSystem={false}
             storageKey="discord-clone"
           >
+            <ModalProvider />
             {children}
           </ThemeProvider>
         </body>
