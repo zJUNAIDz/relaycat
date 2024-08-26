@@ -14,7 +14,7 @@ import { ModalProvider } from "@/components/providers/modal-provider";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Bismillah",
+  title: "RelayComm",
   description: "Discord app clone",
 };
 
