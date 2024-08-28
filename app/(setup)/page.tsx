@@ -1,5 +1,5 @@
 import InitialModal from "@/components/modals/inital-modal";
-import { db } from "@/lib/prisma";
+import { db } from "@/lib/db";
 import { initialProfile } from "@/lib/initial-profile";
 import { redirect } from "next/navigation";
 
