@@ -8,45 +8,70 @@ datasource db {
   relationMode = "prisma"
 }
 
-model Profile {
-  id        String    @id @default(uuid())
-  userId    String    @unique
-  name      String
-  imageUrl  String
-  email     String
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  servers   Server[]
-  members   Member[]
-  channels   Channel[]
+//=========== Auth.js Modals for prisma start ===============
+model Account {
+  userId            String?
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  Profile           User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([provider, providerAccountId])
+  @@index([userId])
+}
+
+//=========== Auth.js Modals for prisma end ===============
+
+model User {
+  id            String    @id @default(uuid())
+  userId        String    @unique
+  name          String?
+  image         String
+  email         String    @unique
+  emailVerified DateTime?
+  accounts      Account[]
+  servers       Server[]
+  members       Member[]
+  channels      Channel[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 }
 
 model Server {
   id         String    @id @default(uuid())
   name       String
-  imageUrl   String
+  image      String
   inviteCode String
-  profileId  String
+  userId     String
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @updatedAt
-  profile    Profile   @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  profile    User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   members    Member[]
   channels   Channel[]
 
-  @@index([profileId])
+  @@index([userId])
 }
 
 model Member {
   id        String     @id @default(uuid())
   role      MemberRole @default(GUEST)
-  profileId String
+  userId    String
   serverId  String
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
-  profile   Profile    @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   server    Server     @relation(fields: [serverId], references: [id], onDelete: Cascade)
 
-  @@index([profileId])
+  @@index([userId])
   @@index([serverId])
 }
 
@@ -54,14 +79,14 @@ model Channel {
   id        String      @id @default(uuid())
   name      String
   type      ChannelType @default(TEXT)
-  profileId String
+  userId    String
   serverId  String
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
-  profile   Profile     @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   server    Server      @relation(fields: [serverId], references: [id], onDelete: Cascade)
 
-  @@index([profileId])
+  @@index([userId])
   @@index([serverId])
 }
 
