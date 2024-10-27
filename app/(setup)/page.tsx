@@ -4,17 +4,17 @@ import { initialProfile } from "@/lib/initial-profile";
 import { redirect } from "next/navigation";
 
 const SetupPage = async () => {
-  const profile = await initialProfile();
+  const user = await initialProfile();
   const servers = await db.server.findFirst({
     where: {
       members: {
         some: {
-          profileId: profile.id,
+          userId: user.id,
         },
       },
     },
   });
-
+  console.log("SERVERS: ", servers);
   if (servers) redirect(`/servers/${servers.id}`);
 
   return <InitialModal />;
