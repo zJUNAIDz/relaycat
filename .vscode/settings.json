@@ -1,4 +1,18 @@
 {
-  "WillLuke.nextjs.addTypesOnSave": true,
-  "WillLuke.nextjs.hasPrompted": true
+    "WillLuke.nextjs.addTypesOnSave": true,
+    "WillLuke.nextjs.hasPrompted": true,
+    "editor.fontSize": 20,
+    "editor.tokenColorCustomizations": {
+        "[One Dark Pro]": {
+            "comments": "#229977",
+            "functions": "#54b0fc",
+            "keywords": "#C677DC"
+        }
+    },
+    "files.autoSave": "afterDelay",
+    "editor.tabSize": 2,
+    "editor.wordWrap": "on",
+    "editor.bracketPairColorization.independentColorPoolPerBracketType": true,
+    "editor.codeActions.triggerOnFocusChange": true,
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
 }
