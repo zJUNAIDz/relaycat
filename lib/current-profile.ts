@@ -1,12 +1,14 @@
-import { auth } from "@clerk/nextjs";
-import { db } from "@/lib/prisma"
+import { auth } from "@/auth";
+import { db } from "@/lib/db";
+import { redirect } from "next/navigation";
 
 const currentProfile = async () => {
-  const { userId } = auth();
-  if (!userId) return null;
-  const profile = await db.profile.findUnique({
+  const session = await auth();
+  const user = session?.user;
+  if (!user) return redirect("/login");
+  const profile = await db.user.findUnique({
     where: {
-      userId
+      id: user.id
     }
   });
   return profile;
