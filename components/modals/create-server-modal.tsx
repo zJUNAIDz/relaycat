@@ -1,11 +1,5 @@
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { DialogDescription, DialogTitle } from "@radix-ui/react-dialog";
-import axios from "axios";
-import { useRouter } from "next/navigation";
-import { FormProvider, useForm } from "react-hook-form";
-import * as z from "zod";
 import FileUpload from "@/components/file-uploads";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,11 +7,23 @@ import {
   DialogContent,
   DialogFooter,
   DialogHeader,
-  DialogTrigger,
 } from "@/components/ui/dialog";
-import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import {
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useModal } from "@/hooks/use-modal-store";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { DialogDescription, DialogTitle } from "@radix-ui/react-dialog";
+import axios from "axios";
+import { useRouter } from "next/navigation";
+import React from "react";
+import { FormProvider, useForm } from "react-hook-form";
+import * as z from "zod";
 
 const formSchema = z.object({
   name: z.string().min(1, {
@@ -29,16 +35,20 @@ const formSchema = z.object({
   }),
 });
 
-const CreateServerModal = () => { //* component beginning
+const CreateServerModal = () => {
+  //* component beginning
 
   const { isOpen, onOpen, onClose, type } = useModal();
   const isModalOpen = isOpen && type == "createServer";
+  const [imageFile, setImageFile] = React.useState<File | null>(null);
+
   const router = useRouter();
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
-      imageUrl: "",
+      imageUrl:
+        "https://global.discourse-cdn.com/turtlehead/original/2X/c/c830d1dee245de3c851f0f88b6c57c83c69f3ace.png",
     },
   });
 
@@ -46,10 +56,40 @@ const CreateServerModal = () => { //* component beginning
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      await axios.post("/api/servers", values);
+      //*=======================
+      if (!imageFile) {
+        alert("Please upload an image");
+        return;
+      }
+      //* Get signed url from api
+      const response = await fetch(
+        `/api/get-upload-url?serverName=${form.getValues("name")}&fileType=${
+          imageFile.type
+        }`
+      );
+      const { signedUrl, key, bucketName } = await response.json();
+      console.log("Signed rul and key in client", { signedUrl, key });
+      //* Upload file to S3
+      // await fetch(signedUrl, {
+      //   method: "PUT",
+      //   headers: { "Content-Type": file.type },
+      //   body: file,
+      // });
+      await axios.put(signedUrl, imageFile, {
+        headers: { "Content-Type": imageFile.type },
+      });
+      //* upload url with final s3 bucket object url
+      //`https://${bucketName}.s3.amazonaws.com/${key}`
+
+      //*-------------------
+
+      await axios.post("/api/servers", {
+        name: values.name,
+        imageUrl: `https://s3.ap-south-1.amazonaws.com/${bucketName}/${key}`,
+      });
       form.reset();
       router.refresh();
-      onClose();
+      window.location.reload();
     } catch (err) {
       console.error("Error: \n", err);
     }
@@ -58,7 +98,7 @@ const CreateServerModal = () => { //* component beginning
   const handleCloseModal = () => {
     form.reset();
     onClose();
-  }
+  };
 
   return (
     <Dialog open={isModalOpen} onOpenChange={handleCloseModal}>
@@ -72,7 +112,7 @@ const CreateServerModal = () => { //* component beginning
             always change it later.
           </DialogDescription>
         </DialogHeader>
-        <FormProvider {...form} >
+        <FormProvider {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
             <div className="space-y-8 px-6">
               <div className="flex justify-center items-center text-center">
@@ -83,9 +123,13 @@ const CreateServerModal = () => { //* component beginning
                     <FormItem>
                       <FormControl>
                         <FileUpload
-                          endpoint="serverImage"
+                          // endpoint="serverImage"
+                          // getServerName={() => form.getValues("name")}
                           value={field.value}
-                          onChange={field.onChange}
+                          onChange={(previewUrl, file) => {
+                            field.onChange(previewUrl);
+                            setImageFile(file);
+                          }}
                         />
                       </FormControl>
                     </FormItem>
@@ -98,9 +142,7 @@ const CreateServerModal = () => { //* component beginning
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel
-                      className="uppercase text-xs font-bold text-zinc-700 dark:text-secondary/70"
-                    >
+                    <FormLabel className="uppercase text-xs font-bold text-zinc-700 dark:text-secondary/70">
                       Server Name
                     </FormLabel>
                     <FormControl>
@@ -117,12 +159,14 @@ const CreateServerModal = () => { //* component beginning
               />
             </div>
             <DialogFooter className="bg-gray-100 px-6 py-4 w-full">
-              <Button variant="primary" type="submit" disabled={isLoading}>Create</Button>
+              <Button variant="primary" type="submit" disabled={isLoading}>
+                Create
+              </Button>
             </DialogFooter>
           </form>
         </FormProvider>
-      </DialogContent >
-    </Dialog >
+      </DialogContent>
+    </Dialog>
   );
 };
 
