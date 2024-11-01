@@ -81,6 +81,9 @@ CREATE INDEX "Account_userId_idx" ON "Account"("userId");
 CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "Server_inviteCode_key" ON "Server"("inviteCode");
+
+-- CreateIndex
 CREATE INDEX "Server_userId_idx" ON "Server"("userId");
 
 -- CreateIndex

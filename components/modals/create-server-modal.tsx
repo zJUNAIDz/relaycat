@@ -42,6 +42,7 @@ const CreateServerModal = () => {
   const isModalOpen = isOpen && type == "createServer";
   const [imageFile, setImageFile] = React.useState<File | null>(null);
 
+
   const router = useRouter();
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -56,19 +57,15 @@ const CreateServerModal = () => {
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      //*=======================
       if (!imageFile) {
         alert("Please upload an image");
         return;
       }
       //* Get signed url from api
       const response = await fetch(
-        `/api/get-upload-url?serverName=${form.getValues("name")}&fileType=${
-          imageFile.type
-        }`
+        `/api/get-upload-url?serverName=${form.getValues("name")}&fileType=${imageFile.type}`
       );
       const { signedUrl, key, bucketName } = await response.json();
-      console.log("Signed rul and key in client", { signedUrl, key });
       //* Upload file to S3
       // await fetch(signedUrl, {
       //   method: "PUT",
@@ -78,10 +75,6 @@ const CreateServerModal = () => {
       await axios.put(signedUrl, imageFile, {
         headers: { "Content-Type": imageFile.type },
       });
-      //* upload url with final s3 bucket object url
-      //`https://${bucketName}.s3.amazonaws.com/${key}`
-
-      //*-------------------
 
       await axios.post("/api/servers", {
         name: values.name,

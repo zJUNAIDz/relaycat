@@ -1,10 +1,9 @@
-import { auth } from "@/auth";
 import { db } from "@/lib/db";
 import { redirect } from "next/navigation";
+import currentProfile from "./current-profile";
 
 export const initialProfile = async () => {
-  const session = await auth();
-  const user = session?.user;
+  const user = await currentProfile();
   if (!user) return redirect("/login");
 
   //* checking for existing profile and return it
