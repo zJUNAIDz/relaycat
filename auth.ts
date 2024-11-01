@@ -49,7 +49,7 @@ export const {
         token.email = user.email;
         token.image = user.image;
       }
-
+      
       //* Try getting user from db if exist
       // const existingUserInDB =
       //   ((await db.user.findUnique({
@@ -72,7 +72,7 @@ export const {
     },
     async session({ token, session }) {
       if (token) {
-        session.user.id = token.id as string;
+        session.user.id = token.sub as string;
         session.user.name = token.name || "No Name";
         session.user.email = token.email || "No Email";
         session.user.image = token.picture || "No Picture";
