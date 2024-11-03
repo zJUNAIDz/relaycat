@@ -116,13 +116,13 @@ const CreateServerModal = () => {
                     <FormItem>
                       <FormControl>
                         <FileUpload
-                          // endpoint="serverImage"
-                          // getServerName={() => form.getValues("name")}
                           value={field.value}
-                          onChange={(previewUrl, file) => {
-                            field.onChange(previewUrl);
-                            setImageFile(file);
-                          }}
+                          onChange={
+                            (previewUrl, file) => {
+                              field.onChange(previewUrl);
+                              setImageFile(file);
+                            }
+                          }
                         />
                       </FormControl>
                     </FormItem>

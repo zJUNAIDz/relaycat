@@ -13,8 +13,7 @@ import {
   Dialog,
   DialogContent,
   DialogFooter,
-  DialogHeader,
-  DialogTrigger,
+  DialogHeader
 } from "../ui/dialog";
 import {
   FormControl,
@@ -35,9 +34,6 @@ const formSchema = z.object({
     .default(
       "https://global.discourse-cdn.com/turtlehead/original/2X/c/c830d1dee245de3c851f0f88b6c57c83c69f3ace.png"
     ),
-  // .min(1, {
-  //   message: "Server image is required.",
-  // }),
 });
 
 const InitialModal = () => {
@@ -61,19 +57,18 @@ const InitialModal = () => {
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      //*=======================
       if (!imageFile) {
         alert("Please upload an image");
         return;
       }
+
       //* Get signed url from api
       const response = await fetch(
-        `/api/get-upload-url?serverName=${form.getValues("name")}&fileType=${
-          imageFile.type
+        `/api/get-upload-url?serverName=${form.getValues("name")}&fileType=${imageFile.type
         }`
       );
+
       const { signedUrl, key, bucketName } = await response.json();
-      console.log("Signed rul and key in client", { signedUrl, key });
       //* Upload file to S3
       // await fetch(signedUrl, {
       //   method: "PUT",
@@ -83,15 +78,12 @@ const InitialModal = () => {
       await axios.put(signedUrl, imageFile, {
         headers: { "Content-Type": imageFile.type },
       });
-      //* upload url with final s3 bucket object url
-      //`https://${bucketName}.s3.amazonaws.com/${key}`
-
-      //*-------------------
 
       await axios.post("/api/servers", {
         name: values.name,
         imageUrl: `https://s3.ap-south-1.amazonaws.com/${bucketName}/${key}`,
       });
+
       form.reset();
       router.refresh();
       window.location.reload();
@@ -102,7 +94,6 @@ const InitialModal = () => {
 
   return (
     <Dialog open>
-      {/* <DialogTrigger>Create</DialogTrigger> */}
       <DialogContent className="bg-white text-black overflow-hidden">
         <DialogHeader>
           <DialogTitle className="text-center text-2xl font-bold">

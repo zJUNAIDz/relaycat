@@ -27,7 +27,7 @@ const InviteModal = () => {
     data: { server },
   } = useModal();
   const origin = useOrigin();
-  const isModalOpen = isOpen && type == "invite"; 
+  const isModalOpen = isOpen && type == "invite";
   const inviteUrl = `${origin}/invite/${server?.inviteCode}`;
 
   const onCopy = () => {
@@ -38,11 +38,9 @@ const InviteModal = () => {
   const onGenerate = async () => {
     try {
       setIsLoading(true);
-      console.log("SERVERID: ", server?.id);
       const response = await axios.patch(
         `/api/servers/${server?.id}/invite-code`
       );
-      console.log("response.data ", response.data)
       onOpen("invite", { server: response.data });
     } catch (err) {
       console.error("Failed to generate new invite link: ", err);
