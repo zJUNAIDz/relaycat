@@ -5,6 +5,7 @@ import {
   DeleteObjectCommand,
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import axios from "axios";
 
 class S3Service {
   private readonly s3Client: S3Client;
@@ -34,5 +35,25 @@ class S3Service {
     }
   }
 
-  
+  async uploadImage(key: string, file: File) {
+    const command = new PutObjectCommand({
+      Bucket: this.bucketName,
+      Key: key,
+    });
+    try {
+      //* get signed url first
+      const signedUrl = await getSignedUrl(this.s3Client, command, {
+        expiresIn: 3600,
+      });
+      const response = await axios.put(signedUrl, file, {
+        headers: {
+          "Content-Type": file.type,
+        },
+      });
+      return response;
+    } catch (err) {
+      console.error("[S3Service.uploadImage] ", err);
+    }
+  }
+
 }
