@@ -3,6 +3,7 @@ import Google from "next-auth/providers/google";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { db } from "./lib/db";
 import { JWTOptions } from "next-auth/jwt";
+import { SignJWT } from "jose";
 
 function getCredentials() {
   const clientId = process.env.AUTH_GOOGLE_ID!;
@@ -16,8 +17,20 @@ function getCredentials() {
   return { clientId, clientSecret };
 }
 
+async function setToken(user: User) {
+  const secret = new TextEncoder().encode(process.env.JWT_SECRET!);
+  const apiToken = await new SignJWT({
+    user
+  })
+    .setProtectedHeader({ alg: "HS256" })
+    .setIssuedAt()
+    .setExpirationTime("30d")
+    .sign(secret);
+  return apiToken;
+}
+
 export const {
-  handlers: { GET, POST },
+  handlers,
   signIn,
   signOut,
   auth,
@@ -29,13 +42,13 @@ export const {
       clientSecret: getCredentials().clientSecret,
     }),
   ],
+  trustHost: true,
   pages: {
     signIn: "/login",
   },
   session: {
     strategy: "jwt",
   },
-  trustHost: true,
   jwt: {
     secret: process.env.JWT_SECRET! || "",
     maxAge: 60 * 60 * 24 * 30,
@@ -43,30 +56,15 @@ export const {
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
+        const apiToken = await setToken(user as User);
+        token.apiToken = apiToken;
+
         //* This block runs when the user signs in for the first time.
         token.sub = user.id as string;
         token.name = user.name;
         token.email = user.email;
         token.image = user.image;
       }
-      
-      //* Try getting user from db if exist
-      // const existingUserInDB =
-      //   ((await db.user.findUnique({
-      //     where: {
-      //       id: (token.sub as string) || undefined,
-      //       email: token.email || undefined,
-      //     },
-      //   })) as User) || null;
-      // if (!existingUserInDB) {
-      //   return token;
-      // }
-      // return {
-      //   id: existingUserInDB.id,
-      //   name: existingUserInDB.name,
-      //   email: existingUserInDB.email,
-      //   image: existingUserInDB.image,
-      // };
 
       return token;
     },
@@ -76,6 +74,7 @@ export const {
         session.user.name = token.name || "No Name";
         session.user.email = token.email || "No Email";
         session.user.image = token.picture || "No Picture";
+        session.apiToken = token.apiToken as string;
       }
       return session;
     },
