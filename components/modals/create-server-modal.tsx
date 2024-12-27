@@ -6,7 +6,6 @@ import {
   Dialog,
   DialogContent,
   DialogFooter,
-  DialogHeader,
 } from "@/components/ui/dialog";
 import {
   FormControl,
@@ -17,6 +16,8 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useModal } from "@/hooks/use-modal-store";
+import { getAuthToken } from "@/utils/token";
+// import { api } from "@/lib/api-client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DialogDescription, DialogTitle } from "@radix-ui/react-dialog";
 import axios from "axios";
@@ -25,23 +26,24 @@ import React from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import * as z from "zod";
 
+const defaultImageUrl = "https://global.discourse-cdn.com/turtlehead/original/2X/c/c830d1dee245de3c851f0f88b6c57c83c69f3ace.png";
+
 const formSchema = z.object({
   name: z.string().min(1, {
     message: "Server name is required.",
   }),
-  //TODO: remove this requirement and use fallback image if not specified
-  imageUrl: z.string().min(1, {
-    message: "Server image is required.",
-  }),
+  imageUrl: z.string().optional().default(defaultImageUrl),
 });
+
+
 
 const CreateServerModal = () => {
   //* component beginning
-
-  const { isOpen, onOpen, onClose, type } = useModal();
+  const { isOpen, onClose, type } = useModal();
   const isModalOpen = isOpen && type == "createServer";
   const [imageFile, setImageFile] = React.useState<File | null>(null);
-
+  const [isLoading, setIsLoading] = React.useState(false);
+  const [errorMessage, setErrorMessage] = React.useState("");
 
   const router = useRouter();
   const form = useForm({
@@ -49,62 +51,115 @@ const CreateServerModal = () => {
     defaultValues: {
       name: "",
       imageUrl:
-        "https://global.discourse-cdn.com/turtlehead/original/2X/c/c830d1dee245de3c851f0f88b6c57c83c69f3ace.png",
+        defaultImageUrl,
     },
   });
 
-  const isLoading = form.formState.isLoading;
 
+  const resetForm = () => {
+    form.reset({
+      name: "",
+      imageUrl: defaultImageUrl,
+    });
+    setImageFile(null);
+  }
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
+
+      setIsLoading(true);
       if (!imageFile) {
-        alert("Please upload an image");
+        if (!values.imageUrl.length) {
+          setErrorMessage("Please upload an image");
+          return;
+        }
+        if (values.imageUrl === defaultImageUrl) {
+          await axios.post("/api/servers", {
+            name: values.name,
+            imageUrl: form.getValues("imageUrl"),
+          });
+          resetForm();
+          router.refresh();
+          onClose();
+          return;
+        }
+
+        //* impossible edge case
+        if (values.imageUrl !== defaultImageUrl) {
+          setErrorMessage("Image Url is not valid. please refresh the page");
+          return;
+        }
+        setErrorMessage("No image found")
         return;
       }
-      //* Get signed url from api
-      const response = await fetch(
-        `/api/get-upload-url?serverName=${form.getValues("name")}&fileType=${imageFile.type}`
+      const apiEndpoint = "http://localhost:3001";
+      const { data: { signedUrl, key, bucketName } } = await axios.get(
+        `${apiEndpoint}/s3/uploadNewImage?serverName=${form.getValues("name")}&fileType=${imageFile.type}`, {
+        withCredentials: true,
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${await getAuthToken()}`,
+        }
+      }
       );
-      const { signedUrl, key, bucketName } = await response.json();
-      //* Upload file to S3
-      // await fetch(signedUrl, {
-      //   method: "PUT",
-      //   headers: { "Content-Type": file.type },
-      //   body: file,
-      // });
+
+      if (!signedUrl || !key || !bucketName) {
+        setErrorMessage("Error uploading image");
+        return;
+      }
+      console.log("signedUrl ", signedUrl, "key ", key, "bucketName ", bucketName)
+      const s3BaseUrl = "https://s3.ap-south-1.amazonaws.com";
+      const imageUrl = `${s3BaseUrl}/${bucketName}/${key}`;
+
       await axios.put(signedUrl, imageFile, {
         headers: { "Content-Type": imageFile.type },
       });
 
-      await axios.post("/api/servers", {
+      await axios.post(`${apiEndpoint}/servers/addNewServer`, {
         name: values.name,
-        imageUrl: `https://s3.ap-south-1.amazonaws.com/${bucketName}/${key}`,
+        imageUrl,
+      }, {
+        withCredentials: true,
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${await getAuthToken()}`,
+        }
       });
-      form.reset();
+
+      // await axios.post("/api/servers", {
+      //   name: values.name,
+      //   imageUrl,
+      // });
+      resetForm();
       router.refresh();
-      window.location.reload();
+      onClose();
     } catch (err) {
-      console.error("Error: \n", err);
+      console.error("[Error][Create Server: fn::onSubmit] ", err);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const handleCloseModal = () => {
-    form.reset();
+    resetForm();
     onClose();
   };
 
   return (
-    <Dialog open={isModalOpen} onOpenChange={handleCloseModal}>
-      <DialogContent className="bg-white text-black overflow-hidden">
-        <DialogHeader>
-          <DialogTitle className="text-center text-2xl font-bold">
-            Customize your Server
-          </DialogTitle>
-          <DialogDescription className="text-center text-zinc-500">
-            Give your Server a personality with a Name and an Image. You can
-            always change it later.
-          </DialogDescription>
-        </DialogHeader>
+    <Dialog
+      open={isModalOpen}
+      onOpenChange={handleCloseModal}
+      aria-label="Add New Server"
+    >
+      <DialogContent className="bg-white text-black overflow-hidden dark:bg-zinc-700 dark:text-white">
+        {/* <DialogHeader> */}
+        <DialogTitle className="text-center text-2xl font-bold">
+          Customize your Server
+        </DialogTitle>
+        <DialogDescription className="text-center text-zinc-500">
+          Give your Server a personality with a Name and an Image. You can
+          always change it later.
+        </DialogDescription>
+        {/* </DialogHeader> */}
         <FormProvider {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
             <div className="space-y-8 px-6">
@@ -141,7 +196,7 @@ const CreateServerModal = () => {
                     <FormControl>
                       <Input
                         disabled={isLoading}
-                        className="bg-zinc-300/50 border-0 focus-visible:ring-0 text-black focus-visble:ring-offset-0"
+                        className="bg-zinc-300/50 border-0 focus-visible:ring-0 text-black focus-visible:ring-offset-0"
                         placeholder="Enter Server Name"
                         {...field}
                       />
@@ -151,8 +206,13 @@ const CreateServerModal = () => {
                 )}
               />
             </div>
-            <DialogFooter className="bg-gray-100 px-6 py-4 w-full">
-              <Button variant="primary" type="submit" disabled={isLoading}>
+            <DialogFooter className="bg-gray-100 dark:bg-gray-500 px-6 py-4 w-full">
+              {errorMessage && (
+                <div className="text-red-500  text-center mb-4">
+                  {errorMessage}
+                </div>
+              )}
+              <Button className="bg-blue-500 text-white dark:bg-blue-700 hover:bg-blue-600 dark:hover:bg-blue-800" variant="primary" type="submit" disabled={isLoading}>
                 Create
               </Button>
             </DialogFooter>
