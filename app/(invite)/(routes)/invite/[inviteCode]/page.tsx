@@ -4,17 +4,18 @@ import { redirect } from "next/navigation";
 import React from "react";
 
 interface InviteCodePageProps {
-  params: {
+  params: Promise<{
     inviteCode: string;
-  };
+  }>;
 }
 
 const InviteCodePage: React.FC<InviteCodePageProps> = async ({
-  params: { inviteCode },
+  params,
 }) => {
+
   const profile = await auth().then((session) => session?.user);
   if (!profile) return redirect("/login");
-
+  const { inviteCode } = await params;
   //* If user already in invited server, it will be redirected to that server
   const alreadyInServer = await db.server.findFirst({
     where: {

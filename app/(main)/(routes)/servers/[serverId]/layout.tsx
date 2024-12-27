@@ -5,23 +5,24 @@ import { redirect } from "next/navigation";
 
 interface ServerIdLayoutProps {
   children: React.ReactNode;
-  params: {
+  params: Promise<{
     serverId: string;
-  }
+  }>
 }
 const ServerIdLayout: React.FC<ServerIdLayoutProps> = async ({
   children,
   params,
 }) => {
-  const user = await currentProfile();
-  if (!user) return redirect("/login");
+  const { profile } = await currentProfile();
+  if (!profile) return redirect("/login");
 
+  const { serverId } = await params;
   const server = await db.server.findUnique({
     where: {
-      id: params.serverId,
+      id: serverId,
       members: {
         some: {
-          userId: user.id,
+          userId: profile.id,
         },
       },
     },
@@ -32,7 +33,7 @@ const ServerIdLayout: React.FC<ServerIdLayoutProps> = async ({
   return (
     <div className="h-full">
       <div className="hidden md:flex h-full w-60 z-20 fixed inset-y-0">
-        <ServerSidebar serverId={params.serverId} />
+        <ServerSidebar serverId={serverId} />
       </div>
       <main className="h-full pl-20 md:pl-60">{children} </main>
     </div>
