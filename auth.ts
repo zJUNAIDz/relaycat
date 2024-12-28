@@ -1,21 +1,13 @@
-import NextAuth from "next-auth";
-import Google from "next-auth/providers/google";
 import { PrismaAdapter } from "@auth/prisma-adapter";
-import { db } from "./lib/db";
-import { JWTOptions } from "next-auth/jwt";
 import { SignJWT } from "jose";
+import NextAuth from "next-auth";
+import { JWTOptions } from "next-auth/jwt";
+import Google from "next-auth/providers/google";
+import { db } from "./lib/db";
+import { getEnv } from "./utils/env";
 
-function getCredentials() {
-  const clientId = process.env.AUTH_GOOGLE_ID!;
-  const clientSecret = process.env.AUTH_GOOGLE_SECRET!;
-  if (!clientId || !clientId.length) {
-    throw new Error(`Google Client Id missing: ${clientId}`);
-  }
-  if (!clientSecret || !clientSecret.length) {
-    throw new Error(`Google Client Secret missing: ${clientSecret}`);
-  }
-  return { clientId, clientSecret };
-}
+const clientId = getEnv("AUTH_GOOGLE_ID");
+const clientSecret = getEnv("AUTH_GOOGLE_SECRET");
 
 async function setToken(user: User) {
   const secret = new TextEncoder().encode(process.env.JWT_SECRET!);
@@ -38,8 +30,8 @@ export const {
   adapter: PrismaAdapter(db),
   providers: [
     Google({
-      clientId: getCredentials().clientId,
-      clientSecret: getCredentials().clientSecret,
+      clientId: clientId,
+      clientSecret: clientSecret,
     }),
   ],
   trustHost: true,
@@ -56,10 +48,10 @@ export const {
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        const apiToken = await setToken(user as User);
-        token.apiToken = apiToken;
-
         //* This block runs when the user signs in for the first time.
+        const apiToken = await setToken(user as User);
+
+        token.apiToken = apiToken;
         token.sub = user.id as string;
         token.name = user.name;
         token.email = user.email;
