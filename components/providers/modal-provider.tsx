@@ -1,9 +1,10 @@
 "use client";
 
 import CreateServerModal from "@/components/modals/create-server-modal";
-import React from "react";
+import EditServerModal from "@/components/modals/edit-server-modal";
 import InviteModal from "@/components/modals/invite-modal";
-import EditServerModal from "../modals/edit-server-modal";
+import MembersModal from "@/components/modals/members-modal";
+import React from "react";
 
 export const ModalProvider = () => {
   //* workaround to make it render on client-side only
@@ -16,6 +17,7 @@ export const ModalProvider = () => {
       <CreateServerModal />
       <InviteModal />
       <EditServerModal />
+      <MembersModal />
     </>
   );
 };
