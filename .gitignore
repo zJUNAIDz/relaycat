@@ -6,7 +6,7 @@
 .pnp.js
 .yarn/install-state.gz
 
-.vscode/
+.vscode
 # testing
 /coverage
 
@@ -36,7 +36,6 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-.vscode/
-.vscode
+
 
 TODO.txt

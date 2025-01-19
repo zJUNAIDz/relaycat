@@ -1,7 +1,7 @@
 {
     "WillLuke.nextjs.addTypesOnSave": true,
     "WillLuke.nextjs.hasPrompted": true,
-    "editor.fontSize": 20,
+    "editor.fontSize": 18,
     "editor.tokenColorCustomizations": {
         "[One Dark Pro]": {
             "comments": "#229977",
@@ -14,5 +14,14 @@
     "editor.wordWrap": "on",
     "editor.bracketPairColorization.independentColorPoolPerBracketType": true,
     "editor.codeActions.triggerOnFocusChange": true,
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "[dockerfile]": {
+        "editor.defaultFormatter": "ms-azuretools.vscode-docker"
+    },
+    "[prisma]": {
+        "editor.defaultFormatter": "Prisma.prisma"
+    },
+    "[typescript]": {
+        "editor.defaultFormatter": "vscode.typescript-language-features"
+    }
 }
