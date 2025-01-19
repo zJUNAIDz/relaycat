@@ -30,6 +30,7 @@ import { Button } from "../ui/button";
 import { useRouter } from "next/navigation"
 import axios from "axios";
 import { getAuthToken } from "@/utils/token";
+import { ServerWithMembersWithUserProfiles } from "@/types";
 export const capitalizeFirstLetter = (string: string): string => {
   return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
 };
@@ -47,6 +48,33 @@ const MembersModal = () => {
 
   const isModalOpen = isOpen && type == "members";
   const membersCount = server?.members?.length || 0;
+
+
+  const onRoleChange = async (memberId: string, role: MemberRole) => {
+    try {
+      setLoadingId(memberId)
+      const url = qs.stringifyUrl({
+        url: `/api/members/${memberId}`,
+        query: {
+          serverId: server?.id
+        }
+      })
+      const { data } = await axios.patch<{ server: ServerWithMembersWithUserProfiles }>(url, { role }, {
+        headers: {
+          Authorization: `Bearer ${getAuthToken()}`
+        }
+      })
+
+      router.refresh()
+      onOpen("members", { server: data.server })
+      console.log(data.server)
+    } catch (error) {
+      console.log(error)
+    } finally {
+      setLoadingId("")
+    }
+  }
+
 
   return (
     <Dialog open={isModalOpen} onOpenChange={onClose}>
@@ -97,7 +125,7 @@ const MembersModal = () => {
                                         key={role}
                                         className="h-6"
                                       >
-                                        <Button disabled={member.role == role} variant="ghost" className="w-full flex items-center justify-start h-6">
+                                        <Button disabled={member.role == role} variant="ghost" className="w-full flex items-center justify-start h-6" onClick={() => onRoleChange(member.id, role as MemberRole)}>
                                           <RoleIcon role={role} className="mr-2" />
                                           <span>{capitalizeFirstLetter(role)}</span>
                                           {
