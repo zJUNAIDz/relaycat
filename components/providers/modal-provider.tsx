@@ -5,6 +5,7 @@ import EditServerModal from "@/components/modals/edit-server-modal";
 import InviteModal from "@/components/modals/invite-modal";
 import MembersModal from "@/components/modals/members-modal";
 import React from "react";
+import CreateChannelModal from "@/components/modals/create-channel-modal";
 
 export const ModalProvider = () => {
   //* workaround to make it render on client-side only
@@ -18,6 +19,7 @@ export const ModalProvider = () => {
       <InviteModal />
       <EditServerModal />
       <MembersModal />
+      <CreateChannelModal />
     </>
   );
 };
