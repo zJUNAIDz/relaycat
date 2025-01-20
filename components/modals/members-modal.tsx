@@ -49,19 +49,44 @@ const MembersModal = () => {
   const isModalOpen = isOpen && type == "members";
   const membersCount = server?.members?.length || 0;
 
+  const onKick = async (memberId: string) => {
+    try {
+      setLoadingId(memberId)
+
+      const url = qs.stringifyUrl({
+        url: "http://localhost:3001/members/kick",
+        query: {
+          serverId: server?.id,
+          memberId
+        }
+      })
+      const { data } = await axios.delete(url, {
+        headers: {
+          Authorization: `Bearer ${await getAuthToken()}`
+        }
+      })
+      router.refresh()
+      onOpen("members", { server: data.server })
+    } catch (err) {
+      console.error("[MEMBERS_MODAL:onKick] ", err)
+    } finally {
+      setLoadingId("")
+    }
+  }
 
   const onRoleChange = async (memberId: string, role: MemberRole) => {
     try {
       setLoadingId(memberId)
       const url = qs.stringifyUrl({
-        url: `/api/members/${memberId}`,
+        url: `http://localhost:3001/members/changeRole`,
         query: {
-          serverId: server?.id
+          serverId: server?.id,
+          memberId
         }
       })
       const { data } = await axios.patch<{ server: ServerWithMembersWithUserProfiles }>(url, { role }, {
         headers: {
-          Authorization: `Bearer ${getAuthToken()}`
+          Authorization: `Bearer ${await getAuthToken()}`
         }
       })
 
@@ -125,7 +150,12 @@ const MembersModal = () => {
                                         key={role}
                                         className="h-6"
                                       >
-                                        <Button disabled={member.role == role} variant="ghost" className="w-full flex items-center justify-start h-6" onClick={() => onRoleChange(member.id, role as MemberRole)}>
+                                        <Button
+                                          disabled={member.role == role}
+                                          variant="ghost"
+                                          className="w-full flex items-center justify-start h-6"
+                                          onClick={() => onRoleChange(member.id, role as MemberRole)}
+                                        >
                                           <RoleIcon role={role} className="mr-2" />
                                           <span>{capitalizeFirstLetter(role)}</span>
                                           {
@@ -142,7 +172,7 @@ const MembersModal = () => {
                             </DropdownMenuSub>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem className="h-6">
-                              <Button variant="ghost" className="h-6">
+                              <Button variant="ghost" className="h-6" onClick={() => onKick(member.id)}>
                                 <Gavel className="h-4 w-4 mr-3" /><span>Kick</span>
                               </Button>
                             </DropdownMenuItem>
