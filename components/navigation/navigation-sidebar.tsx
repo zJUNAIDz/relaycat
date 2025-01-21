@@ -8,14 +8,14 @@ import { NavigationAction } from "./navigation-action";
 import NavigationItem from "./navigation-item";
 
 const NavigationSidebar = async () => {
-  const user = await currentProfile();
-  if (!user) return redirect("/");
+  const { profile } = await currentProfile();
+  if (!profile) return redirect("/login");
 
   const servers = await db.server.findMany({
     where: {
       members: {
         some: {
-          userId: user.id,
+          userId: profile.id,
         },
       },
     },
