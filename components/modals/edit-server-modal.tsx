@@ -25,6 +25,8 @@ import React from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import * as z from "zod";
 
+const defaultImageUrl = "https://global.discourse-cdn.com/turtlehead/original/2X/c/c830d1dee245de3c851f0f88b6c57c83c69f3ace.png";
+
 const formSchema = z.object({
   name: z.string().min(1, {
     message: "Server name is required.",
@@ -38,7 +40,7 @@ const formSchema = z.object({
 const EditServerModal = () => {
   //* component beginning
 
-  const { isOpen, onOpen, onClose, type, data: { server } } = useModal();
+  const { isOpen, onClose, type, data: { server } } = useModal();
   const isModalOpen = isOpen && type == "editServer";
   const [imageFile, setImageFile] = React.useState<File | null>(null);
 
@@ -80,7 +82,6 @@ const EditServerModal = () => {
       await axios.put(signedUrl, imageFile, {
         headers: { "Content-Type": imageFile.type },
       });
-
       await axios.patch(`/api/servers/${server?.id}`, {
         name: values.name,
         imageUrl: `https://s3.ap-south-1.amazonaws.com/${bucketName}/${key}`,
@@ -107,12 +108,12 @@ const EditServerModal = () => {
 
   return (
     <Dialog open={isModalOpen} onOpenChange={handleCloseModal}>
-      <DialogContent className="bg-white text-black overflow-hidden">
+      <DialogContent className="overflow-hidden">
         <DialogHeader>
           <DialogTitle className="text-center text-2xl font-bold">
             Modify your Server
           </DialogTitle>
-          <DialogDescription className="text-center text-zinc-500">
+          <DialogDescription className="text-center">
             Give your Server a personality with a Name and an Image. You can
             always change it later.
           </DialogDescription>
@@ -147,13 +148,13 @@ const EditServerModal = () => {
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="uppercase text-xs font-bold text-zinc-700 dark:text-secondary/70">
+                    <FormLabel className="uppercase text-xs font-bold text-zinc-700 dark:text-[#97A6BC]">
                       Server Name
                     </FormLabel>
                     <FormControl>
                       <Input
                         disabled={isLoading}
-                        className="bg-zinc-300/50 border-0 focus-visible:ring-0 text-black focus-visble:ring-offset-0"
+                        className="border-0 focus-visible:ring-0  focus-visble:ring-offset-0"
                         placeholder="Enter Server Name"
                         {...field}
                       />
@@ -163,7 +164,7 @@ const EditServerModal = () => {
                 )}
               />
             </div>
-            <DialogFooter className="bg-gray-100 px-6 py-4 w-full">
+            <DialogFooter className="px-6 py-4 w-full">
               <Button variant="primary" type="submit" disabled={isLoading}>
                 Edit
               </Button>

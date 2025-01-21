@@ -24,6 +24,7 @@ import {
 } from "../ui/form";
 import { Input } from "../ui/input";
 
+const defaultImageUrl = "https://global.discourse-cdn.com/turtlehead/original/2X/c/c830d1dee245de3c851f0f88b6c57c83c69f3ace.png";
 const formSchema = z.object({
   name: z.string().min(1, {
     message: "Server name is required.",
@@ -57,31 +58,16 @@ const InitialModal = () => {
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      if (!imageFile) {
-        alert("Please upload an image");
-        return;
-      }
+      const bucketName = process.env.AWS_BUCKET_NAME!;
+      const key = `${values.name}-${Date.now()}-${imageFile?.name}.${imageFile?.type}`;
 
-      //* Get signed url from api
-      const response = await fetch(
-        `/api/get-upload-url?serverName=${form.getValues("name")}&fileType=${imageFile.type
-        }`
-      );
 
-      const { signedUrl, key, bucketName } = await response.json();
-      //* Upload file to S3
-      // await fetch(signedUrl, {
-      //   method: "PUT",
-      //   headers: { "Content-Type": file.type },
-      //   body: file,
-      // });
-      await axios.put(signedUrl, imageFile, {
-        headers: { "Content-Type": imageFile.type },
-      });
 
       await axios.post("/api/servers", {
         name: values.name,
-        imageUrl: `https://s3.ap-south-1.amazonaws.com/${bucketName}/${key}`,
+        imageUrl: imageFile
+          ? `https://s3.ap-south-1.amazonaws.com/${bucketName}/${key}`
+          : "https://global.discourse-cdn.com/turtlehead/original/2X/c/c830d1dee245de3c851f0f88b6c57c83c69f3ace.png",
       });
 
       form.reset();
@@ -94,7 +80,7 @@ const InitialModal = () => {
 
   return (
     <Dialog open>
-      <DialogContent className="bg-white text-black overflow-hidden">
+      <DialogContent className="overflow-hidden">
         <DialogHeader>
           <DialogTitle className="text-center text-2xl font-bold">
             Customize your Server
@@ -132,13 +118,13 @@ const InitialModal = () => {
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="uppercase text-xs font-bold text-zinc-700 dark:text-secondary/70">
+                    <FormLabel className="uppercase text-xs font-bold">
                       Server Name
                     </FormLabel>
                     <FormControl>
                       <Input
                         disabled={isLoading}
-                        className="bg-zinc-300/50 border-0 focus-visible:ring-0 text-black focus-visble:ring-offset-0"
+                        className="focus-visible:ring-0 focus-visble:ring-offset-0"
                         placeholder="Enter Server Name"
                         {...field}
                       />
@@ -148,7 +134,7 @@ const InitialModal = () => {
                 )}
               />
             </div>
-            <DialogFooter className="bg-gray-100 px-6 py-4 w-full">
+            <DialogFooter className="px-6 py-4 w-full">
               <Button variant="primary" type="submit" disabled={isLoading}>
                 Create
               </Button>

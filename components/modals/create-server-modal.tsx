@@ -150,12 +150,12 @@ const CreateServerModal = () => {
       onOpenChange={handleCloseModal}
       aria-label="Add New Server"
     >
-      <DialogContent className="bg-white text-black overflow-hidden dark:bg-zinc-700 dark:text-white">
+      <DialogContent className="overflow-hidden">
         {/* <DialogHeader> */}
         <DialogTitle className="text-center text-2xl font-bold">
           Customize your Server
         </DialogTitle>
-        <DialogDescription className="text-center text-zinc-500">
+        <DialogDescription className="text-center">
           Give your Server a personality with a Name and an Image. You can
           always change it later.
         </DialogDescription>
@@ -190,13 +190,13 @@ const CreateServerModal = () => {
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="uppercase text-xs font-bold text-zinc-700 dark:text-secondary/70">
+                    <FormLabel className="uppercase text-xs font-bold text-zinc-700 dark:text-[#97A6BC]">
                       Server Name
                     </FormLabel>
                     <FormControl>
                       <Input
                         disabled={isLoading}
-                        className="bg-zinc-300/50 border-0 focus-visible:ring-0 text-black focus-visible:ring-offset-0"
+                        className="border-2 border-black border-solid focus-visible:ring-1 text-black dark:text-[#edf1f8] focus-visible:ring-offset-1 "
                         placeholder="Enter Server Name"
                         {...field}
                       />
@@ -206,7 +206,7 @@ const CreateServerModal = () => {
                 )}
               />
             </div>
-            <DialogFooter className="bg-gray-100 dark:bg-gray-500 px-6 py-4 w-full">
+            <DialogFooter className="px-6 py-4 w-full">
               {errorMessage && (
                 <div className="text-red-500  text-center mb-4">
                   {errorMessage}
