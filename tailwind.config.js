@@ -2,10 +2,10 @@
 module.exports = {
   darkMode: ["class"],
   content: [
-    './pages/**/*.{ts,tsx}',
-    './components/**/*.{ts,tsx}',
-    './app/**/*.{ts,tsx}',
-    './src/**/*.{ts,tsx}',
+    "./pages/**/*.{ts,tsx}",
+    "./components/**/*.{ts,tsx}",
+    "./app/**/*.{ts,tsx}",
+    "./src/**/*.{ts,tsx}",
   ],
   theme: {
     container: {
@@ -20,7 +20,36 @@ module.exports = {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
-        background: "hsl(var(--background))",
+        light: {
+          gray: {
+            100: "#F5F5F5",
+            200: "#EDEDED",
+            300: "#E0E0E0",
+            400: "#C2C2C2",
+            500: "#9E9E9E",
+            600: "#757575",
+            700: "#616161",
+            800: "#424242",
+            900: "#212121",
+          },
+        },
+        dark: {
+          gray: {
+            100: "#212121",
+            200: "#424242",
+            300: "#616161",
+            400: "#757575",
+            500: "#313337",
+            600: "#C2C2C2",
+            700: "#E0E0E0",
+            800: "#EDEDED",
+            900: "#F5F5F5",
+          },
+        },
+        background: {
+          DEFAULT: "hsl(var(--background))",
+          lightGray: "#313337",
+        },
         foreground: "hsl(var(--foreground))",
         primary: {
           DEFAULT: "hsl(var(--primary))",
@@ -73,4 +102,4 @@ module.exports = {
     },
   },
   plugins: [require("tailwindcss-animate")],
-}
+};
