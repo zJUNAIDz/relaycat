@@ -3,8 +3,8 @@ import { SignJWT } from "jose";
 import NextAuth from "next-auth";
 import { JWTOptions } from "next-auth/jwt";
 import Google from "next-auth/providers/google";
-import { db } from "./lib/db";
-import { getEnv } from "./utils/env";
+import { db } from "@/shared/lib/db";
+import { getEnv } from "@/shared/utils/env";
 
 const clientId = getEnv("AUTH_GOOGLE_ID");
 const clientSecret = getEnv("AUTH_GOOGLE_SECRET");

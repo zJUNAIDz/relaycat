@@ -1,10 +1,10 @@
-import { ThemeProvider } from "@/components/providers/theme-provider";
-import { cn } from "@/utils/cn";
+import { ThemeProvider } from "@/shared/providers/theme-provider";
+import { cn } from "@/shared/utils/cn";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 
-import { ModalProvider } from "@/components/providers/modal-provider";
+import { ModalProvider } from "@/shared/providers/modal-provider";
 
 
 const inter = Inter({ subsets: ["latin"] });

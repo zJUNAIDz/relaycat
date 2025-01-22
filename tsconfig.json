@@ -26,12 +26,6 @@
       "@/*": [
         "./*"
       ],
-      "@features/*": [
-        "./features/*"
-      ],
-      "@shared": [
-        "./shared/*"
-      ]
     }
   },
   "include": [

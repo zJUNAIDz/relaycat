@@ -1,5 +1,5 @@
 import { auth } from "@/auth";
-import { db } from "@/lib/db";
+import { db } from "@/shared/lib/db";
 import { redirect } from "next/navigation";
 import React from "react";
 

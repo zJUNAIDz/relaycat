@@ -1,6 +1,6 @@
-import ServerSidebar from "@/components/server/server-sidebar";
-import currentProfile from "@/lib/current-profile";
-import { db } from "@/lib/db";
+import ServerSidebar from "@/features/server/components/server-sidebar";
+import currentProfile from "@/shared/lib/current-profile";
+import { db } from "@/shared/lib/db";
 import { redirect } from "next/navigation";
 
 interface ServerIdLayoutProps {
