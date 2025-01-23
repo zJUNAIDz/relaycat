@@ -6,6 +6,8 @@ module.exports = {
     "./components/**/*.{ts,tsx}",
     "./app/**/*.{ts,tsx}",
     "./src/**/*.{ts,tsx}",
+    "./features/**/*.{ts,tsx}",
+    "./shared/**/*.{ts,tsx}",
   ],
   theme: {
     container: {
@@ -17,6 +19,12 @@ module.exports = {
     },
     extend: {
       colors: {
+        // Discord's core brand colors
+        "relaycat-blurple": "#5865F2",
+        "relaycat-green": "#57F287",
+        "relaycat-yellow": "#FEE75C",
+        "relaycat-red": "#ED4245",
+        "relaycat-pink": "#EB459E",
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
