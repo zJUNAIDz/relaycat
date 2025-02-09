@@ -29,7 +29,7 @@ import { UserAvatar } from "@/shared/components/user-avatar";
 import { Button } from "@/shared/components/ui/button";
 import { useRouter } from "next/navigation"
 import axios from "axios";
-import { getAuthToken } from "@/shared/utils/token";
+import { getAuthTokenOnClient } from "@/shared/utils/client";
 import { ServerWithMembersWithUserProfiles } from "@/shared/types";
 export const capitalizeFirstLetter = (string: string): string => {
   return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
@@ -62,7 +62,7 @@ const MembersModal = () => {
       })
       const { data } = await axios.delete(url, {
         headers: {
-          Authorization: `Bearer ${await getAuthToken()}`
+          Authorization: `Bearer ${await getAuthTokenOnClient()}`
         }
       })
       router.refresh()
@@ -86,13 +86,12 @@ const MembersModal = () => {
       })
       const { data } = await axios.patch<{ server: ServerWithMembersWithUserProfiles }>(url, { role }, {
         headers: {
-          Authorization: `Bearer ${await getAuthToken()}`
+          Authorization: `Bearer ${await getAuthTokenOnClient()}`
         }
       })
 
       router.refresh()
       onOpen("members", { server: data.server })
-      console.log(data.server)
     } catch (error) {
       console.log(error)
     } finally {

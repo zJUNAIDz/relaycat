@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@/shared/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -10,10 +11,11 @@ import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
 import { useModal } from "@/shared/hooks/use-modal-store";
 import { useOrigin } from "@/shared/hooks/use-origin";
+import { getAuthTokenOnClient } from "@/shared/utils/client";
 import axios from "axios";
 import { Check, Copy, RefreshCw } from "lucide-react";
+import { useRouter } from "next/navigation";
 import React from "react";
-import { Button } from "@/shared/components/ui/button";
 
 const InviteModal = () => {
   //* component beginning
@@ -27,6 +29,7 @@ const InviteModal = () => {
     data: { server },
   } = useModal();
   const origin = useOrigin();
+  const router = useRouter()
   const isModalOpen = isOpen && type == "invite";
   const inviteUrl = `${origin}/invite/${server?.inviteCode}`;
 
@@ -38,19 +41,27 @@ const InviteModal = () => {
   const onGenerate = async () => {
     try {
       setIsLoading(true);
+      const token = await getAuthTokenOnClient();
       const response = await axios.patch(
-        `/api/servers/${server?.id}/invite-code`
-      );
-      onOpen("invite", { server: response.data });
+        `http://localhost:3001/servers/${server?.id}/invite-code`, {}, {
+        headers: {
+          "Authorization": `Bearer ${token}`,
+        }
+      });
+      // router.refresh()
+      onOpen("invite", { server: response.data.server });
     } catch (err) {
       console.error("Failed to generate new invite link: ", err);
     } finally {
       setIsLoading(false);
     }
   };
-
+  const handleCloseModal = () => {
+    // router.refresh()
+    onClose()
+  }
   return (
-    <Dialog open={isModalOpen} onOpenChange={onClose}>
+    <Dialog open={isModalOpen} onOpenChange={handleCloseModal}>
       <DialogContent aria-description="Invite Link" className="overflow-hidden">
         <DialogHeader>
           <DialogTitle className="text-center text-2xl font-bold">
@@ -70,7 +81,7 @@ const InviteModal = () => {
               readOnly
             />
             <Button
-              disabled={isLoading}
+              disabled={isLoading || copied}
               variant="ghost"
               size="icon"
               onClick={onCopy}

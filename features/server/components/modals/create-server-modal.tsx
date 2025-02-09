@@ -16,7 +16,7 @@ import {
 } from "@/shared/components/ui/form";
 import { Input } from "@/shared/components/ui/input";
 import { useModal } from "@/shared/hooks/use-modal-store";
-import { getAuthToken } from "@/shared/utils/token";
+import { getAuthTokenOnClient } from "@/shared/utils/client";
 // import { api } from "@/lib/api-client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DialogDescription, DialogTitle } from "@radix-ui/react-dialog";
@@ -97,7 +97,7 @@ const CreateServerModal = () => {
         withCredentials: true,
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${await getAuthToken()}`,
+          "Authorization": `Bearer ${await getAuthTokenOnClient()}`,
         }
       }
       );
@@ -106,7 +106,6 @@ const CreateServerModal = () => {
         setErrorMessage("Error uploading image");
         return;
       }
-      console.log("signedUrl ", signedUrl, "key ", key, "bucketName ", bucketName)
       const s3BaseUrl = "https://s3.ap-south-1.amazonaws.com";
       const imageUrl = `${s3BaseUrl}/${bucketName}/${key}`;
 
@@ -114,14 +113,14 @@ const CreateServerModal = () => {
         headers: { "Content-Type": imageFile.type },
       });
 
-      await axios.post(`${apiEndpoint}/servers/addNewServer`, {
+      await axios.post(`${apiEndpoint}/servers/add`, {
         name: values.name,
         imageUrl,
       }, {
         withCredentials: true,
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${await getAuthToken()}`,
+          "Authorization": `Bearer ${await getAuthTokenOnClient()}`,
         }
       });
 

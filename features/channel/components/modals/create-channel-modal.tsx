@@ -15,7 +15,7 @@ import {
 } from "@/shared/components/ui/form";
 import { Input } from "@/shared/components/ui/input";
 import { useModal } from "@/shared/hooks/use-modal-store";
-import { getAuthToken } from "@/shared/utils/token";
+import { getAuthTokenOnClient } from "@/shared/utils/client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ChannelType } from "@prisma/client";
 import { DialogTitle } from "@radix-ui/react-dialog";
@@ -38,7 +38,7 @@ const formSchema = z.object({
 
 const CreateChannelModal = () => {
   //* component beginning
-  const { isOpen, onClose, type } = useModal();
+  const { isOpen, onClose, type, data: { channelType } } = useModal();
   const isModalOpen = isOpen && type == "createChannel";
   const [isLoading, setIsLoading] = React.useState(false);
   const [errorMessage, setErrorMessage] = React.useState("");
@@ -48,7 +48,7 @@ const CreateChannelModal = () => {
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
-      type: ChannelType.TEXT
+      type: channelType || ChannelType.TEXT
     }
   });
 
@@ -70,7 +70,7 @@ const CreateChannelModal = () => {
 
       await axios.post(url, values, {
         headers: {
-          Authorization: `Bearer ${await getAuthToken()}`
+          Authorization: `Bearer ${await getAuthTokenOnClient()}`
         }
       })
       form.reset()
@@ -87,7 +87,13 @@ const CreateChannelModal = () => {
     resetForm();
     onClose();
   };
-
+  React.useEffect(() => {
+    if (channelType) {
+      form.setValue("type", channelType)
+    } else {
+      form.setValue("type", ChannelType.TEXT)
+    }
+  }, [channelType, form])
 
   return (
     <Dialog

@@ -28,7 +28,6 @@ const currentProfile = async (): Promise<UserProfileResponse> => {
     const session = await auth();
     const user = session?.user;
     if (!user) return { profile: null, status: UserAuthStatus.AUTHENTICATED };
-    console.log("user: ", user);
     const profile = await db.user.findUnique({
       where: {
         id: user.id

@@ -40,6 +40,7 @@ const NavigationItem: React.FC<NavigationItemProps> = ({
           <Image
             fill
             src={imageUrl}
+            quality={30}
             alt={`Server: ${name}`}
           />
         </div>
