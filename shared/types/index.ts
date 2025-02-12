@@ -1,8 +1,20 @@
-import { Server, Member, User } from "@prisma/client";
-import exp from "constants";
+import { Channel, Member, Server, User } from "@prisma/client";
 
-export type ServerWithMembersWithUserProfiles = Server & {
+export type ServerWithMembersAndUser = Server & {
   members: (Member & { user: User })[];
+};
+
+export type ServerWithMembersUserAndChannels = Server & {
+  members: (Member & { user: User })[];
+  channels: Channel[];
+}
+
+export type ServerWithMembersOnly = Server & {
+  members: Member[];
+};
+
+export type ServerWithChannels = Server & {
+  channels: Channel[];
 };
 
 export const UserAuthStatus = {
@@ -13,6 +25,7 @@ export const UserAuthStatus = {
   DELETED: "DELETED",
   ERROR: "ERROR",
 } as const;
+
 export type UserAuthStatusType = keyof typeof UserAuthStatus;
 
 export type UserProfileResponse = {
@@ -25,12 +38,15 @@ export interface CreateServerRequest {
   name: string;
   imageUrl: string;
 }
+
 export const CreateServerResponseStatus = {
   SUCCESS: "SUCCESS",
   FAILED: "FAILED",
   ERROR: "ERROR",
 } as const;
+
 export type CreateServerResponseStatusType = keyof typeof CreateServerResponseStatus;
+
 export interface CreateServerResponse {
   server: Server | null;
   status: CreateServerResponseStatusType;
