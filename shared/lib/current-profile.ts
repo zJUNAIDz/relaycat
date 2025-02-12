@@ -1,6 +1,7 @@
 import { auth } from "@/auth";
-import { db } from "@/shared/lib/db";
 import { UserAuthStatus, UserProfileResponse } from "@/shared/types";
+import axios from "axios";
+import { getEnv } from "../utils/env";
 
 /**
  * Fetches the current user's profile from the database based on their session.
@@ -27,13 +28,14 @@ const currentProfile = async (): Promise<UserProfileResponse> => {
   try {
     const session = await auth();
     const user = session?.user;
+    const token = session?.apiToken
     if (!user) return { profile: null, status: UserAuthStatus.AUTHENTICATED };
-    const profile = await db.user.findUnique({
-      where: {
-        id: user.id
+    const API_URL = getEnv("API_URL")
+    const { data: { profile } }: { data: { profile: User | null } } = await axios.get(`${API_URL}/profiles/${user.id}`, {
+      headers: {
+        "Authorization": `Bearer ${token}`
       }
-    });
-
+    })
     if (!profile) return { profile: null, status: UserAuthStatus.DELETED }
     return { profile, status: UserAuthStatus.AUTHENTICATED };
   } catch (err) {
