@@ -1,8 +1,8 @@
 interface User {
   id: string;
-  name?: string | null;
-  image?: string;
-  email?: string;
+  name: string | null;
+  image: string;
+  email: string;
   emailVerified: Date | null;
   accounts: Account[];
   servers: Server[];
