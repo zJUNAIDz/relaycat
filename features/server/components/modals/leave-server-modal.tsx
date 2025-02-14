@@ -15,7 +15,7 @@ import { useRouter } from "next/navigation";
 import qs from "query-string";
 import React from "react";
 import { Button } from "@/shared/components/ui/button";
-import { getAuthToken } from "@/shared/utils/token";
+import { getAuthTokenOnClient } from "@/shared/utils/client";
 const LeaveServerModal = () => {
 
   const {
@@ -41,7 +41,7 @@ const LeaveServerModal = () => {
         serverId: server?.id
       }, {
         headers: {
-          Authorization: `Bearer ${await getAuthToken()}`
+          Authorization: `Bearer ${await getAuthTokenOnClient()}`
         }
       })
       onClose()

@@ -1,5 +1,7 @@
 "use client";
 
+import { RoleIcon } from "@/shared/components/icons";
+import { Button } from "@/shared/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -7,12 +9,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/shared/components/ui/dialog";
-import { ScrollArea } from "@/shared/components/ui/scroll-area";
-import { useModal } from "@/shared/hooks/use-modal-store";
-import { MemberRole } from "@prisma/client";
-import { Check, Gavel, Loader2, MoreVertical, Shield } from "lucide-react";
-import React from "react";
-import { RoleIcon } from "@/shared/components/icons";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -24,13 +20,17 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger
 } from "@/shared/components/ui/dropdown-menu";
-import qs from "query-string"
+import { ScrollArea } from "@/shared/components/ui/scroll-area";
 import { UserAvatar } from "@/shared/components/user-avatar";
-import { Button } from "@/shared/components/ui/button";
-import { useRouter } from "next/navigation"
-import axios from "axios";
+import { useModal } from "@/shared/hooks/use-modal-store";
+import { ServerWithMembersAndUser } from "@/shared/types";
 import { getAuthTokenOnClient } from "@/shared/utils/client";
-import { ServerWithMembersWithUserProfiles } from "@/shared/types";
+import { MemberRole } from "@prisma/client";
+import axios from "axios";
+import { Check, Gavel, Loader2, MoreVertical, Shield } from "lucide-react";
+import { useRouter } from "next/navigation";
+import qs from "query-string";
+import React from "react";
 export const capitalizeFirstLetter = (string: string): string => {
   return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
 };
@@ -41,11 +41,11 @@ const MembersModal = () => {
     onOpen,
     onClose,
     type,
-    data: { server },
+    data,
   } = useModal();
   const router = useRouter()
   const [loadingId, setLoadingId] = React.useState("")
-
+  const { server } = data as { server: ServerWithMembersAndUser };
   const isModalOpen = isOpen && type == "members";
   const membersCount = server?.members?.length || 0;
 
@@ -84,7 +84,7 @@ const MembersModal = () => {
           memberId
         }
       })
-      const { data } = await axios.patch<{ server: ServerWithMembersWithUserProfiles }>(url, { role }, {
+      const { data } = await axios.patch<{ server: ServerWithMembersAndUser }>(url, { serverId: server.id, memberId, role }, {
         headers: {
           Authorization: `Bearer ${await getAuthTokenOnClient()}`
         }
@@ -93,7 +93,7 @@ const MembersModal = () => {
       router.refresh()
       onOpen("members", { server: data.server })
     } catch (error) {
-      console.log(error)
+      console.error("[onRoleChange] ", error)
     } finally {
       setLoadingId("")
     }

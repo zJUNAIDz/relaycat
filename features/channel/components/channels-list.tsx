@@ -1,12 +1,12 @@
 "use client"
 import { ServerChannel } from "@/features/server/components/server-channel";
 import { ServerSection } from "@/features/server/components/server-section";
-import { ServerWithMembersWithUserProfiles } from "@/shared/types";
+import { ServerWithMembersAndUser } from "@/shared/types";
 import { Channel, ChannelType, MemberRole } from "@prisma/client";
 interface ChannelListProps {
   channelsGroupedByType: Channel[][];
   role: MemberRole;
-  server: ServerWithMembersWithUserProfiles;
+  server: ServerWithMembersAndUser;
 }
 
 

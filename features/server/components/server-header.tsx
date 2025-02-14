@@ -7,7 +7,7 @@ import {
   DropdownMenuTrigger,
 } from "@/shared/components/ui/dropdown-menu";
 import { useModal } from "@/shared/hooks/use-modal-store";
-import { ServerWithMembersWithUserProfiles } from "@/shared/types";
+import { ServerWithMembersAndUser } from "@/shared/types";
 import { MemberRole } from "@prisma/client";
 import {
   ChevronDown,
@@ -21,7 +21,7 @@ import {
 import React from "react";
 
 interface ServerHeaderProps {
-  server: ServerWithMembersWithUserProfiles;
+  server: ServerWithMembersAndUser;
   role?: MemberRole;
 }
 //TODO: Replace icons with discord icons or more unique ones

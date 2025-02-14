@@ -1,8 +1,8 @@
-import { ServerWithMembers, ServerWithMembersWithUserProfiles } from "@/shared/types";
+import { ServerWithMembersAndUser, ServerWithMembersOnly, ServerWithMembersUserAndChannels } from "@/shared/types";
 import { getEnv } from "@/shared/utils/env";
 import { getAuthTokenOnServer } from "@/shared/utils/server";
 import { Server } from "@prisma/client";
-import axios, { Axios, AxiosResponse } from "axios";
+import axios, { AxiosResponse } from "axios";
 import queryString from "query-string";
 
 class ServerService {
@@ -11,10 +11,10 @@ class ServerService {
     this.apiEndpoint = getEnv("API_URL");
   }
 
-  async getServersByUserId(userId: string): Promise<ServerWithMembersWithUserProfiles[] | Server[] | null> {
+  async getServersByUserId(userId: string): Promise<ServerWithMembersAndUser[] | Server[] | null> {
     try {
 
-      const { data: servers }: { data: ServerWithMembersWithUserProfiles[] | Server[] } = await axios.get(`${this.apiEndpoint}/servers`, {
+      const { data: servers }: { data: ServerWithMembersAndUser[] | Server[] } = await axios.get(`${this.apiEndpoint}/servers`, {
         params: {
           userId
         },
@@ -25,36 +25,42 @@ class ServerService {
       if (!servers) return null
       return servers;
     } catch (err) {
-      console.log("[SERVER_SERVICE:getServerWithMembersWithUserProfiles] ", err)
+      console.error("[SERVER_SERVICE:getServerWithMembersWithUserProfiles] ", err)
       return null
     }
   }
 
-  async getServer(serverId: string, options?: ["members"]): Promise<ServerWithMembers | null>;
-  async getServer(serverId: string, options?: ["user", "members"] | ["user"]): Promise<ServerWithMembersWithUserProfiles | null>;
+  async getServer(serverId: string, options?: ["members"]): Promise<ServerWithMembersOnly | null>;
+  async getServer(serverId: string, options?: ["user", "members"] | ["user"]): Promise<ServerWithMembersAndUser | null>;
+  async getServer(serverId: string, options?: ["user", "members", "channels"] | ["user", "channels"]): Promise<ServerWithMembersUserAndChannels>
   async getServer(serverId: string, options?: undefined | []): Promise<Server | null>;
-  async getServer(serverId: string, options?: string[]): Promise<ServerWithMembersWithUserProfiles | ServerWithMembers | Server | null> {
+  async getServer(serverId: string, options?: string[]): Promise<ServerWithMembersAndUser | ServerWithMembersOnly | Server | null> {
     try {
       const url = queryString.stringifyUrl({
         url: `${this.apiEndpoint}/servers/${serverId}`,
         query: {
           user: options?.includes("users") ? true : false,
           member: options?.includes("members") ? true : false,
+          options: options?.toString()
         },
       })
 
       const token = await getAuthTokenOnServer();
-      const { data: server }: AxiosResponse<
-        | ServerWithMembersWithUserProfiles
-        | ServerWithMembers
-        | Server> = await axios.get(url, {
+      const { data: server }:
+        AxiosResponse<
+          | Server
+          | ServerWithMembersOnly
+          | ServerWithMembersAndUser
+          | ServerWithMembersUserAndChannels
+        > = await axios.get(url, {
           headers: {
             Authorization: `Bearer ${token}`
           }
+
         })
       return server
     } catch (err) {
-      console.error("[SERVER_SERVICE:getServerWithMembersWithUserProfiles] ", err)
+      console.error("[SERVER_SERVICE:getServer] ", err)
       return null
     }
   }

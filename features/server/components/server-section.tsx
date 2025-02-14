@@ -5,7 +5,7 @@ import { ChannelType, MemberRole, Server } from "@prisma/client";
 import { Plus, Settings } from "lucide-react";
 
 interface ServerSectionProps {
-  server: Server;
+  server?: Server;
   label: string;
   role?: MemberRole;
   sectionType: "channels" | "members";
