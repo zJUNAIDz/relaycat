@@ -1,6 +1,6 @@
 import ServerSidebar from "@/features/server/components/server-sidebar";
+import { serverService } from "@/features/server/server-service";
 import currentProfile from "@/shared/lib/current-profile";
-import { db } from "@/shared/lib/db";
 import { redirect } from "next/navigation";
 
 interface ServerIdLayoutProps {
@@ -17,16 +17,8 @@ const ServerIdLayout: React.FC<ServerIdLayoutProps> = async ({
   if (!profile) return redirect("/login");
 
   const { serverId } = await params;
-  const server = await db.server.findUnique({
-    where: {
-      id: serverId,
-      members: {
-        some: {
-          userId: profile.id,
-        },
-      },
-    },
-  });
+  const server = await serverService.getServer(serverId)
+
 
   if (!server) redirect("/");
 

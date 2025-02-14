@@ -2,24 +2,16 @@ import { ModeToggle } from "@/shared/components/mode-toggle";
 import { ScrollArea } from "@/shared/components/ui/scroll-area";
 import { Separator } from "@/shared/components/ui/separator";
 import currentProfile from "@/shared/lib/current-profile";
-import { db } from "@/shared/lib/db";
 import { redirect } from "next/navigation";
 import { NavigationAction } from "./navigation-action";
 import NavigationItem from "./navigation-item";
+import { serverService } from "../server-service";
 
 const NavigationSidebar = async () => {
   const { profile } = await currentProfile();
   if (!profile) return redirect("/login");
 
-  const servers = await db.server.findMany({
-    where: {
-      members: {
-        some: {
-          userId: profile.id,
-        },
-      },
-    },
-  });
+  const servers = await serverService.getServersByUserId(profile.id);
 
   return (
     <div
@@ -27,7 +19,7 @@ const NavigationSidebar = async () => {
     dark:bg-[#1e1f22] bg-[#e3e5e8] py-3"
     >
       <ScrollArea className="flex flex-1 w-full justify-center items-center ">
-        {servers.map(({ id, name, image }) => (
+        {servers && servers.map(({ id, name, image }) => (
           <div
             key={id}
             className="mb-4 flex w-full justify-center items-center"

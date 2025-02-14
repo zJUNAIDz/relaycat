@@ -4,11 +4,11 @@ import { ServerSearch } from "@/features/server/navigation/server-search";
 import { RoleIcon } from "@/shared/components/icons";
 import { ScrollArea } from "@/shared/components/ui/scroll-area";
 import { Separator } from "@/shared/components/ui/separator";
-import { db } from "@/shared/lib/db";
 import { ChannelType, MemberRole } from "@prisma/client";
 import { Hash, Mic, Video } from "lucide-react";
 import { redirect } from "next/navigation";
 import React from "react";
+import { serverService } from "../server-service";
 import ServerHeader from "./server-header";
 import { ServerMembersList } from "./server-member-list";
 interface ServerSidebarProps {
@@ -31,34 +31,8 @@ const ServerSidebar: React.FC<ServerSidebarProps> = async ({ serverId }) => {
   const user = await auth().then((session) => session?.user);
   if (!user) return redirect("/login");
 
-  const server = await db.server.findUnique({
-    where: {
-      id: serverId,
-      members: {
-        some: {
-          userId: user.id,
-        },
-      },
-    },
-    include: {
-      channels: {
-        orderBy: {
-          createdAt: "asc",
-        },
-      },
-      members: {
-        include: {
-          user: true,
-        },
-        orderBy: {
-          role: "asc",
-        },
-      },
-    },
-  });
-
+  const server = await serverService.getServer(serverId, ["user", "channels"])
   if (!server) return redirect("/");
-  const channels = server.channels
 
   const textChannels = server?.channels.filter(
     (channel) => channel.type === ChannelType.TEXT
@@ -128,7 +102,7 @@ const ServerSidebar: React.FC<ServerSidebarProps> = async ({ serverId }) => {
           role={role}
           server={server}
         />
-        <ServerMembersList members={server.members} />
+        <ServerMembersList members={server.members} serverId={serverId} />
       </ScrollArea>
     </div>
   );
