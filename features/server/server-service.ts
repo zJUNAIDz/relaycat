@@ -30,7 +30,9 @@ class ServerService {
     }
   }
 
-  
+  async getServer(serverId: string, options?: ["members"]): Promise<ServerWithMembers | null>;
+  async getServer(serverId: string, options?: ["user", "members"] | ["user"]): Promise<ServerWithMembersWithUserProfiles | null>;
+  async getServer(serverId: string, options?: undefined | []): Promise<Server | null>;
   async getServer(serverId: string, options?: string[]): Promise<ServerWithMembersWithUserProfiles | ServerWithMembers | Server | null> {
     try {
       const url = queryString.stringifyUrl({
