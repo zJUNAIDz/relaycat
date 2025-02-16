@@ -1,13 +1,17 @@
 import { auth } from "@/auth";
+import { ChannelList } from "@/features/channel/components/channels-list";
+import { ServerSearch } from "@/features/server/navigation/server-search";
+import { RoleIcon } from "@/shared/components/icons";
+import { ScrollArea } from "@/shared/components/ui/scroll-area";
+import { Separator } from "@/shared/components/ui/separator";
 import { db } from "@/shared/lib/db";
 import { ChannelType, MemberRole } from "@prisma/client";
+import { Hash, Mic, Video } from "lucide-react";
 import { redirect } from "next/navigation";
 import React from "react";
 import ServerHeader from "./server-header";
-import { ScrollArea } from "@/shared/components/ui/scroll-area";
-import { ServerSearch } from "@/features/server/navigation/server-search";
-import { Hash, Mic, Video } from "lucide-react";
-import { RoleIcon } from "@/shared/components/icons";
+import { ServerMember } from "./server-member";
+import { ServerSection } from "./server-section";
 interface ServerSidebarProps {
   serverId: string;
 }
@@ -55,6 +59,7 @@ const ServerSidebar: React.FC<ServerSidebarProps> = async ({ serverId }) => {
   });
 
   if (!server) return redirect("/");
+  const channels = server.channels
 
   const textChannels = server?.channels.filter(
     (channel) => channel.type === ChannelType.TEXT
@@ -66,10 +71,10 @@ const ServerSidebar: React.FC<ServerSidebarProps> = async ({ serverId }) => {
     (channel) => channel.type === ChannelType.VIDEO
   );
   const members = server?.members;
-  const role = server?.members.find(
+  const role = server.members.find(
     (member) => member.userId === user.id
   )?.role;
-
+  if (!role) return redirect("/login");
   return (
     <div className="flex flex-col h-full text-primary w-full dark:bg-[#2B2D31] bg-[#F2F3F5]">
       <ServerHeader server={server} role={role} />
@@ -113,6 +118,16 @@ const ServerSidebar: React.FC<ServerSidebarProps> = async ({ serverId }) => {
               }))
             },
           ]}
+        />
+        <Separator className="bg-zinc-200 dark:bg-zinc-700 rounded-md my-2" />
+        <ChannelList
+          channelsGroupedByType={[
+            textChannels,
+            audioChannels,
+            videoChannels,
+          ]}
+          role={role}
+          server={server}
         />
       </ScrollArea>
     </div>
