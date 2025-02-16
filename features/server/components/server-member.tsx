@@ -7,16 +7,15 @@ import { useParams, useRouter } from "next/navigation";
 
 interface ServerMemberProps {
   member: Member & { user: User };
-  server: Server;
+  serverId: Server["id"];
 }
 
-export const ServerMember: React.FC<ServerMemberProps> = ({ member, server }) => {
+export const ServerMember: React.FC<ServerMemberProps> = ({ member, serverId }) => {
   const params = useParams();
   const router = useRouter();
   const onClick = () => {
-    router.push(`/servers/${server.id}/conversations/${member.id}`)
+    router.push(`/servers/${serverId}/conversations/${member.id}`)
   }
-  console.log(member)
   return (
     <button
       onClick={onClick}

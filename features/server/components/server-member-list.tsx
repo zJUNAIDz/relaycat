@@ -1,12 +1,14 @@
 // "use client"
-import { Avatar, AvatarImage } from "@/shared/components/ui/avatar";
-import { ServerWithMembersWithUserProfiles } from "@/shared/types";
+import { ServerWithMembersAndUser } from "@/shared/types";
+import { Server } from "@prisma/client";
+import { ServerMember } from "./server-member";
 import { ServerSection } from "./server-section";
 
 interface ServerMembersListProps {
-  members: ServerWithMembersWithUserProfiles["members"]
+  members: ServerWithMembersAndUser["members"]
+  serverId: Server["id"]
 }
-export const ServerMembersList: React.FC<ServerMembersListProps> = async ({ members }) => {
+export const ServerMembersList: React.FC<ServerMembersListProps> = async ({ members, serverId }) => {
   //TODO: fix this
 
   //* Impossible edge case
@@ -17,17 +19,10 @@ export const ServerMembersList: React.FC<ServerMembersListProps> = async ({ memb
         sectionType="members"
         label="Members"
       />
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-1">
         {
           !!members?.length && members.map(member => (
-            <div key={member.userId} className="flex items-center gap-2">
-              <Avatar className="h-10 w-10">
-                <AvatarImage
-                  src={member.user.image}
-                />
-              </Avatar>
-              <div className="text-sm">{member.user.name}</div>
-            </div>
+            <ServerMember key={member.id} member={member} serverId={serverId} />
           ))
         }
       </div>
