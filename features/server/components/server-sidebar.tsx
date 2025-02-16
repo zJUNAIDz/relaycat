@@ -10,8 +10,7 @@ import { Hash, Mic, Video } from "lucide-react";
 import { redirect } from "next/navigation";
 import React from "react";
 import ServerHeader from "./server-header";
-import { ServerMember } from "./server-member";
-import { ServerSection } from "./server-section";
+import { ServerMembersList } from "./server-member-list";
 interface ServerSidebarProps {
   serverId: string;
 }
@@ -129,6 +128,7 @@ const ServerSidebar: React.FC<ServerSidebarProps> = async ({ serverId }) => {
           role={role}
           server={server}
         />
+        <ServerMembersList members={server.members} />
       </ScrollArea>
     </div>
   );
