@@ -2,7 +2,7 @@ import { ServerWithMembers, ServerWithMembersWithUserProfiles } from "@/shared/t
 import { getEnv } from "@/shared/utils/env";
 import { getAuthTokenOnServer } from "@/shared/utils/server";
 import { Server } from "@prisma/client";
-import axios, { AxiosResponse } from "axios";
+import axios, { Axios, AxiosResponse } from "axios";
 import queryString from "query-string";
 
 class ServerService {
@@ -58,6 +58,27 @@ class ServerService {
       return null
     }
   }
+  async joinServerByInviteCode(inviteCode: string): Promise<{ serverId: Server["id"] | null, error: string | null }> {
+    try {
+      const token = await getAuthTokenOnServer();
+      const endpoint = `${this.apiEndpoint}/servers/join/invite`
+
+      const { data: { serverId, error } }: AxiosResponse<{ serverId: Server["id"] | null, error: string | null }> = await axios.patch(endpoint, { inviteCode }, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
+
+      if (!serverId) return { serverId: null, error }
+      return { serverId, error: null }
+    } catch (err) {
+      console.error("[SERVER_SERVICE:joinServerByInviteCode] ", err)
+      return {
+        serverId: null, error: "Something went wrong"
+      }
+    }
+  }
+
 }
 
 export const serverService = new ServerService();
