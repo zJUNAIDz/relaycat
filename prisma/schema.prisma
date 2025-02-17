@@ -70,6 +70,7 @@ model Member {
   user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   server    Server     @relation(fields: [serverId], references: [id], onDelete: Cascade)
 
+  @@unique([serverId, userId])
   @@index([userId])
   @@index([serverId])
 }
