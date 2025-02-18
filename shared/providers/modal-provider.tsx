@@ -1,13 +1,14 @@
 "use client";
 
+import CreateChannelModal from "@/features/channel/components/modals/create-channel-modal";
+import DeleteChannelModal from "@/features/channel/components/modals/delete-channel-model";
 import CreateServerModal from "@/features/server/components/modals/create-server-modal";
+import DeleteServerModal from "@/features/server/components/modals/delete-server-modal";
 import EditServerModal from "@/features/server/components/modals/edit-server-modal";
 import InviteModal from "@/features/server/components/modals/invite-modal";
+import LeaveServerModal from "@/features/server/components/modals/leave-server-modal";
 import MembersModal from "@/features/server/components/modals/members-modal";
 import React from "react";
-import CreateChannelModal from "@/features/channel/components/modals/create-channel-modal";
-import LeaveServerModal from "@/features/server/components/modals/leave-server-modal";
-import DeleteServerModal from "@/features/server/components/modals/delete-server-modal";
 
 export const ModalProvider = () => {
   //* workaround to make it render on client-side only
@@ -24,6 +25,7 @@ export const ModalProvider = () => {
       <CreateChannelModal />
       <LeaveServerModal />
       <DeleteServerModal />
+      <DeleteChannelModal />
     </>
   );
 };

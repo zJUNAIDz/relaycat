@@ -1,9 +1,10 @@
 "use client";
 import { ActionTooltip } from "@/shared/components/action-tooltip";
+import { useModal } from "@/shared/hooks/use-modal-store";
 import { cn } from "@/shared/utils/cn";
-import { Channel, ChannelType, MemberRole, Server } from "@prisma/client"
+import { Channel, ChannelType, MemberRole, Server } from "@prisma/client";
 import { Edit, Hash, Mic, Trash, Video } from "lucide-react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 
 interface ServerChannelProps {
   channel: Channel;
@@ -17,6 +18,7 @@ const channelIconMap = {
 }
 export const ServerChannel: React.FC<ServerChannelProps> = ({ channel, server, role }) => {
   const params = useParams();
+  const { onOpen } = useModal()
   const Icon = channelIconMap[channel.type];
   return (
     <button
@@ -47,7 +49,7 @@ export const ServerChannel: React.FC<ServerChannelProps> = ({ channel, server, r
               <Edit className="hidden group-hover:block w-4 h-4 text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300" />
             </ActionTooltip>
             <ActionTooltip label="Delete channel" side="top" className="text-xs">
-              <Trash className="hidden group-hover:block w-4 h-4 text-zinc-500 hover:text-red-500 " />
+              <Trash onClick={() => onOpen("deleteChannel", { server, channel })} className="hidden group-hover:block w-4 h-4 text-zinc-500 hover:text-red-500 " />
             </ActionTooltip>
           </div>
         )
