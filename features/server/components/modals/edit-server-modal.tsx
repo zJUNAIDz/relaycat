@@ -82,7 +82,7 @@ const EditServerModal = () => {
       await axios.put(signedUrl, imageFile, {
         headers: { "Content-Type": imageFile.type },
       });
-      await axios.patch(`/api/servers/${server?.id}`, {
+      await axios.patch(`/api/servers/edit/${server?.id}`, {
         name: values.name,
         imageUrl: `https://s3.ap-south-1.amazonaws.com/${bucketName}/${key}`,
       });
