@@ -71,7 +71,7 @@ export const {
       return session;
     },
     redirect() {
-      return "/";
+      return "/setup";
     },
     async signIn(params) {
       return true;

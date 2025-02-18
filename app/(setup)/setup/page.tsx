@@ -1,7 +1,6 @@
 import InitialModal from "@/features/server/components/modals/inital-modal";
 import { serverService } from "@/features/server/server-service";
 import currentProfile from "@/shared/lib/current-profile";
-import { db } from "@/shared/lib/db";
 import { redirect } from "next/navigation";
 
 const SetupPage = async () => {
