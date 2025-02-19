@@ -17,6 +17,7 @@ const channelIconMap = {
   [ChannelType.VIDEO]: Video,
 }
 export const ServerChannel: React.FC<ServerChannelProps> = ({ channel, server, role }) => {
+  const router = useRouter();
   const params = useParams();
   const { onOpen } = useModal()
 
@@ -30,9 +31,14 @@ export const ServerChannel: React.FC<ServerChannelProps> = ({ channel, server, r
     e.stopPropagation();
     onOpen("deleteChannel", { server, channel });
   }
+  const onChannelClick = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    e.stopPropagation();
+    router.push(`/servers/${server.id}/channels/${channel.id}`);
+  }
+
   return (
     <button
-      onClick={() => { }}
+      onClick={onChannelClick}
       className={cn(
         "group px-2 py-2 rounded-md flex items-center gap-x-2 w-full hover:bg-zinc-700/10 dark:hover:bg-zinc-700/50 transition mb-1",
         params.channelId == channel.id && "bg-zinc-700/20 dark:bg-zinc-700"
