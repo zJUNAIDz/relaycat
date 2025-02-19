@@ -14,26 +14,26 @@ import {
   FormMessage,
 } from "@/shared/components/ui/form";
 import { Input } from "@/shared/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/components/ui/select";
 import { useModal } from "@/shared/hooks/use-modal-store";
 import { getAuthTokenOnClient } from "@/shared/utils/client";
+import { capitalizeFirstLetter } from "@/shared/utils/misc";
+import { publicEnv } from "@/shared/utils/publicEnv";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ChannelType } from "@prisma/client";
 import { DialogTitle } from "@radix-ui/react-dialog";
 import axios from "axios";
 import { useParams, useRouter } from "next/navigation";
+import qs from "query-string";
 import React from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import * as z from "zod";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/components/ui/select";
-import { capitalizeFirstLetter } from "@/shared/utils/misc";
-import qs from "query-string";
-import { publicEnv } from "@/shared/utils/publicEnv";
 
 const formSchema = z.object({
   name: z.string().min(1, {
     message: "Channel name is required.",
   }),
-  type: z.nativeEnum(ChannelType)
+  type: z.nativeEnum(ChannelType),
 });
 
 const CreateChannelModal = () => {
@@ -42,7 +42,7 @@ const CreateChannelModal = () => {
   const isModalOpen = isOpen && type == "createChannel";
   const [isLoading, setIsLoading] = React.useState(false);
   const [errorMessage, setErrorMessage] = React.useState("");
-  const params = useParams<{ serverId: string }>()
+  const { serverId } = useParams<{ serverId: string }>()
   const router = useRouter();
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -55,7 +55,7 @@ const CreateChannelModal = () => {
   const resetForm = () => {
     form.reset({
       name: "",
-      type: ChannelType.TEXT
+      type: ChannelType.TEXT,
     });
   }
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
@@ -63,12 +63,10 @@ const CreateChannelModal = () => {
     try {
       const url = qs.stringifyUrl({
         url: `${apiEndpoint}/channels/create`,
-        query: {
-          serverId: params.serverId
-        }
+
       })
 
-      await axios.post(url, values, {
+      await axios.post(url, { ...values, serverId }, {
         headers: {
           Authorization: `Bearer ${await getAuthTokenOnClient()}`
         }
@@ -77,6 +75,8 @@ const CreateChannelModal = () => {
       router.refresh()
       onClose()
     } catch (err) {
+      if (err instanceof z.ZodError)
+        setErrorMessage(err.message)
       console.error("[Error][Create Channel: fn::onSubmit] ", err);
     } finally {
       setIsLoading(false);
