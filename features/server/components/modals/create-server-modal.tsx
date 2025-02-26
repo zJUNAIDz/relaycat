@@ -20,7 +20,7 @@ import { getAuthTokenOnClient } from "@/shared/utils/client";
 // import { api } from "@/lib/api-client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DialogDescription, DialogTitle } from "@radix-ui/react-dialog";
-import axios from "axios";
+import axios, { Axios, AxiosError } from "axios";
 import { useRouter } from "next/navigation";
 import React from "react";
 import { FormProvider, useForm } from "react-hook-form";
@@ -63,6 +63,7 @@ const CreateServerModal = () => {
     });
     setImageFile(null);
   }
+  const apiEndpoint = "http://localhost:3001";
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
 
@@ -73,9 +74,13 @@ const CreateServerModal = () => {
           return;
         }
         if (values.imageUrl === defaultImageUrl) {
-          await axios.post("/api/servers", {
+          await axios.post(`${apiEndpoint}/servers/`, {
             name: values.name,
             imageUrl: form.getValues("imageUrl"),
+          }, {
+            headers: {
+              "Authorization": `Bearer ${await getAuthTokenOnClient()}`
+            }
           });
           resetForm();
           router.refresh();
@@ -91,7 +96,6 @@ const CreateServerModal = () => {
         setErrorMessage("No image found")
         return;
       }
-      const apiEndpoint = "http://localhost:3001";
       const { data: { signedUrl, key, bucketName } } = await axios.get(
         `${apiEndpoint}/s3/uploadNewImage?serverName=${form.getValues("name")}&fileType=${imageFile.type}`, {
         withCredentials: true,
@@ -109,15 +113,14 @@ const CreateServerModal = () => {
       const s3BaseUrl = "https://s3.ap-south-1.amazonaws.com";
       const imageUrl = `${s3BaseUrl}/${bucketName}/${key}`;
 
-      await axios.put(signedUrl, imageFile, {
+      const signedUrlResponse = await axios.put(signedUrl, imageFile, {
         headers: { "Content-Type": imageFile.type },
       });
-
+      console.log({ signedUrlResponse });
       await axios.post(`${apiEndpoint}/servers/add`, {
         name: values.name,
         imageUrl,
       }, {
-        withCredentials: true,
         headers: {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${await getAuthTokenOnClient()}`,
@@ -132,6 +135,9 @@ const CreateServerModal = () => {
       router.refresh();
       onClose();
     } catch (err) {
+      if (err instanceof AxiosError) {
+        console.error("[Error][Create Server: fn::onSubmit] ", err.response?.data);
+      }
       console.error("[Error][Create Server: fn::onSubmit] ", err);
     } finally {
       setIsLoading(false);
