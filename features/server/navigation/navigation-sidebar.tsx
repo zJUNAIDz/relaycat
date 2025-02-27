@@ -9,7 +9,7 @@ import { serverService } from "../server-service";
 
 const NavigationSidebar = async () => {
   const { profile } = await currentProfile();
-  if (!profile) return redirect("/login");
+  if (!profile) return redirect("/auth");
 
   const servers = await serverService.getServersByUserId(profile.id);
 

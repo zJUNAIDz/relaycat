@@ -44,7 +44,7 @@ const DeleteServerModal = () => {
       })
       onClose()
       router.refresh()
-      router.push("/")
+      router.push("/setup")
     } catch (err) {
       console.error("[DELETE_SERVER_MODAL] ", err)
     } finally {

@@ -29,7 +29,7 @@ const roleIconMap = {
 
 const ServerSidebar: React.FC<ServerSidebarProps> = async ({ serverId }) => {
   const user = await auth().then((session) => session?.user);
-  if (!user) return redirect("/login");
+  if (!user) return redirect("/auth");
 
   const server = await serverService.getServer(serverId, ["user", "channels"])
   if (!server) return redirect("/");
@@ -47,7 +47,7 @@ const ServerSidebar: React.FC<ServerSidebarProps> = async ({ serverId }) => {
   const role = server.members.find(
     (member) => member.userId === user.id
   )?.role;
-  if (!role) return redirect("/login");
+  if (!role) return redirect("/auth");
   return (
     <div className="flex flex-col h-full text-primary w-full dark:bg-[#2B2D31] bg-[#F2F3F5]">
       <ServerHeader server={server} role={role} />

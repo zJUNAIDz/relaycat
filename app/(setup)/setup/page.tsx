@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 
 const SetupPage = async () => {
   const { profile } = await currentProfile();
-  if (!profile) return redirect("/login");
+  if (!profile) return redirect("/auth");
   //TODO: optimize it to query first server only
   const servers = await serverService.getServersByUserId(profile.id)
   if (servers) redirect(`/servers/${servers[0].id}`);

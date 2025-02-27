@@ -15,7 +15,7 @@ const InviteCodePage: React.FC<InviteCodePageProps> = async ({
 }) => {
 
   const profile = await auth().then((session) => session?.user);
-  if (!profile) return redirect("/login");
+  if (!profile) return redirect("/auth");
   const { inviteCode } = await params;
 
   const { serverId } = await serverService.joinServerByInviteCode(inviteCode)
