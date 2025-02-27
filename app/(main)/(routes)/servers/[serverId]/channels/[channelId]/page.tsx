@@ -6,6 +6,26 @@ interface ChannelIdPageProps {
   params: any
 }
 
+export async function generateMetadata({ params }: ChannelIdPageProps) {
+  const { channelId } = await params
+  const channel = await db.channel.findUnique({
+    where: {
+      id: channelId,
+    },
+    include: {
+      server: {
+        select: {
+          name: true,
+        }
+      }
+    }
+  })
+
+  return {
+    title: `#${channel?.name} | ${channel?.server.name} `,
+  }
+}
+
 
 const ChannelIdPage = async ({ params }: ChannelIdPageProps) => {
   const { serverId, channelId } = await params
