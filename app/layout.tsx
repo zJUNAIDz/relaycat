@@ -26,7 +26,7 @@ export default function RootLayout({
           attribute="class"
           defaultTheme="dark"
           enableSystem={false}
-          storageKey="discord-clone"
+          storageKey="relaycat"
         >
           <ModalProvider />
           {children}
