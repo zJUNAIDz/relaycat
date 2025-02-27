@@ -3,11 +3,10 @@ import { SignJWT } from "jose";
 import NextAuth from "next-auth";
 import { JWTOptions } from "next-auth/jwt";
 import Google from "next-auth/providers/google";
+import Github from "next-auth/providers/github";
 import { db } from "@/shared/lib/db";
 import { getEnv } from "@/shared/utils/env";
 
-const clientId = getEnv("AUTH_GOOGLE_ID");
-const clientSecret = getEnv("AUTH_GOOGLE_SECRET");
 
 async function setToken(user: User) {
   const secret = new TextEncoder().encode(process.env.JWT_SECRET!);
@@ -30,13 +29,19 @@ export const {
   adapter: PrismaAdapter(db),
   providers: [
     Google({
-      clientId: clientId,
-      clientSecret: clientSecret,
+      clientId: getEnv("AUTH_GOOGLE_ID"),
+      clientSecret: getEnv("AUTH_GOOGLE_SECRET"),
+    }),
+    Github({
+      clientId: getEnv("AUTH_GITHUB_ID"),
+      clientSecret: getEnv("AUTH_GITHUB_SECRET"),
     }),
   ],
   trustHost: true,
   pages: {
-    signIn: "/login",
+    signIn: "/auth",
+    error: "/auth/error",
+    signOut: "/auth/signout",
   },
   session: {
     strategy: "jwt",
