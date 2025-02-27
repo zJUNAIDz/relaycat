@@ -10,8 +10,8 @@ import { ModalProvider } from "@/shared/providers/modal-provider";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "RelayComm",
-  description: "Discord app clone",
+  title: "RelayCat",
+  description: "A Communication Platform",
 };
 
 export default function RootLayout({
