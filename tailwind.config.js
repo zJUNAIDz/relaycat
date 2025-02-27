@@ -18,6 +18,10 @@ module.exports = {
       },
     },
     extend: {
+      backgroundImage: {
+        "multi-gradient":
+          "linear-gradient(135deg, #2a3fb4, #0063d0, #007fd6, #0097c9, #00abb0,#00bd94 )",
+      },
       colors: {
         // Discord's core brand colors
         "relaycat-blurple": "#5865F2",
