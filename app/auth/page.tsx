@@ -1,10 +1,13 @@
 "use client"
 import { login } from "@/shared/lib/actions";
 import { motion } from "framer-motion";
+import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { HiArrowRight, HiChat, HiGlobe, HiLockClosed, HiMail, HiShieldCheck, HiSparkles, HiUser } from "react-icons/hi";
 const AuthScreen = () => {
-  const [isLogin, setIsLogin] = useState(true);
+
+  const searchParams = useSearchParams()
+  const [isLogin, setIsLogin] = useState(!!searchParams.has("login"));
   const [view, setView] = useState<"mobile" | "desktop">("desktop");
   const features = [
     { icon: HiChat, title: "Real-Time Chat", text: "Instant messaging with markdown support" },
