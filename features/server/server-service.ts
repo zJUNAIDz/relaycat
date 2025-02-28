@@ -16,9 +16,6 @@ class ServerService {
     try {
 
       const { data: servers }: { data: ServerWithMembersAndUser[] | Server[] } = await axios.get(`${this.API_URL}/servers`, {
-        params: {
-          userId
-        },
         headers: {
           Authorization: `Bearer ${await getAuthTokenOnServer()}`
         }
