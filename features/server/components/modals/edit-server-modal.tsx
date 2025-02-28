@@ -18,7 +18,6 @@ import {
 import { Input } from "@/shared/components/ui/input";
 import { useModal } from "@/shared/hooks/use-modal-store";
 import { getAuthTokenOnClient } from "@/shared/utils/client";
-import { publicEnv } from "@/shared/utils/publicEnv";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DialogDescription, DialogTitle } from "@radix-ui/react-dialog";
 import axios from "axios";
@@ -27,6 +26,7 @@ import React from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import * as z from "zod";
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL!
 const defaultImageUrl = "https://global.discourse-cdn.com/turtlehead/original/2X/c/c830d1dee245de3c851f0f88b6c57c83c69f3ace.png";
 
 const formSchema = z.object({
@@ -56,13 +56,12 @@ const EditServerModal = () => {
   });
 
   const isLoading = form.formState.isLoading;
-  const apiEndpoint = publicEnv("API_URL") || "http://localhost:3001"
-  console.log("api url", apiEndpoint)
+  console.log("api url", API_URL)
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       const authToken = await getAuthTokenOnClient()
       if (!imageFile) {
-        await axios.patch(`${apiEndpoint}/servers/${server?.id}`, {
+        await axios.patch(`${API_URL}/servers/${server?.id}`, {
           name: values.name,
           imageUrl: values?.imageUrl,
         },
@@ -79,7 +78,7 @@ const EditServerModal = () => {
       }
       //* Get signed url from api
       const { data: { signedUrl, key, bucketName } } = await axios.get(
-        `${apiEndpoint}/s3/uploadNewImage?serverName=${form.getValues("name")}&fileType=${imageFile.type}`, {
+        `${API_URL}/s3/uploadNewImage?serverName=${form.getValues("name")}&fileType=${imageFile.type}`, {
         headers: {
           "Authorization": `Bearer ${authToken}`
         }
@@ -94,7 +93,7 @@ const EditServerModal = () => {
       await axios.put(signedUrl, imageFile, {
         headers: { "Content-Type": imageFile.type },
       });
-      await axios.patch(`${apiEndpoint}/servers/${server?.id}`, {
+      await axios.patch(`${API_URL}/servers/${server?.id}`, {
         name: values.name,
         imageUrl: `https://s3.ap-south-1.amazonaws.com/${bucketName}/${key}`,
       },

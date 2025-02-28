@@ -20,12 +20,13 @@ import { getAuthTokenOnClient } from "@/shared/utils/client";
 // import { api } from "@/lib/api-client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DialogDescription, DialogTitle } from "@radix-ui/react-dialog";
-import axios, { Axios, AxiosError } from "axios";
+import axios, { AxiosError } from "axios";
 import { useRouter } from "next/navigation";
 import React from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import * as z from "zod";
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL!;
 const defaultImageUrl = "https://global.discourse-cdn.com/turtlehead/original/2X/c/c830d1dee245de3c851f0f88b6c57c83c69f3ace.png";
 
 const formSchema = z.object({
@@ -63,7 +64,6 @@ const CreateServerModal = () => {
     });
     setImageFile(null);
   }
-  const apiEndpoint = "http://localhost:3001";
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       setIsLoading(true);
@@ -74,7 +74,7 @@ const CreateServerModal = () => {
           return;
         }
         if (values.imageUrl === defaultImageUrl) {
-          await axios.post(`${apiEndpoint}/servers/`, {
+          await axios.post(`${API_URL}/servers/`, {
             name: values.name,
             imageUrl: form.getValues("imageUrl"),
           }, {
@@ -97,7 +97,7 @@ const CreateServerModal = () => {
         return;
       }
       const { data: { signedUrl, key, bucketName } } = await axios.get(
-        `${apiEndpoint}/s3/uploadNewImage?serverName=${form.getValues("name")}&fileType=${imageFile.type}`, {
+        `${API_URL}/s3/uploadNewImage?serverName=${form.getValues("name")}&fileType=${imageFile.type}`, {
         withCredentials: true,
         headers: {
           "Content-Type": "application/json",
@@ -105,7 +105,7 @@ const CreateServerModal = () => {
         }
       }
       );
- 
+
       if (!signedUrl || !key || !bucketName) {
         setErrorMessage("Error uploading image");
         return;
@@ -117,7 +117,7 @@ const CreateServerModal = () => {
         headers: { "Content-Type": imageFile.type },
       });
       console.log({ signedUrlResponse });
-      await axios.post(`${apiEndpoint}/servers`, {
+      await axios.post(`${API_URL}/servers`, {
         name: values.name,
         imageUrl,
       }, {

@@ -1,21 +1,19 @@
 "use client";
 
+import { Button } from "@/shared/components/ui/button";
 import {
   Dialog,
-  DialogClose,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle
 } from "@/shared/components/ui/dialog";
 import { useModal } from "@/shared/hooks/use-modal-store";
-import { publicEnv } from "@/shared/utils/publicEnv";
+import { getAuthTokenOnClient } from "@/shared/utils/client";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import qs from "query-string";
 import React from "react";
-import { Button } from "@/shared/components/ui/button";
-import { getAuthTokenOnClient } from "@/shared/utils/client";
 const LeaveServerModal = () => {
 
   const {
@@ -27,12 +25,12 @@ const LeaveServerModal = () => {
   const router = useRouter()
   const isModalOpen = isOpen && type == "leaveServer";
   const [isLoading, setIsLoading] = React.useState(false);
-  const apiEndpoint = publicEnv("API_URL") || "http://localhost:3001"
+  const API_URL = process.env.NEXT_PUBLIC_API_URL!
   const leaveServer = async () => {
     try {
       setIsLoading(true)
       const url = qs.stringifyUrl({
-        url: `${apiEndpoint}/servers/leave`,
+        url: `${API_URL}/servers/leave`,
         query: {
           serverId: server?.id
         }

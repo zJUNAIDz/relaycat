@@ -18,7 +18,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useModal } from "@/shared/hooks/use-modal-store";
 import { getAuthTokenOnClient } from "@/shared/utils/client";
 import { capitalizeFirstLetter } from "@/shared/utils/misc";
-import { publicEnv } from "@/shared/utils/publicEnv";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ChannelType } from "@prisma/client";
 import { DialogTitle } from "@radix-ui/react-dialog";
@@ -28,6 +27,8 @@ import qs from "query-string";
 import React from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import * as z from "zod";
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL!
 
 const formSchema = z.object({
   name: z.string().min(1, {
@@ -59,10 +60,9 @@ const CreateChannelModal = () => {
     });
   }
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    const apiEndpoint = publicEnv("API_URL") || "http://localhost:3001"
     try {
       const url = qs.stringifyUrl({
-        url: `${apiEndpoint}/channels/create`,
+        url: `${API_URL}/channels/create`,
 
       })
 

@@ -10,11 +10,13 @@ import {
 } from "@/shared/components/ui/dialog";
 import { useModal } from "@/shared/hooks/use-modal-store";
 import { getAuthTokenOnClient } from "@/shared/utils/client";
-import { publicEnv } from "@/shared/utils/publicEnv";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import qs from "query-string";
 import React from "react";
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL!
+
 const DeleteChannelModal = () => {
 
   const {
@@ -26,12 +28,11 @@ const DeleteChannelModal = () => {
   const router = useRouter()
   const isModalOpen = isOpen && type == "deleteChannel";
   const [isLoading, setIsLoading] = React.useState(false);
-  const apiEndpoint = publicEnv("API_URL") || "http://localhost:3001"
   const deleteChannel = async () => {
     try {
       setIsLoading(true)
       const url = qs.stringifyUrl({
-        url: `${apiEndpoint}/channels/${channel?.id}`,
+        url: `${API_URL}/channels/${channel?.id}`,
       })
       await axios.delete(url, {
         headers: {

@@ -25,15 +25,15 @@ import { UserAvatar } from "@/shared/components/user-avatar";
 import { useModal } from "@/shared/hooks/use-modal-store";
 import { ServerWithMembersAndUser } from "@/shared/types";
 import { getAuthTokenOnClient } from "@/shared/utils/client";
+import { capitalizeFirstLetter } from "@/shared/utils/misc";
 import { MemberRole } from "@prisma/client";
 import axios from "axios";
 import { Check, Gavel, Loader2, MoreVertical, Shield } from "lucide-react";
 import { useRouter } from "next/navigation";
 import qs from "query-string";
 import React from "react";
-export const capitalizeFirstLetter = (string: string): string => {
-  return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
-};
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL!;
 
 const MembersModal = () => {
   const {
@@ -54,7 +54,7 @@ const MembersModal = () => {
       setLoadingId(memberId)
       const authToken = await getAuthTokenOnClient()
       const url = qs.stringifyUrl({
-        url: "http://localhost:3001/members/kick",
+        url: `${API_URL}/members/kick`,
         query: {
           serverId: server?.id,
           memberId
@@ -79,7 +79,7 @@ const MembersModal = () => {
       setLoadingId(memberId)
       const authToken = await getAuthTokenOnClient()
       const url = qs.stringifyUrl({
-        url: `http://localhost:3001/members/changeRole`,
+        url: `${API_URL}/members/changeRole`,
         query: {
           serverId: server?.id,
           memberId

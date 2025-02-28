@@ -17,6 +17,8 @@ import { Check, Copy, RefreshCw } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React from "react";
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
 const InviteModal = () => {
   //* component beginning
   const [copied, setCopied] = React.useState(false);
@@ -29,7 +31,6 @@ const InviteModal = () => {
     data: { server },
   } = useModal();
   const origin = useOrigin();
-  const router = useRouter()
   const isModalOpen = isOpen && type == "invite";
   const inviteUrl = `${origin}/invite/${server?.inviteCode}`;
 
@@ -43,7 +44,7 @@ const InviteModal = () => {
       setIsLoading(true);
       const token = await getAuthTokenOnClient();
       const response = await axios.patch(
-        `http://localhost:3001/servers/${server?.id}/invite-code`, {}, {
+        `${API_URL}/servers/${server?.id}/invite-code`, {}, {
         headers: {
           "Authorization": `Bearer ${token}`,
         }
