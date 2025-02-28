@@ -17,6 +17,7 @@ import {
 } from "@/shared/components/ui/form";
 import { Input } from "@/shared/components/ui/input";
 import { useModal } from "@/shared/hooks/use-modal-store";
+import { API_URL, DEFAULT_SERVER_IMAGE_URL } from "@/shared/lib/constants";
 import { getAuthTokenOnClient } from "@/shared/utils/client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DialogDescription, DialogTitle } from "@radix-ui/react-dialog";
@@ -26,8 +27,6 @@ import React from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import * as z from "zod";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL!
-const defaultImageUrl = "https://global.discourse-cdn.com/turtlehead/original/2X/c/c830d1dee245de3c851f0f88b6c57c83c69f3ace.png";
 
 const formSchema = z.object({
   name: z.string().min(1, {
@@ -36,7 +35,7 @@ const formSchema = z.object({
   //TODO: remove this requirement and use fallback image if not specified
   imageUrl: z.string().min(1, {
     message: "Server image is required.",
-  }).default(defaultImageUrl),
+  }).default(DEFAULT_SERVER_IMAGE_URL),
 });
 
 const EditServerModal = () => {
@@ -51,7 +50,7 @@ const EditServerModal = () => {
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
-      imageUrl: defaultImageUrl,
+      imageUrl: DEFAULT_SERVER_IMAGE_URL,
     },
   });
 

@@ -11,13 +11,12 @@ import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
 import { useModal } from "@/shared/hooks/use-modal-store";
 import { useOrigin } from "@/shared/hooks/use-origin";
+import { API_URL } from "@/shared/lib/constants";
 import { getAuthTokenOnClient } from "@/shared/utils/client";
 import axios from "axios";
 import { Check, Copy, RefreshCw } from "lucide-react";
-import { useRouter } from "next/navigation";
 import React from "react";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 const InviteModal = () => {
   //* component beginning

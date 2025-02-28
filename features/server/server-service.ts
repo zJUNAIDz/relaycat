@@ -1,3 +1,4 @@
+import { API_URL } from "@/shared/lib/constants";
 import { ServerWithMembersAndUser, ServerWithMembersOnly, ServerWithMembersUserAndChannels } from "@/shared/types";
 import { getEnv } from "@/shared/utils/env";
 import { getAuthTokenOnServer } from "@/shared/utils/server";
@@ -6,15 +7,15 @@ import axios, { AxiosResponse } from "axios";
 import queryString from "query-string";
 
 class ServerService {
-  apiEndpoint: string;
+  API_URL: string;
   constructor() {
-    this.apiEndpoint = getEnv("API_URL");
+    this.API_URL = API_URL;
   }
 
   async getServersByUserId(userId: string): Promise<ServerWithMembersAndUser[] | Server[] | null> {
     try {
 
-      const { data: servers }: { data: ServerWithMembersAndUser[] | Server[] } = await axios.get(`${this.apiEndpoint}/servers`, {
+      const { data: servers }: { data: ServerWithMembersAndUser[] | Server[] } = await axios.get(`${this.API_URL}/servers`, {
         params: {
           userId
         },
@@ -37,7 +38,7 @@ class ServerService {
   async getServer(serverId: string, options?: string[]): Promise<ServerWithMembersAndUser | ServerWithMembersOnly | Server | null> {
     try {
       const url = queryString.stringifyUrl({
-        url: `${this.apiEndpoint}/servers/${serverId}`,
+        url: `${this.API_URL}/servers/${serverId}`,
         query: {
           user: options?.includes("users") ? true : false,
           member: options?.includes("members") ? true : false,
@@ -67,7 +68,7 @@ class ServerService {
   async joinServerByInviteCode(inviteCode: string): Promise<{ serverId: Server["id"] | null, error: string | null }> {
     try {
       const token = await getAuthTokenOnServer();
-      const endpoint = `${this.apiEndpoint}/servers/join/invite`
+      const endpoint = `${this.API_URL}/servers/join/invite`
 
       const { data: { serverId, error } }: AxiosResponse<{ serverId: Server["id"] | null, error: string | null }> = await axios.patch(endpoint, { inviteCode }, {
         headers: {

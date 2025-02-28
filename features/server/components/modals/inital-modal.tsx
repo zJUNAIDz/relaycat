@@ -1,12 +1,5 @@
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { DialogDescription, DialogTitle } from "@radix-ui/react-dialog";
-import axios from "axios";
-import { useRouter } from "next/navigation";
-import React from "react";
-import { FormProvider, useForm } from "react-hook-form";
-import * as z from "zod";
 import FileUpload from "@/shared/components/file-uploads";
 import { Button } from "@/shared/components/ui/button";
 import {
@@ -23,8 +16,15 @@ import {
   FormMessage,
 } from "@/shared/components/ui/form";
 import { Input } from "@/shared/components/ui/input";
+import { API_URL, DEFAULT_SERVER_IMAGE_URL } from "@/shared/lib/constants";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { DialogDescription, DialogTitle } from "@radix-ui/react-dialog";
+import axios from "axios";
+import { useRouter } from "next/navigation";
+import React from "react";
+import { FormProvider, useForm } from "react-hook-form";
+import * as z from "zod";
 
-const defaultImageUrl = "https://global.discourse-cdn.com/turtlehead/original/2X/c/c830d1dee245de3c851f0f88b6c57c83c69f3ace.png";
 const formSchema = z.object({
   name: z.string().min(1, {
     message: "Server name is required.",
@@ -32,9 +32,7 @@ const formSchema = z.object({
   //TODO: remove this requirement and use fallback image if not specified
   imageUrl: z
     .string()
-    .default(
-      "https://global.discourse-cdn.com/turtlehead/original/2X/c/c830d1dee245de3c851f0f88b6c57c83c69f3ace.png"
-    ),
+    .default(DEFAULT_SERVER_IMAGE_URL),
 });
 
 const InitialModal = () => {
@@ -44,8 +42,7 @@ const InitialModal = () => {
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
-      imageUrl:
-        "https://global.discourse-cdn.com/turtlehead/original/2X/c/c830d1dee245de3c851f0f88b6c57c83c69f3ace.png",
+      imageUrl: DEFAULT_SERVER_IMAGE_URL,
     },
   });
   const [imageFile, setImageFile] = React.useState<File | null>(null);
@@ -63,11 +60,11 @@ const InitialModal = () => {
 
 
 
-      await axios.post("/api/servers", {
+      await axios.post(`${API_URL}/servers`, {
         name: values.name,
         imageUrl: imageFile
           ? `https://s3.ap-south-1.amazonaws.com/${bucketName}/${key}`
-          : "https://global.discourse-cdn.com/turtlehead/original/2X/c/c830d1dee245de3c851f0f88b6c57c83c69f3ace.png",
+          : DEFAULT_SERVER_IMAGE_URL,
       });
 
       form.reset();

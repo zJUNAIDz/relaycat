@@ -14,6 +14,8 @@ import axios from "axios";
 import { useRouter } from "next/navigation";
 import qs from "query-string";
 import React from "react";
+import { API_URL } from "@/shared/lib/constants";
+
 const LeaveServerModal = () => {
 
   const {
@@ -25,7 +27,6 @@ const LeaveServerModal = () => {
   const router = useRouter()
   const isModalOpen = isOpen && type == "leaveServer";
   const [isLoading, setIsLoading] = React.useState(false);
-  const API_URL = process.env.NEXT_PUBLIC_API_URL!
   const leaveServer = async () => {
     try {
       setIsLoading(true)

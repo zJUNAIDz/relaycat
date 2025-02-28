@@ -9,13 +9,12 @@ import {
   DialogTitle
 } from "@/shared/components/ui/dialog";
 import { useModal } from "@/shared/hooks/use-modal-store";
+import { API_URL } from "@/shared/lib/constants";
 import { getAuthTokenOnClient } from "@/shared/utils/client";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import qs from "query-string";
 import React from "react";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL!
 
 const DeleteChannelModal = () => {
 

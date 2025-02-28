@@ -23,6 +23,7 @@ import {
 import { ScrollArea } from "@/shared/components/ui/scroll-area";
 import { UserAvatar } from "@/shared/components/user-avatar";
 import { useModal } from "@/shared/hooks/use-modal-store";
+import { API_URL } from "@/shared/lib/constants";
 import { ServerWithMembersAndUser } from "@/shared/types";
 import { getAuthTokenOnClient } from "@/shared/utils/client";
 import { capitalizeFirstLetter } from "@/shared/utils/misc";
@@ -33,7 +34,6 @@ import { useRouter } from "next/navigation";
 import qs from "query-string";
 import React from "react";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL!;
 
 const MembersModal = () => {
   const {

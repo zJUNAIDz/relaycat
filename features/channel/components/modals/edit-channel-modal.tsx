@@ -16,6 +16,7 @@ import {
 import { Input } from "@/shared/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/components/ui/select";
 import { useModal } from "@/shared/hooks/use-modal-store";
+import { API_URL } from "@/shared/lib/constants";
 import { getAuthTokenOnClient } from "@/shared/utils/client";
 import { capitalizeFirstLetter } from "@/shared/utils/misc";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -28,7 +29,6 @@ import React from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import * as z from "zod";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL!
 
 const formSchema = z.object({
   name: z.string().min(1, {

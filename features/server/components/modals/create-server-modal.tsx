@@ -25,15 +25,14 @@ import { useRouter } from "next/navigation";
 import React from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import * as z from "zod";
+import { API_URL, DEFAULT_SERVER_IMAGE_URL } from "@/shared/lib/constants";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL!;
-const defaultImageUrl = "https://global.discourse-cdn.com/turtlehead/original/2X/c/c830d1dee245de3c851f0f88b6c57c83c69f3ace.png";
 
 const formSchema = z.object({
   name: z.string().min(1, {
     message: "Server name is required.",
   }),
-  imageUrl: z.string().optional().default(defaultImageUrl),
+  imageUrl: z.string().optional().default(DEFAULT_SERVER_IMAGE_URL),
 });
 
 
@@ -52,7 +51,7 @@ const CreateServerModal = () => {
     defaultValues: {
       name: "",
       imageUrl:
-        defaultImageUrl,
+        DEFAULT_SERVER_IMAGE_URL,
     },
   });
 
@@ -60,7 +59,7 @@ const CreateServerModal = () => {
   const resetForm = () => {
     form.reset({
       name: "",
-      imageUrl: defaultImageUrl,
+      imageUrl: DEFAULT_SERVER_IMAGE_URL,
     });
     setImageFile(null);
   }
@@ -73,7 +72,7 @@ const CreateServerModal = () => {
           setErrorMessage("Please upload an image");
           return;
         }
-        if (values.imageUrl === defaultImageUrl) {
+        if (values.imageUrl === DEFAULT_SERVER_IMAGE_URL) {
           await axios.post(`${API_URL}/servers/`, {
             name: values.name,
             imageUrl: form.getValues("imageUrl"),
@@ -89,7 +88,7 @@ const CreateServerModal = () => {
         }
 
         //* impossible edge case
-        if (values.imageUrl !== defaultImageUrl) {
+        if (values.imageUrl !== DEFAULT_SERVER_IMAGE_URL) {
           setErrorMessage("Image Url is not valid. please refresh the page");
           return;
         }
