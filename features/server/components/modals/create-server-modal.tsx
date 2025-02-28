@@ -105,7 +105,7 @@ const CreateServerModal = () => {
         }
       }
       );
-
+ 
       if (!signedUrl || !key || !bucketName) {
         setErrorMessage("Error uploading image");
         return;
@@ -117,7 +117,7 @@ const CreateServerModal = () => {
         headers: { "Content-Type": imageFile.type },
       });
       console.log({ signedUrlResponse });
-      await axios.post(`${apiEndpoint}/servers/add`, {
+      await axios.post(`${apiEndpoint}/servers`, {
         name: values.name,
         imageUrl,
       }, {
