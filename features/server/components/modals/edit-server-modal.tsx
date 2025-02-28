@@ -17,6 +17,8 @@ import {
 } from "@/shared/components/ui/form";
 import { Input } from "@/shared/components/ui/input";
 import { useModal } from "@/shared/hooks/use-modal-store";
+import { getAuthTokenOnClient } from "@/shared/utils/client";
+import { publicEnv } from "@/shared/utils/publicEnv";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DialogDescription, DialogTitle } from "@radix-ui/react-dialog";
 import axios from "axios";
@@ -34,7 +36,7 @@ const formSchema = z.object({
   //TODO: remove this requirement and use fallback image if not specified
   imageUrl: z.string().min(1, {
     message: "Server image is required.",
-  }),
+  }).default(defaultImageUrl),
 });
 
 const EditServerModal = () => {
@@ -49,30 +51,39 @@ const EditServerModal = () => {
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
-      imageUrl:
-        "https://global.discourse-cdn.com/turtlehead/original/2X/c/c830d1dee245de3c851f0f88b6c57c83c69f3ace.png",
+      imageUrl: defaultImageUrl,
     },
   });
 
   const isLoading = form.formState.isLoading;
-
+  const apiEndpoint = publicEnv("API_URL") || "http://localhost:3001"
+  console.log("api url", apiEndpoint)
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       if (!imageFile) {
-        await axios.patch(`/api/servers/${server?.id}`, {
+        await axios.patch(`${apiEndpoint}/servers/${server?.id}`, {
           name: values.name,
           imageUrl: values?.imageUrl,
-        });
+        },
+          {
+            headers: {
+              "Authorization": `Bearer ${await getAuthTokenOnClient()}`
+            }
+          }
+        );
         form.reset();
         router.refresh();
         window.location.reload();
         return;
       }
       //* Get signed url from api
-      const response = await fetch(
-        `/api/get-upload-url?serverName=${form.getValues("name")}&fileType=${imageFile.type}`
+      const { data: { signedUrl, key, bucketName } } = await axios.get(
+        `${apiEndpoint}/s3/uploadNewImage?serverName=${form.getValues("name")}&fileType=${imageFile.type}`, {
+        headers: {
+          "Authorization": `Bearer ${await getAuthTokenOnClient()}`
+        }
+      }
       );
-      const { signedUrl, key, bucketName } = await response.json();
       //* Upload file to S3
       // await fetch(signedUrl, {
       //   method: "PUT",
@@ -82,10 +93,15 @@ const EditServerModal = () => {
       await axios.put(signedUrl, imageFile, {
         headers: { "Content-Type": imageFile.type },
       });
-      await axios.patch(`/api/servers/edit/${server?.id}`, {
+      await axios.patch(`${apiEndpoint}/servers/${server?.id}`, {
         name: values.name,
         imageUrl: `https://s3.ap-south-1.amazonaws.com/${bucketName}/${key}`,
-      });
+      },
+        {
+          headers: {
+            "Authorization": `Bearer ${await getAuthTokenOnClient()}`
+          }
+        });
       form.reset();
       router.refresh();
       window.location.reload();
