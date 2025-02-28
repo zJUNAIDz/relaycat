@@ -6,3 +6,8 @@ export const getAuthTokenOnServer = async () => {
   if (token) return token
   throw new Error("No token found")
 };
+export const getCurrentUser = async () => {
+  const session = await auth()
+  if (!session) return null
+  return session.user
+}
