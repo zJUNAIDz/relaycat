@@ -52,7 +52,7 @@ const MembersModal = () => {
   const onKick = async (memberId: string) => {
     try {
       setLoadingId(memberId)
-
+      const authToken = await getAuthTokenOnClient()
       const url = qs.stringifyUrl({
         url: "http://localhost:3001/members/kick",
         query: {
@@ -62,7 +62,7 @@ const MembersModal = () => {
       })
       const { data } = await axios.delete(url, {
         headers: {
-          Authorization: `Bearer ${await getAuthTokenOnClient()}`
+          Authorization: `Bearer ${authToken}`
         }
       })
       router.refresh()
@@ -77,6 +77,7 @@ const MembersModal = () => {
   const onRoleChange = async (memberId: string, role: MemberRole) => {
     try {
       setLoadingId(memberId)
+      const authToken = await getAuthTokenOnClient()
       const url = qs.stringifyUrl({
         url: `http://localhost:3001/members/changeRole`,
         query: {
@@ -86,7 +87,7 @@ const MembersModal = () => {
       })
       const { data } = await axios.patch<{ server: ServerWithMembersAndUser }>(url, { serverId: server.id, memberId, role }, {
         headers: {
-          Authorization: `Bearer ${await getAuthTokenOnClient()}`
+          Authorization: `Bearer ${authToken}`
         }
       })
 

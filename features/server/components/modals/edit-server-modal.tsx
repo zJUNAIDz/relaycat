@@ -60,6 +60,7 @@ const EditServerModal = () => {
   console.log("api url", apiEndpoint)
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
+      const authToken = await getAuthTokenOnClient()
       if (!imageFile) {
         await axios.patch(`${apiEndpoint}/servers/${server?.id}`, {
           name: values.name,
@@ -67,7 +68,7 @@ const EditServerModal = () => {
         },
           {
             headers: {
-              "Authorization": `Bearer ${await getAuthTokenOnClient()}`
+              "Authorization": `Bearer ${authToken}`
             }
           }
         );
@@ -80,7 +81,7 @@ const EditServerModal = () => {
       const { data: { signedUrl, key, bucketName } } = await axios.get(
         `${apiEndpoint}/s3/uploadNewImage?serverName=${form.getValues("name")}&fileType=${imageFile.type}`, {
         headers: {
-          "Authorization": `Bearer ${await getAuthTokenOnClient()}`
+          "Authorization": `Bearer ${authToken}`
         }
       }
       );
@@ -99,7 +100,7 @@ const EditServerModal = () => {
       },
         {
           headers: {
-            "Authorization": `Bearer ${await getAuthTokenOnClient()}`
+            "Authorization": `Bearer ${authToken}`
           }
         });
       form.reset();

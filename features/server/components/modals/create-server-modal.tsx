@@ -66,8 +66,8 @@ const CreateServerModal = () => {
   const apiEndpoint = "http://localhost:3001";
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-
       setIsLoading(true);
+      const authToken = await getAuthTokenOnClient();
       if (!imageFile) {
         if (!values.imageUrl.length) {
           setErrorMessage("Please upload an image");
@@ -79,7 +79,7 @@ const CreateServerModal = () => {
             imageUrl: form.getValues("imageUrl"),
           }, {
             headers: {
-              "Authorization": `Bearer ${await getAuthTokenOnClient()}`
+              "Authorization": `Bearer ${authToken}`
             }
           });
           resetForm();
@@ -101,7 +101,7 @@ const CreateServerModal = () => {
         withCredentials: true,
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${await getAuthTokenOnClient()}`,
+          "Authorization": `Bearer ${authToken}`,
         }
       }
       );
@@ -123,7 +123,7 @@ const CreateServerModal = () => {
       }, {
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${await getAuthTokenOnClient()}`,
+          "Authorization": `Bearer ${authToken}`,
         }
       });
 
