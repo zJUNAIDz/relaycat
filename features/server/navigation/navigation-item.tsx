@@ -40,8 +40,10 @@ const NavigationItem: React.FC<NavigationItemProps> = ({
           <Image
             fill
             src={imageUrl}
+            sizes="(max-width: 768px) 50px, (max-width: 1200px) 70px"
             quality={30}
             alt={`Server: ${name}`}
+            priority={true}
           />
         </div>
       </button>
