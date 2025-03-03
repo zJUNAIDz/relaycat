@@ -11,7 +11,7 @@ const NavigationSidebar = async () => {
   const { profile } = await currentProfile();
   if (!profile) return redirect("/auth");
 
-  const servers = await serverService.getServersByUserId(profile.id);
+  const servers = await serverService.getCurrentUserServers();
 
   return (
     <div

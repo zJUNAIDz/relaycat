@@ -12,12 +12,12 @@ class ServerService {
     this.API_URL = API_URL;
   }
 
-  async getServersByUserId(userId: string): Promise<ServerWithMembersAndUser[] | Server[] | null> {
+  async getCurrentUserServers(): Promise<ServerWithMembersAndUser[] | Server[] | null> {
     try {
 
-      const { data: servers }: { data: ServerWithMembersAndUser[] | Server[] } = await axios.get(`${this.API_URL}/servers`, {
+      const { data: servers }: { data: Server[] } = await axios.get(`${this.API_URL}/servers`,{
         headers: {
-          Authorization: `Bearer ${await getAuthTokenOnServer()}`
+          "Authorization": `Bearer ${await getAuthTokenOnServer()}`
         }
       });
       if (!servers) return null
