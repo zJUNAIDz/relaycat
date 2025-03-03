@@ -39,7 +39,7 @@ const ChannelIdPage = async ({ params }: ChannelIdPageProps) => {
   }
   //*TODO: move db logic to server
   const url = `${API_URL}/channels/${channelId}`
-  const { data: { channel } } = await axios.get(url, {
+  const { data: { channel: { channel } } } = await axios.get(url, {
     headers: {
       "Authorization": `Bearer ${await getAuthTokenOnServer()}`
     }

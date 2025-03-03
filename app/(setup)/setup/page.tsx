@@ -7,8 +7,8 @@ const SetupPage = async () => {
   const { profile } = await currentProfile();
   if (!profile) return redirect("/auth");
   //TODO: optimize it to query first server only
-  const servers = await serverService.getServersByUserId(profile.id)
-  if (servers) redirect(`/servers/${servers[0].id}`);
+  const servers = await serverService.getCurrentUserServers()
+  if (servers?.length) redirect(`/servers/${servers[0].id}`);
 
   return <InitialModal />;
 };

@@ -17,6 +17,7 @@ import {
 } from "@/shared/components/ui/form";
 import { Input } from "@/shared/components/ui/input";
 import { API_URL, DEFAULT_SERVER_IMAGE_URL } from "@/shared/lib/constants";
+import { getAuthTokenOnClient } from "@/shared/utils/client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DialogDescription, DialogTitle } from "@radix-ui/react-dialog";
 import axios from "axios";
@@ -65,6 +66,10 @@ const InitialModal = () => {
         imageUrl: imageFile
           ? `https://s3.ap-south-1.amazonaws.com/${bucketName}/${key}`
           : DEFAULT_SERVER_IMAGE_URL,
+      }, {
+        headers: {
+          "Authorization": `Bearer ${await getAuthTokenOnClient()}`
+        },
       });
 
       form.reset();

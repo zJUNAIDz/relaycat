@@ -33,7 +33,6 @@ const DefaultServerPage: React.FC = () => {
           whileTap={{ scale: 0.98 }}
           className="px-6 py-3 bg-indigo-600 text-gray-100 font-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
           onClick={() => {
-            console.log("Create Channel clicked!");
           }}
         >
           Create Channel

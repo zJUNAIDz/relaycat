@@ -55,7 +55,6 @@ const EditServerModal = () => {
   });
 
   const isLoading = form.formState.isLoading;
-  console.log("api url", API_URL)
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       const authToken = await getAuthTokenOnClient()

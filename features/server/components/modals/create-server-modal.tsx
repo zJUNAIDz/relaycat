@@ -112,10 +112,9 @@ const CreateServerModal = () => {
       const s3BaseUrl = "https://s3.ap-south-1.amazonaws.com";
       const imageUrl = `${s3BaseUrl}/${bucketName}/${key}`;
 
-      const signedUrlResponse = await axios.put(signedUrl, imageFile, {
+      await axios.put(signedUrl, imageFile, {
         headers: { "Content-Type": imageFile.type },
       });
-      console.log({ signedUrlResponse });
       await axios.post(`${API_URL}/servers`, {
         name: values.name,
         imageUrl,
