@@ -20,7 +20,7 @@ import { API_URL, DEFAULT_SERVER_IMAGE_URL } from "@/shared/lib/constants";
 import { getAuthTokenOnClient } from "@/shared/utils/client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DialogDescription, DialogTitle } from "@radix-ui/react-dialog";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { useRouter } from "next/navigation";
 import React from "react";
 import { FormProvider, useForm } from "react-hook-form";
@@ -49,34 +49,93 @@ const InitialModal = () => {
   const [imageFile, setImageFile] = React.useState<File | null>(null);
   //* workaround to avoid Hydration warnings
   const [isMounted, setIsMounted] = React.useState(false);
+  const [isLoading, setIsLoading] = React.useState(false);
+  const [errorMessage, setErrorMessage] = React.useState("");
   React.useEffect(() => setIsMounted(true), []);
   if (!isMounted) return null;
 
-  const isLoading = form.formState.isLoading;
-
+  const resetForm = () => {
+    form.reset({
+      name: "",
+      imageUrl: DEFAULT_SERVER_IMAGE_URL,
+    });
+    setImageFile(null);
+  }
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      const bucketName = process.env.AWS_BUCKET_NAME!;
-      const key = `${values.name}-${Date.now()}-${imageFile?.name}.${imageFile?.type}`;
+      setIsLoading(true);
+      const authToken = await getAuthTokenOnClient();
+      console.log({ authToken })
+      if (!imageFile) {
+        if (!values.imageUrl.length) {
+          setErrorMessage("Please upload an image");
+          return;
+        }
+        if (values.imageUrl === DEFAULT_SERVER_IMAGE_URL) {
+          await axios.post(`${API_URL}/servers`, {
+            name: values.name,
+            imageUrl: values.imageUrl,
+          }, {
+            headers: {
+              "Authorization": `Bearer ${authToken}`
+            }
+          });
+          resetForm();
+          router.refresh();
+          return;
+        }
 
+        //* impossible edge case
+        // if (values.imageUrl !== DEFAULT_SERVER_IMAGE_URL) {
+        //   setErrorMessage("Image Url is not valid. please refresh the page");
+        //   return;
+        // }
+        setErrorMessage("No image found")
+        return;
+      }
+      const { data: { signedUrl, key, bucketName } } = await axios.get(
+        `${API_URL}/s3/uploadNewImage?serverName=${form.getValues("name")}&fileType=${imageFile.type}`, {
+        withCredentials: true,
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${authToken}`,
+        }
+      }
+      );
 
+      if (!signedUrl || !key || !bucketName) {
+        setErrorMessage("Error uploading image");
+        return;
+      }
+      const s3BaseUrl = "https://s3.ap-south-1.amazonaws.com";
+      const imageUrl = `${s3BaseUrl}/${bucketName}/${key}`;
 
+      await axios.put(signedUrl, imageFile, {
+        headers: { "Content-Type": imageFile.type },
+      });
       await axios.post(`${API_URL}/servers`, {
         name: values.name,
-        imageUrl: imageFile
-          ? `https://s3.ap-south-1.amazonaws.com/${bucketName}/${key}`
-          : DEFAULT_SERVER_IMAGE_URL,
+        imageUrl,
       }, {
         headers: {
-          "Authorization": `Bearer ${await getAuthTokenOnClient()}`
-        },
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${authToken}`,
+        }
       });
 
-      form.reset();
+      // await axios.post("/api/servers", {
+      //   name: values.name,
+      //   imageUrl,
+      // });
+      resetForm();
       router.refresh();
-      window.location.reload();
     } catch (err) {
-      console.error("Error: \n", err);
+      if (err instanceof AxiosError) {
+        console.error("[Error][Create Server: fn::onSubmit] ", err.response?.data);
+      }
+      console.error("[Error][Create Server: fn::onSubmit] ", err);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -103,6 +162,8 @@ const InitialModal = () => {
                     <FormItem>
                       <FormControl>
                         <FileUpload
+                          type="image"
+                          defaultValue={DEFAULT_SERVER_IMAGE_URL}
                           value={field.value}
                           onChange={(previewUrl, file) => {
                             field.onChange(previewUrl);
