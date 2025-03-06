@@ -32,7 +32,7 @@ const ServerSidebar: React.FC<ServerSidebarProps> = async ({ serverId }) => {
   if (!user) return redirect("/auth");
 
   const server = await serverService.getServer(serverId, ["user", "channels"])
-  if (!server) return redirect("/");
+  if (!server) return redirect("/setup");
 
   const textChannels = server?.channels.filter(
     (channel) => channel.type === ChannelType.TEXT

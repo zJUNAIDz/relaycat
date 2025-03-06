@@ -20,7 +20,7 @@ const ServerIdLayout: React.FC<ServerIdLayoutProps> = async ({
   const server = await serverService.getServer(serverId)
 
 
-  if (!server) redirect("/");
+  if (!server) redirect("/setup");
 
   return (
     <div className="h-full">
