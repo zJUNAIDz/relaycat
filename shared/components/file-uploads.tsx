@@ -100,6 +100,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ type, value, defaultValue, onCh
         />
         <Button
           type="button"
+          className="bg-blue-500 text-white dark:bg-blue-700 hover:bg-blue-600 dark:hover:bg-blue-800"  
           onClick={() => document.getElementById("fileUpload")?.click()}
         >
           Upload File
