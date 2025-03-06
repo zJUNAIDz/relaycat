@@ -4,6 +4,7 @@ import { cn } from "@/shared/utils/cn";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import SocketProvider from "@/shared/providers/socket-provider";
 
 
 const inter = Inter({ subsets: ["latin"] });
@@ -28,8 +29,10 @@ export default function RootLayout({
           enableSystem={false}
           storageKey="relaycat"
         >
-          <ModalProvider />
+          <SocketProvider>
+            <ModalProvider />
           {children}
+          </SocketProvider>
         </ThemeProvider>
       </body>
     </html>
