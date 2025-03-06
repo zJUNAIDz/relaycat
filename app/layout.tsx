@@ -1,10 +1,11 @@
 import { ModalProvider } from "@/shared/providers/modal-provider";
+import { QueryProvider } from "@/shared/providers/query-provider";
+import SocketProvider from "@/shared/providers/socket-provider";
 import { ThemeProvider } from "@/shared/providers/theme-provider";
 import { cn } from "@/shared/utils/cn";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import SocketProvider from "@/shared/providers/socket-provider";
 
 
 const inter = Inter({ subsets: ["latin"] });
@@ -31,7 +32,9 @@ export default function RootLayout({
         >
           <SocketProvider>
             <ModalProvider />
-          {children}
+            <QueryProvider>
+              {children}
+            </QueryProvider>
           </SocketProvider>
         </ThemeProvider>
       </body>
