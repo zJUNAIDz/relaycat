@@ -1,8 +1,8 @@
 import ChatHeader from "@/features/chat/components/chat-header";
 import { ChatInput } from "@/features/chat/components/chat-input";
+import { ChatMessages } from "@/features/chat/components/chat-messages";
 import { memberService } from "@/features/member/member-service";
 import { API_URL } from "@/shared/lib/constants";
-import currentProfile from "@/shared/lib/current-profile";
 import { getAuthTokenOnServer, getCurrentUser } from "@/shared/utils/server";
 import axios from "axios";
 import { redirect } from "next/navigation";
@@ -49,20 +49,36 @@ const ChannelIdPage = async ({ params }: ChannelIdPageProps) => {
   if (!channel) {
     redirect("/")
   }
-  const { member: { id: memberId } } = await memberService.getMemberByUserId(user.id)
-  if (!memberId) {
+  const { member, error } = await memberService.getMemberByUserId(user.id)
+  if (error || !member) {
+    redirect("/auth")
+  }
+  const memberId = member?.id;
+  if (!member) {
     redirect("/")
   }
   return (
     <div className="h-screen flex flex-col bg-white dark:bg-[#313338] ">
       <ChatHeader type="channel" label={channel.name} serverId={serverId} />
-      <div className="flex-1">
-        messages
-      </div>
+      <ChatMessages
+        member={member}
+        chatId={channelId}
+        name={channel.name}
+        type="channel"
+        apiUrl={`${API_URL}/messages`}
+        socketUrl={`${API_URL}/socket/messages`}
+        socketQuery={{
+          channelId,
+          serverId,
+          userId: user.id
+        }}
+        paramKey="channelId"
+        paramValue={channelId}
+      />
       <ChatInput
         name={channel.name}
         type="channel"
-        apiUrl={`${process.env.NEXT_PUBLIC_API_URL}/messages`}
+        apiUrl={`${API_URL}/messages`}
         query={{
           channelId,
           memberId,
