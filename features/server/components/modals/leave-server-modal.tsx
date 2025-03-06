@@ -57,11 +57,9 @@ const LeaveServerModal = () => {
   return (
     <Dialog open={isModalOpen} onOpenChange={onClose}>
       <DialogContent aria-description="Invite Link" className="overflow-hidden w-full">
-        <DialogHeader>
           <DialogTitle className="text-center text-2xl font-bold">
             Leave Server
           </DialogTitle>
-        </DialogHeader>
         <DialogDescription className="text-center">
           Are you sure want to leave server <span className="text-blue-500">{server?.name}</span>?
         </DialogDescription>

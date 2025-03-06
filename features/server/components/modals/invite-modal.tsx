@@ -4,8 +4,7 @@ import { Button } from "@/shared/components/ui/button";
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
-  DialogTitle,
+  DialogTitle
 } from "@/shared/components/ui/dialog";
 import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
@@ -63,11 +62,9 @@ const InviteModal = () => {
   return (
     <Dialog open={isModalOpen} onOpenChange={handleCloseModal}>
       <DialogContent aria-description="Invite Link" className="overflow-hidden">
-        <DialogHeader>
           <DialogTitle className="text-center text-2xl font-bold">
             Invite Friends
           </DialogTitle>
-        </DialogHeader>
         <div className="p-6">
           <Label className="uppercase text-xs font-bold">
             Server Invite Link

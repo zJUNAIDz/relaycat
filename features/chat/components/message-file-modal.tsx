@@ -5,10 +5,10 @@ import { Button } from "@/shared/components/ui/button";
 import {
   Dialog,
   DialogContent,
-  DialogTitle,
   DialogDescription,
   DialogFooter,
   DialogHeader,
+  DialogTitle,
 } from "@/shared/components/ui/dialog";
 import {
   FormControl,
@@ -65,7 +65,7 @@ const MessageFileModal = () => {
     return (
       <Dialog open={isModalOpen} >
         <DialogContent>
-          <DialogDescription> Something went wrong</DialogDescription>
+          <DialogTitle> Something went wrong</DialogTitle>
         </DialogContent>
       </Dialog>
     )
@@ -145,14 +145,12 @@ const MessageFileModal = () => {
       aria-label="Upload message file"
     >
       <DialogContent className="overflow-hidden">
-        <DialogHeader>
-          <DialogTitle className="text-center text-2xl font-bold">
-            Upload your file
-          </DialogTitle>
-          <DialogDescription className="text-center">
-            Allowed file types are .png, .jpeg, .gif, .jpg, .webp, .pdf
-          </DialogDescription>
-        </DialogHeader>
+        <DialogTitle className="text-center text-2xl font-bold">
+          Upload your file
+        </DialogTitle>
+        <DialogDescription className="text-center">
+          Allowed file types are .png, .jpeg, .gif, .jpg, .webp, .pdf
+        </DialogDescription>
         <FormProvider {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
             <div className="space-y-8 px-6">

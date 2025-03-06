@@ -104,7 +104,6 @@ const MembersModal = () => {
   return (
     <Dialog open={isModalOpen} onOpenChange={onClose}>
       <DialogContent className="overflow-hidden">
-        <DialogHeader>
           <DialogTitle className="text-center text-2xl font-bold">
             Manage Members
           </DialogTitle>
@@ -112,7 +111,6 @@ const MembersModal = () => {
             {/* Covering impossible edge case of No Members. servers with no members will automatically be deleted in 24 hours. 😋 */}
             {membersCount ? membersCount === 1 ? `${membersCount} Member` : `${membersCount} Members` : "No members"}
           </DialogDescription>
-        </DialogHeader>
         <div className="p-6">
           <ScrollArea className="mt-8 max-h-[100rem] pr-6">
             {server?.members && (

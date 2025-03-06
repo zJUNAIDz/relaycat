@@ -18,6 +18,7 @@ import { Input } from "@/shared/components/ui/input";
 import { useModal } from "@/shared/hooks/use-modal-store";
 import { getAuthTokenOnClient } from "@/shared/utils/client";
 // import { api } from "@/lib/api-client";
+import { API_URL, DEFAULT_SERVER_IMAGE_URL } from "@/shared/lib/constants";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DialogDescription, DialogTitle } from "@radix-ui/react-dialog";
 import axios, { AxiosError } from "axios";
@@ -25,7 +26,6 @@ import { useRouter } from "next/navigation";
 import React from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import * as z from "zod";
-import { API_URL, DEFAULT_SERVER_IMAGE_URL } from "@/shared/lib/constants";
 
 
 const formSchema = z.object({
@@ -73,9 +73,9 @@ const CreateServerModal = () => {
           return;
         }
         if (values.imageUrl === DEFAULT_SERVER_IMAGE_URL) {
-          await axios.post(`${API_URL}/servers/`, {
+          await axios.post(`${API_URL}/servers`, {
             name: values.name,
-            imageUrl: form.getValues("imageUrl"),
+            imageUrl: values.imageUrl,
           }, {
             headers: {
               "Authorization": `Bearer ${authToken}`
@@ -97,7 +97,6 @@ const CreateServerModal = () => {
       }
       const { data: { signedUrl, key, bucketName } } = await axios.get(
         `${API_URL}/s3/uploadNewImage?serverName=${form.getValues("name")}&fileType=${imageFile.type}`, {
-        withCredentials: true,
         headers: {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${authToken}`,
@@ -125,10 +124,6 @@ const CreateServerModal = () => {
         }
       });
 
-      // await axios.post("/api/servers", {
-      //   name: values.name,
-      //   imageUrl,
-      // });
       resetForm();
       router.refresh();
       onClose();
@@ -154,7 +149,6 @@ const CreateServerModal = () => {
       aria-label="Add New Server"
     >
       <DialogContent className="overflow-hidden">
-        {/* <DialogHeader> */}
         <DialogTitle className="text-center text-2xl font-bold">
           Customize your Server
         </DialogTitle>
@@ -162,7 +156,6 @@ const CreateServerModal = () => {
           Give your Server a personality with a Name and an Image. You can
           always change it later.
         </DialogDescription>
-        {/* </DialogHeader> */}
         <FormProvider {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
             <div className="space-y-8 px-6">
@@ -174,7 +167,9 @@ const CreateServerModal = () => {
                     <FormItem>
                       <FormControl>
                         <FileUpload
+                          type="image"
                           value={field.value}
+                          defaultValue={DEFAULT_SERVER_IMAGE_URL}
                           onChange={
                             (previewUrl, file) => {
                               field.onChange(previewUrl);

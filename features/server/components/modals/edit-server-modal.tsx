@@ -5,8 +5,7 @@ import { Button } from "@/shared/components/ui/button";
 import {
   Dialog,
   DialogContent,
-  DialogFooter,
-  DialogHeader,
+  DialogFooter
 } from "@/shared/components/ui/dialog";
 import {
   FormControl,
@@ -123,7 +122,6 @@ const EditServerModal = () => {
   return (
     <Dialog open={isModalOpen} onOpenChange={handleCloseModal}>
       <DialogContent className="overflow-hidden">
-        <DialogHeader>
           <DialogTitle className="text-center text-2xl font-bold">
             Modify your Server
           </DialogTitle>
@@ -131,7 +129,6 @@ const EditServerModal = () => {
             Give your Server a personality with a Name and an Image. You can
             always change it later.
           </DialogDescription>
-        </DialogHeader>
         <FormProvider {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
             <div className="space-y-8 px-6">
@@ -143,6 +140,7 @@ const EditServerModal = () => {
                     <FormItem>
                       <FormControl>
                         <FileUpload
+                        type="image"
                           value={field.value}
                           onChange={
                             (previewUrl, file) => {
