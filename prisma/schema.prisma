@@ -1,3 +1,8 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 generator client {
   provider = "prisma-client-js"
 }
@@ -43,6 +48,8 @@ model User {
   channels      Channel[]
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
+
+  @@index([id])
 }
 
 model Server {
@@ -61,16 +68,19 @@ model Server {
 }
 
 model Member {
-  id        String     @id @default(uuid())
-  role      MemberRole @default(GUEST)
-  userId    String
-  serverId  String
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
-  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  server    Server     @relation(fields: [serverId], references: [id], onDelete: Cascade)
+  id                    String          @id @default(uuid())
+  role                  MemberRole      @default(GUEST)
+  userId                String
+  serverId              String
+  createdAt             DateTime        @default(now())
+  updatedAt             DateTime        @updatedAt
+  user                  User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  server                Server          @relation(fields: [serverId], references: [id], onDelete: Cascade)
+  Messages              Message[]
+  ConversationInitiated Conversation[]  @relation("memberOne")
+  ConversationRecieved  Conversation[]  @relation("memberTwo")
+  DirectMessage         DirectMessage[]
 
-  @@unique([serverId, userId])
   @@index([userId])
   @@index([serverId])
 }
@@ -85,6 +95,7 @@ model Channel {
   updatedAt DateTime    @updatedAt
   user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   server    Server      @relation(fields: [serverId], references: [id], onDelete: Cascade)
+  Message   Message[]
 
   @@index([userId])
   @@index([serverId])
@@ -100,4 +111,48 @@ enum ChannelType {
   TEXT
   AUDIO
   VIDEO
+}
+
+model Message {
+  id        String   @id @default(uuid())
+  content   String?  @db.Text
+  fileUrl   String?  @db.Text
+  deleted   Boolean  @default(false)
+  memberId  String
+  member    Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  channelId String
+  channel   Channel  @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([channelId])
+  @@index([memberId])
+}
+
+model Conversation {
+  id            String          @id @default(uuid())
+  memberOneId   String
+  memberOne     Member          @relation("memberOne", fields: [memberOneId], references: [id], onDelete: Cascade)
+  memberTwoId   String
+  memberTwo     Member          @relation("memberTwo", fields: [memberTwoId], references: [id], onDelete: Cascade)
+  DirectMessage DirectMessage[]
+
+  @@unique([memberOneId, memberTwoId])
+  @@index([memberTwoId])
+}
+
+model DirectMessage {
+  id             String       @id @default(uuid())
+  content        String       @db.Text
+  fileUrl        String       @db.Text
+  memberId       String
+  member         Member       @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  deleted        Boolean      @default(false)
+
+  @@index([memberId])
+  @@index([conversationId])
 }
