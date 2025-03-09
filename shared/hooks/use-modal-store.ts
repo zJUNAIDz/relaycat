@@ -11,7 +11,8 @@ export type ModalType =
   | "members"
   | "leaveServer"
   | "deleteServer"
-  | "messageFile";
+  | "messageFile"
+  | "deleteMessage";
 
 interface ModalData {
   server?: ServerWithMembersAndUser | Server;
