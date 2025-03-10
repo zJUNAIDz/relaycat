@@ -1,7 +1,6 @@
 import { Popover, PopoverContent, PopoverTrigger } from "@/shared/components/ui/popover";
 import { Smile } from "lucide-react";
-import Picker from "@emoji-mart/react";
-import data from "@emoji-mart/data";
+import Picker, { EmojiClickData, EmojiStyle, Theme } from "emoji-picker-react";
 import { useTheme } from "next-themes"
 interface EmojiPickerProps {
   onChange: (value: string) => void;
@@ -20,9 +19,9 @@ export const EmojiPicker = ({ onChange }: EmojiPickerProps) => {
         className="bg-transparent border-none shadow-none drop-shadow-none mb-16"
       >
         <Picker
-          data={data}
-          onEmojiSelect={(emoji: any) => onChange(emoji.native)}
-          theme={resolvedTheme}
+          onEmojiClick={(data: EmojiClickData) => onChange(data.emoji)}
+          theme={resolvedTheme as Theme}
+          emojiStyle={EmojiStyle.GOOGLE}
         />
       </PopoverContent>
     </Popover>
