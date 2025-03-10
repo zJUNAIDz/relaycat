@@ -3,6 +3,7 @@
 import CreateChannelModal from "@/features/channel/components/modals/create-channel-modal";
 import DeleteChannelModal from "@/features/channel/components/modals/delete-channel-model";
 import EditChannelModal from "@/features/channel/components/modals/edit-channel-modal";
+import DeleteMessageModal from "@/features/chat/components/delete-message-modal";
 import MessageFileModal from "@/features/chat/components/message-file-modal";
 import CreateServerModal from "@/features/server/components/modals/create-server-modal";
 import DeleteServerModal from "@/features/server/components/modals/delete-server-modal";
@@ -30,6 +31,7 @@ export const ModalProvider = () => {
       <DeleteChannelModal />
       <EditChannelModal />
       <MessageFileModal />
+      <DeleteMessageModal />
     </>
   );
 };
