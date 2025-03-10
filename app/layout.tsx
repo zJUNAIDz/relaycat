@@ -1,6 +1,5 @@
-import { ModalProvider } from "@/shared/providers/modal-provider";
-import { QueryProvider } from "@/shared/providers/query-provider";
-import SocketProvider from "@/shared/providers/socket-provider";
+
+import { AuthProvider } from "@/shared/providers/auth-provider";
 import { ThemeProvider } from "@/shared/providers/theme-provider";
 import { cn } from "@/shared/utils/cn";
 import type { Metadata } from "next";
@@ -15,8 +14,7 @@ export const metadata: Metadata = {
   description: "A Fast & Secure Communication Platform",
 
 };
-
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -30,12 +28,9 @@ export default function RootLayout({
           enableSystem={false}
           storageKey="relaycat"
         >
-          <SocketProvider>
-            <ModalProvider />
-            <QueryProvider>
-              {children}
-            </QueryProvider>
-          </SocketProvider>
+          <AuthProvider>
+            {children}
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>
