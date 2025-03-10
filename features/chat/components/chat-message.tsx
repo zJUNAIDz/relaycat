@@ -29,6 +29,7 @@ interface ChatMessageProps {
   deleted: Message["deleted"];
   currentMember: Member;
   isUpdated: boolean;
+  apiUrl: string;
   socketUrl: string;
   socketQuery: Record<string, string>;
 }
@@ -49,6 +50,7 @@ export const ChatMessage = ({
   deleted,
   currentMember,
   isUpdated,
+  apiUrl,
   socketUrl,
   socketQuery
 }: ChatMessageProps) => {
@@ -84,6 +86,27 @@ export const ChatMessage = ({
     }
   }
 
+  const onMemberClick = () => {
+    if (member.userId !== currentMember.userId)
+      router.push(`/servers/${member.serverId}/conversations/${member.userId}`)
+    return
+  }
+
+  React.useEffect(() => {
+    const handleEscapeKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setIsEditing(false);
+      }
+    }
+
+    window.addEventListener("keydown", handleEscapeKeyDown);
+    return () => window.removeEventListener("keydown", handleEscapeKeyDown);
+  })
+  React.useEffect(() => {
+    form.reset({
+      content: content || " ",
+    })
+  }, [content, form]);
   const isAdmin = member.role === MemberRole.ADMIN;
   const isModerator = member.role === MemberRole.MODERATOR;
   const isOwner = member.id === currentMember.id; //composer of the message
@@ -104,7 +127,7 @@ export const ChatMessage = ({
         <div className="flex flex-col w-full">
           <div className="flex items-center gap-x-2">
             <div className="flex items-center space-x-2">
-              <p className="text-sm font-semibold hover:underline cursor-pointer">
+              <p onClick={onMemberClick} className="text-sm font-semibold hover:underline cursor-pointer">
                 {member.user.name}
               </p>
               <ActionTooltip label={member.role} side="top" className="text-xs">
@@ -212,6 +235,7 @@ export const ChatMessage = ({
             }
             <ActionTooltip label="Delete" side="top">
               <Trash
+                onClick={() => onOpen("deleteMessage", { apiUrl })}
                 className="cursor-pointer ml-auto w-4 h-4 text-zinc-500 dark:text-zinc-400 hover:text-red-600 dark:hover:text-red-300" />
             </ActionTooltip>
           </div>
