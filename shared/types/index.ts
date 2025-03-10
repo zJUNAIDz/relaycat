@@ -1,4 +1,4 @@
-import { Channel, Member, Server, User } from "@prisma/client";
+import { Channel, Member, Message, Server, User } from "@prisma/client";
 
 export type ServerWithMembersAndUser = Server & {
   members: (Member & { user: User })[];
@@ -51,3 +51,6 @@ export interface CreateServerResponse {
   server: Server | null;
   status: CreateServerResponseStatusType;
 }
+
+export type MessageWithMemberWithUser = Message & { member: Member & { user: User } }
+export type MemberWithUser = Member & { user: User }

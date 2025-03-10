@@ -29,7 +29,7 @@ const InviteModal = () => {
     data: { server },
   } = useModal();
   const origin = useOrigin();
-  const { token } = useAuth();
+  const { authToken } = useAuth();
   const isModalOpen = isOpen && type == "invite";
   const inviteUrl = `${origin}/invite/${server?.inviteCode}`;
 
@@ -44,7 +44,7 @@ const InviteModal = () => {
       const response = await axios.patch(
         `${API_URL}/servers/${server?.id}/invite-code`, {}, {
         headers: {
-          "Authorization": `Bearer ${token}`,
+          "Authorization": `Bearer ${authToken}`,
         }
       });
       // router.refresh()
