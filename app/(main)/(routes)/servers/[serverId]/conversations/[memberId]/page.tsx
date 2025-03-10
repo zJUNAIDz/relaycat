@@ -1,9 +1,12 @@
-import "server-only"
 import ChatHeader from "@/features/chat/components/chat-header";
+import { ChatInput } from "@/features/chat/components/chat-input";
+import { ChatMessages } from "@/features/chat/components/chat-messages";
 import { conversationService } from "@/features/conversation/conversation-service";
 import { memberService } from "@/features/member/member-service";
+import { API_URL, SOCKET_URL } from "@/shared/lib/constants";
 import { getCurrentUser } from "@/shared/utils/server";
 import { redirect } from "next/navigation";
+import "server-only";
 
 interface MemberIdPageProps {
   params: Promise<{
@@ -12,7 +15,6 @@ interface MemberIdPageProps {
   }>
 }
 const MemberIdPage = async ({ params }: MemberIdPageProps) => {
-  // if (!(await params)) return <div>Params is undefined</div>
   const user = await getCurrentUser();
   if (!user) redirect("/auth?login=");
   const { memberId, serverId } = await params;
@@ -23,6 +25,7 @@ const MemberIdPage = async ({ params }: MemberIdPageProps) => {
     redirect(`/servers/${serverId}`)
   }
   const targetMember = memberOne.userId === currentMember.userId ? memberTwo : memberOne;
+  const conversationId = targetMember.id;
   return (
     <div className="bg-white dark:bg-[#313338]">
       <ChatHeader
@@ -30,6 +33,29 @@ const MemberIdPage = async ({ params }: MemberIdPageProps) => {
         serverId={serverId}
         type="conversation"
         label={targetMember.user.name}
+      />
+      <ChatMessages
+        name={targetMember.user.name}
+        member={currentMember}
+        type="conversation"
+        chatId={conversationId}
+        apiUrl={`${API_URL}/messages`}
+        socketUrl={SOCKET_URL}
+        socketQuery={{
+          channelId: conversationId,
+          serverId: serverId
+        }}
+        paramKey="conversationId"
+        paramValue={conversationId}
+      />
+      <ChatInput
+        name={targetMember.user.name}
+        type="conversation"
+        apiUrl={`${API_URL}/messages`}
+        query={{
+          memberId: targetMember.id,
+          serverId: serverId
+        }}
       />
     </div>
   )
