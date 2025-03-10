@@ -17,7 +17,7 @@ import { Input } from "@/shared/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/components/ui/select";
 import { useModal } from "@/shared/hooks/use-modal-store";
 import { API_URL } from "@/shared/lib/constants";
-import { getAuthTokenOnClient } from "@/shared/utils/client";
+import { useAuth } from "@/shared/providers/auth-provider";
 import { capitalizeFirstLetter } from "@/shared/utils/misc";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ChannelType } from "@prisma/client";
@@ -39,6 +39,8 @@ const formSchema = z.object({
 
 const CreateChannelModal = () => {
   //* component beginning
+  const { authToken } = useAuth();
+  console.log("createChannel", authToken)
   const { isOpen, onClose, type, data: { channelType } } = useModal();
   const isModalOpen = isOpen && type == "createChannel";
   const [isLoading, setIsLoading] = React.useState(false);
@@ -68,7 +70,7 @@ const CreateChannelModal = () => {
 
       await axios.post(url, { ...values, serverId }, {
         headers: {
-          Authorization: `Bearer ${await getAuthTokenOnClient()}`
+          Authorization: `Bearer ${authToken}`
         }
       })
       form.reset()

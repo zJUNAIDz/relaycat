@@ -11,7 +11,7 @@ import { Label } from "@/shared/components/ui/label";
 import { useModal } from "@/shared/hooks/use-modal-store";
 import { useOrigin } from "@/shared/hooks/use-origin";
 import { API_URL } from "@/shared/lib/constants";
-import { getAuthTokenOnClient } from "@/shared/utils/client";
+import { useAuth } from "@/shared/providers/auth-provider";
 import axios from "axios";
 import { Check, Copy, RefreshCw } from "lucide-react";
 import React from "react";
@@ -29,6 +29,7 @@ const InviteModal = () => {
     data: { server },
   } = useModal();
   const origin = useOrigin();
+  const { token } = useAuth();
   const isModalOpen = isOpen && type == "invite";
   const inviteUrl = `${origin}/invite/${server?.inviteCode}`;
 
@@ -40,7 +41,6 @@ const InviteModal = () => {
   const onGenerate = async () => {
     try {
       setIsLoading(true);
-      const token = await getAuthTokenOnClient();
       const response = await axios.patch(
         `${API_URL}/servers/${server?.id}/invite-code`, {}, {
         headers: {
@@ -62,9 +62,9 @@ const InviteModal = () => {
   return (
     <Dialog open={isModalOpen} onOpenChange={handleCloseModal}>
       <DialogContent aria-description="Invite Link" className="overflow-hidden">
-          <DialogTitle className="text-center text-2xl font-bold">
-            Invite Friends
-          </DialogTitle>
+        <DialogTitle className="text-center text-2xl font-bold">
+          Invite Friends
+        </DialogTitle>
         <div className="p-6">
           <Label className="uppercase text-xs font-bold">
             Server Invite Link

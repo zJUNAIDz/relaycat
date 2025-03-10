@@ -16,9 +16,8 @@ import {
 } from "@/shared/components/ui/form";
 import { Input } from "@/shared/components/ui/input";
 import { useModal } from "@/shared/hooks/use-modal-store";
-import { getAuthTokenOnClient } from "@/shared/utils/client";
-// import { api } from "@/lib/api-client";
 import { API_URL, DEFAULT_SERVER_IMAGE_URL } from "@/shared/lib/constants";
+import { useAuth } from "@/shared/providers/auth-provider";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DialogDescription, DialogTitle } from "@radix-ui/react-dialog";
 import axios, { AxiosError } from "axios";
@@ -44,6 +43,7 @@ const CreateServerModal = () => {
   const [imageFile, setImageFile] = React.useState<File | null>(null);
   const [isLoading, setIsLoading] = React.useState(false);
   const [errorMessage, setErrorMessage] = React.useState("");
+  const { authToken } = useAuth();
 
   const router = useRouter();
   const form = useForm({
@@ -66,7 +66,6 @@ const CreateServerModal = () => {
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       setIsLoading(true);
-      const authToken = await getAuthTokenOnClient();
       if (!imageFile) {
         if (!values.imageUrl.length) {
           setErrorMessage("Please upload an image");

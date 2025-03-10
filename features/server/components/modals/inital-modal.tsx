@@ -16,7 +16,7 @@ import {
 } from "@/shared/components/ui/form";
 import { Input } from "@/shared/components/ui/input";
 import { API_URL, DEFAULT_SERVER_IMAGE_URL } from "@/shared/lib/constants";
-import { getAuthTokenOnClient } from "@/shared/utils/client";
+import { useAuth } from "@/shared/providers/auth-provider";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DialogDescription, DialogTitle } from "@radix-ui/react-dialog";
 import axios, { AxiosError } from "axios";
@@ -50,6 +50,7 @@ const InitialModal = () => {
   const [isMounted, setIsMounted] = React.useState(false);
   const [isLoading, setIsLoading] = React.useState(false);
   const [errorMessage, setErrorMessage] = React.useState("");
+  const { authToken } = useAuth();
   React.useEffect(() => setIsMounted(true), []);
   if (!isMounted) return null;
 
@@ -63,7 +64,6 @@ const InitialModal = () => {
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       setIsLoading(true);
-      const authToken = await getAuthTokenOnClient();
       console.log({ authToken })
       if (!imageFile) {
         if (!values.imageUrl.length) {
@@ -141,13 +141,13 @@ const InitialModal = () => {
   return (
     <Dialog open>
       <DialogContent className="overflow-hidden">
-          <DialogTitle className="text-center text-2xl font-bold">
-            Customize your Server
-          </DialogTitle>
-          <DialogDescription className="text-center text-zinc-500">
-            Give your Server a personality with a Name and an Image. You can
-            always change it later.
-          </DialogDescription>
+        <DialogTitle className="text-center text-2xl font-bold">
+          Customize your Server
+        </DialogTitle>
+        <DialogDescription className="text-center text-zinc-500">
+          Give your Server a personality with a Name and an Image. You can
+          always change it later.
+        </DialogDescription>
         <FormProvider {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
             <div className="space-y-8 px-6">

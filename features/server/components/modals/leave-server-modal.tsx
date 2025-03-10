@@ -5,16 +5,15 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogHeader,
   DialogTitle
 } from "@/shared/components/ui/dialog";
 import { useModal } from "@/shared/hooks/use-modal-store";
-import { getAuthTokenOnClient } from "@/shared/utils/client";
+import { API_URL } from "@/shared/lib/constants";
+import { useAuth } from "@/shared/providers/auth-provider";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import qs from "query-string";
 import React from "react";
-import { API_URL } from "@/shared/lib/constants";
 
 const LeaveServerModal = () => {
 
@@ -27,6 +26,7 @@ const LeaveServerModal = () => {
   const router = useRouter()
   const isModalOpen = isOpen && type == "leaveServer";
   const [isLoading, setIsLoading] = React.useState(false);
+  const { authToken } = useAuth();
   const leaveServer = async () => {
     try {
       setIsLoading(true)
@@ -40,7 +40,7 @@ const LeaveServerModal = () => {
         serverId: server?.id
       }, {
         headers: {
-          Authorization: `Bearer ${await getAuthTokenOnClient()}`
+          Authorization: `Bearer ${authToken}`
         }
       })
       onClose()
@@ -57,9 +57,9 @@ const LeaveServerModal = () => {
   return (
     <Dialog open={isModalOpen} onOpenChange={onClose}>
       <DialogContent aria-description="Invite Link" className="overflow-hidden w-full">
-          <DialogTitle className="text-center text-2xl font-bold">
-            Leave Server
-          </DialogTitle>
+        <DialogTitle className="text-center text-2xl font-bold">
+          Leave Server
+        </DialogTitle>
         <DialogDescription className="text-center">
           Are you sure want to leave server <span className="text-blue-500">{server?.name}</span>?
         </DialogDescription>

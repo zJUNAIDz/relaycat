@@ -2,7 +2,7 @@
 import { Form, FormControl, FormField, FormItem } from "@/shared/components/ui/form";
 import { Input } from "@/shared/components/ui/input";
 import { useModal } from "@/shared/hooks/use-modal-store";
-import { getAuthTokenOnClient } from "@/shared/utils/client";
+import { useAuth } from "@/shared/providers/auth-provider";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
 import { Plus } from "lucide-react";
@@ -26,6 +26,7 @@ const formSchema = z.object({
 
 
 export const ChatInput = ({ apiUrl, query, name, type }: ChatInputProps) => {
+  const { authToken } = useAuth();
   React.useEffect(() => {
     form.setFocus("content")
   })
@@ -47,7 +48,7 @@ export const ChatInput = ({ apiUrl, query, name, type }: ChatInputProps) => {
       })
       await axios.post(url, values, {
         headers: {
-          "Authorization": `Bearer ${await getAuthTokenOnClient()}`
+          "Authorization": `Bearer ${authToken}`
         }
       });
       router.refresh();

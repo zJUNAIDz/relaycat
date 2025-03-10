@@ -10,7 +10,7 @@ import {
 } from "@/shared/components/ui/dialog";
 import { useModal } from "@/shared/hooks/use-modal-store";
 import { API_URL } from "@/shared/lib/constants";
-import { getAuthTokenOnClient } from "@/shared/utils/client";
+import { useAuth } from "@/shared/providers/auth-provider";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import qs from "query-string";
@@ -24,6 +24,7 @@ const DeleteChannelModal = () => {
     type,
     data: { server, channel }
   } = useModal();
+  const { authToken } = useAuth();
   const router = useRouter()
   const isModalOpen = isOpen && type == "deleteChannel";
   const [isLoading, setIsLoading] = React.useState(false);
@@ -35,7 +36,7 @@ const DeleteChannelModal = () => {
       })
       await axios.delete(url, {
         headers: {
-          Authorization: `Bearer ${await getAuthTokenOnClient()}`
+          Authorization: `Bearer ${authToken}`
         }
       })
       onClose()

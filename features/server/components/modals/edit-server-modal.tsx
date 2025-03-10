@@ -17,7 +17,7 @@ import {
 import { Input } from "@/shared/components/ui/input";
 import { useModal } from "@/shared/hooks/use-modal-store";
 import { API_URL, DEFAULT_SERVER_IMAGE_URL } from "@/shared/lib/constants";
-import { getAuthTokenOnClient } from "@/shared/utils/client";
+import { useAuth } from "@/shared/providers/auth-provider";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DialogDescription, DialogTitle } from "@radix-ui/react-dialog";
 import axios from "axios";
@@ -43,6 +43,7 @@ const EditServerModal = () => {
   const { isOpen, onClose, type, data: { server } } = useModal();
   const isModalOpen = isOpen && type == "editServer";
   const [imageFile, setImageFile] = React.useState<File | null>(null);
+  const { authToken } = useAuth()
 
   const router = useRouter();
   const form = useForm({
@@ -56,7 +57,6 @@ const EditServerModal = () => {
   const isLoading = form.formState.isLoading;
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      const authToken = await getAuthTokenOnClient()
       if (!imageFile) {
         await axios.patch(`${API_URL}/servers/${server?.id}`, {
           name: values.name,
@@ -122,13 +122,13 @@ const EditServerModal = () => {
   return (
     <Dialog open={isModalOpen} onOpenChange={handleCloseModal}>
       <DialogContent className="overflow-hidden">
-          <DialogTitle className="text-center text-2xl font-bold">
-            Modify your Server
-          </DialogTitle>
-          <DialogDescription className="text-center">
-            Give your Server a personality with a Name and an Image. You can
-            always change it later.
-          </DialogDescription>
+        <DialogTitle className="text-center text-2xl font-bold">
+          Modify your Server
+        </DialogTitle>
+        <DialogDescription className="text-center">
+          Give your Server a personality with a Name and an Image. You can
+          always change it later.
+        </DialogDescription>
         <FormProvider {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
             <div className="space-y-8 px-6">
@@ -140,7 +140,7 @@ const EditServerModal = () => {
                     <FormItem>
                       <FormControl>
                         <FileUpload
-                        type="image"
+                          type="image"
                           value={field.value}
                           onChange={
                             (previewUrl, file) => {

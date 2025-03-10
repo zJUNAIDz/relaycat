@@ -17,7 +17,7 @@ import { Input } from "@/shared/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/components/ui/select";
 import { useModal } from "@/shared/hooks/use-modal-store";
 import { API_URL } from "@/shared/lib/constants";
-import { getAuthTokenOnClient } from "@/shared/utils/client";
+import { useAuth } from "@/shared/providers/auth-provider";
 import { capitalizeFirstLetter } from "@/shared/utils/misc";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ChannelType } from "@prisma/client";
@@ -41,6 +41,7 @@ const EditChannelModal = () => {
   //* component beginning
   const { isOpen, onClose, type, data: { channel } } = useModal();
   const isModalOpen = isOpen && type == "editChannel";
+  const { authToken } = useAuth();
   const [isLoading, setIsLoading] = React.useState(false);
   const [errorMessage, setErrorMessage] = React.useState("");
   const { serverId } = useParams<{ serverId: string }>()
@@ -69,7 +70,7 @@ const EditChannelModal = () => {
 
       await axios.patch(url, { ...values, serverId }, {
         headers: {
-          Authorization: `Bearer ${await getAuthTokenOnClient()}`
+          Authorization: `Bearer ${authToken}`
         }
       })
       form.reset()

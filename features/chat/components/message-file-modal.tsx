@@ -7,8 +7,7 @@ import {
   DialogContent,
   DialogDescription,
   DialogFooter,
-  DialogHeader,
-  DialogTitle,
+  DialogTitle
 } from "@/shared/components/ui/dialog";
 import {
   FormControl,
@@ -16,9 +15,9 @@ import {
   FormItem
 } from "@/shared/components/ui/form";
 import { useModal } from "@/shared/hooks/use-modal-store";
-import { getAuthTokenOnClient } from "@/shared/utils/client";
 // import { api } from "@/lib/api-client";
 import { API_URL, DEFAULT_SERVER_IMAGE_URL } from "@/shared/lib/constants";
+import { useAuth } from "@/shared/providers/auth-provider";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios, { AxiosError } from "axios";
 import { useRouter } from "next/navigation";
@@ -52,6 +51,7 @@ const MessageFileModal = () => {
   const [file, setFile] = React.useState<File | null>(null);
   const [isLoading, setIsLoading] = React.useState(false);
   const [errorMessage, setErrorMessage] = React.useState("");
+  const { authToken } = useAuth();
 
   const router = useRouter();
   const form = useForm({
@@ -80,7 +80,6 @@ const MessageFileModal = () => {
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       setIsLoading(true);
-      const authToken = await getAuthTokenOnClient();
       if (!file) {
 
         return;

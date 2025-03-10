@@ -6,8 +6,7 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogHeader,
-  DialogTitle,
+  DialogTitle
 } from "@/shared/components/ui/dialog";
 import {
   DropdownMenu,
@@ -24,8 +23,8 @@ import { ScrollArea } from "@/shared/components/ui/scroll-area";
 import { UserAvatar } from "@/shared/components/user-avatar";
 import { useModal } from "@/shared/hooks/use-modal-store";
 import { API_URL } from "@/shared/lib/constants";
+import { useAuth } from "@/shared/providers/auth-provider";
 import { ServerWithMembersAndUser } from "@/shared/types";
-import { getAuthTokenOnClient } from "@/shared/utils/client";
 import { capitalizeFirstLetter } from "@/shared/utils/misc";
 import { MemberRole } from "@prisma/client";
 import axios from "axios";
@@ -45,6 +44,7 @@ const MembersModal = () => {
   } = useModal();
   const router = useRouter()
   const [loadingId, setLoadingId] = React.useState("")
+  const { authToken } = useAuth()
   const { server } = data as { server: ServerWithMembersAndUser };
   const isModalOpen = isOpen && type == "members";
   const membersCount = server?.members?.length || 0;
@@ -52,7 +52,6 @@ const MembersModal = () => {
   const onKick = async (memberId: string) => {
     try {
       setLoadingId(memberId)
-      const authToken = await getAuthTokenOnClient()
       const url = qs.stringifyUrl({
         url: `${API_URL}/members/kick`,
         query: {
@@ -77,7 +76,6 @@ const MembersModal = () => {
   const onRoleChange = async (memberId: string, role: MemberRole) => {
     try {
       setLoadingId(memberId)
-      const authToken = await getAuthTokenOnClient()
       const url = qs.stringifyUrl({
         url: `${API_URL}/members/changeRole`,
         query: {
@@ -104,13 +102,13 @@ const MembersModal = () => {
   return (
     <Dialog open={isModalOpen} onOpenChange={onClose}>
       <DialogContent className="overflow-hidden">
-          <DialogTitle className="text-center text-2xl font-bold">
-            Manage Members
-          </DialogTitle>
-          <DialogDescription className="text-center">
-            {/* Covering impossible edge case of No Members. servers with no members will automatically be deleted in 24 hours. 😋 */}
-            {membersCount ? membersCount === 1 ? `${membersCount} Member` : `${membersCount} Members` : "No members"}
-          </DialogDescription>
+        <DialogTitle className="text-center text-2xl font-bold">
+          Manage Members
+        </DialogTitle>
+        <DialogDescription className="text-center">
+          {/* Covering impossible edge case of No Members. servers with no members will automatically be deleted in 24 hours. 😋 */}
+          {membersCount ? membersCount === 1 ? `${membersCount} Member` : `${membersCount} Members` : "No members"}
+        </DialogDescription>
         <div className="p-6">
           <ScrollArea className="mt-8 max-h-[100rem] pr-6">
             {server?.members && (

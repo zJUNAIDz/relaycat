@@ -5,12 +5,11 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogHeader,
   DialogTitle
 } from "@/shared/components/ui/dialog";
 import { useModal } from "@/shared/hooks/use-modal-store";
 import { API_URL } from "@/shared/lib/constants";
-import { getAuthTokenOnClient } from "@/shared/utils/client";
+import { useAuth } from "@/shared/providers/auth-provider";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import qs from "query-string";
@@ -27,6 +26,8 @@ const DeleteServerModal = () => {
   const router = useRouter()
   const isModalOpen = isOpen && type == "deleteServer";
   const [isLoading, setIsLoading] = React.useState(false);
+  const { authToken } = useAuth();
+
   const leaveServer = async () => {
     try {
       setIsLoading(true)
@@ -38,7 +39,7 @@ const DeleteServerModal = () => {
       })
       await axios.delete(url, {
         headers: {
-          Authorization: `Bearer ${await getAuthTokenOnClient()}`
+          Authorization: `Bearer ${authToken}`
         }
       })
       onClose()
@@ -55,9 +56,9 @@ const DeleteServerModal = () => {
   return (
     <Dialog open={isModalOpen} onOpenChange={onClose}>
       <DialogContent aria-description="Invite Link" className="overflow-hidden w-full">
-          <DialogTitle className="text-center text-2xl font-bold">
-            Delete Server
-          </DialogTitle>
+        <DialogTitle className="text-center text-2xl font-bold">
+          Delete Server
+        </DialogTitle>
         <DialogDescription className="text-center">
           Are you sure want to Delete this Server <span className="text-blue-500">{server?.name}</span>?
         </DialogDescription>
