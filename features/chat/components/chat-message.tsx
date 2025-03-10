@@ -1,17 +1,28 @@
 import { ActionTooltip } from "@/shared/components/action-tooltip";
 import { RoleIcon } from "@/shared/components/icons";
+import { Button } from "@/shared/components/ui/button";
+import { Form, FormControl, FormField, FormItem } from "@/shared/components/ui/form";
+import { Input } from "@/shared/components/ui/input";
 import { UserAvatar } from "@/shared/components/user-avatar";
+import { useModal } from "@/shared/hooks/use-modal-store";
+import { API_URL } from "@/shared/lib/constants";
+import { useAuth } from "@/shared/providers/auth-provider";
 import { MemberWithUser } from "@/shared/types";
 import { cn } from "@/shared/utils/cn";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Member, MemberRole, Message } from "@prisma/client";
+import axios from "axios";
 import { Edit, Trash } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import queryString from "query-string";
 import React from "react";
-
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 interface ChatMessageProps {
-  id: string;
-  content: Message["content"]
+  id: Message["id"];
+  content: Message["content"];
   member: MemberWithUser;
   timestamp: string;
   fileUrl: Message["fileUrl"];
@@ -21,6 +32,14 @@ interface ChatMessageProps {
   socketUrl: string;
   socketQuery: Record<string, string>;
 }
+
+
+const formSchema = z.object({
+  content: z.string().min(1),
+});
+
+
+
 export const ChatMessage = ({
   id,
   content,
@@ -33,8 +52,37 @@ export const ChatMessage = ({
   socketUrl,
   socketQuery
 }: ChatMessageProps) => {
+
   const [isEditing, setIsEditing] = React.useState(false);
-  const [isDeleting, setIsDeleting] = React.useState(false);
+  const { authToken, isLoading: isLoadingAuth, error } = useAuth()
+  const router = useRouter();
+  const { onOpen } = useModal();
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      content: content || "",
+    }
+  })
+
+  const isLoading = form.formState.isSubmitting;
+  const onMessageEdit = async (values: z.infer<typeof formSchema>) => {
+    try {
+      const url = queryString.stringifyUrl({
+        url: `${API_URL}/messages/${id}`,
+        query: socketQuery,
+      });
+      console.log("onMessage token: ", authToken)
+      await axios.patch(url, values, {
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+        }
+      })
+
+      setIsEditing(false);
+    } catch (err) {
+      console.log("[onMessageEdit] ", err)
+    }
+  }
 
   const isAdmin = member.role === MemberRole.ADMIN;
   const isModerator = member.role === MemberRole.MODERATOR;
@@ -44,6 +92,9 @@ export const ChatMessage = ({
   const fileType = fileUrl?.split(".").pop();
   const isPDF = fileUrl && fileType === "pdf";
   const isImage = !isPDF && fileUrl;
+  if (isLoadingAuth) return <div>Loading...</div>;
+  if (error) return <div>Error: {error}</div>;
+  if (!authToken) return <div>Unauthorized</div>;
   return (
     <div className="relative group flex items-center hover:bg-black/5 p-4 transition w-full">
       <div className="group flex gap-x-2 items-start w-full">
@@ -95,10 +146,10 @@ export const ChatMessage = ({
           {
             !fileUrl && !isEditing && (
               <p className={cn(
-                "text-sm text-zinc-800 dark:text-zinc-200 mt-1",
-                deleted && "italic text-zinc-500 dark:text-zinc-400 text-xs mt-1"
+                "text-md text-zinc-800 dark:text-zinc-200 mt-1",
+                deleted && "italic text-zinc-500 dark:text-zinc-400 text-sm mt-1"
               )}>
-                {content}
+                {!deleted ? content : "This message has been deleted."}
                 {isUpdated && !deleted && (
                   <span className="text-xs italic text-zinc-500 dark:text-zinc-400">
                     edited
@@ -107,18 +158,43 @@ export const ChatMessage = ({
               </p>
             )
           }
-          {/* {isUpdated && !deleted && (
-            <span className="text-xs text-gray-500">Edited</span>
-          )}
-          {deleted ? (
-            <span className="text-xs italic text-gray-500">Message deleted</span>
-          ) : (
-            <p
-              className={`text-sm ${fileUrl && "text-blue-500"} ${isUpdated && "italic"}`}
-            >
-              {content}
-            </p>
-          )} */}
+          {
+            !fileUrl && isEditing && (
+              <Form {...form}>
+                <form
+                  className="flex items-center w-full gap-x-2 pt-2"
+                  onSubmit={form.handleSubmit(onMessageEdit)}
+                >
+                  <FormField
+                    control={form.control}
+                    name="content"
+                    render={({ field }) => {
+                      console.log({ field })
+                      return (
+                        <FormItem className="flex-1">
+                          <FormControl>
+                            <div className="relative w-full">
+                              <Input
+                                className="p-2 bg-zinc-200/90 dark:bg-zinc-700/75 border-none border-0 focus-visible:ring-0 focus-visible:ring-offset-0 text-zinc-600 dark:text-zinc-200"
+                                placeholder="edited message..."
+                                disabled={isLoading}
+                                {...field}
+                              />
+                            </div>
+                          </FormControl>
+                        </FormItem>
+                      )
+                    }}
+                  />
+                </form>
+                <Button size="sm" variant="primary">
+                  Save
+                </Button>
+                <div className="mt-2 text-xs text-zinc-700 dark:text-zinc-400 ">escape to <a className="text-blue-600 dark:text-blue-400 hover:underline" role="button">cancel</a> • enter to <a className="text-blue-600 dark:text-blue-400 hover:underline" role="button" >save</a></div>
+              </Form>
+
+            )
+          }
         </div>
       </div>
       {
@@ -127,24 +203,16 @@ export const ChatMessage = ({
             {
               canEditMessage && (
                 <ActionTooltip label="Edit" side="top">
-                  {/* <button
-                    className="text-zinc-500 hover:text-zinc-600 dark:text-zinc-400 dark:hover:text-zinc-300 transition"
+                  <Edit
                     onClick={() => setIsEditing(true)}
-                  >
-                    <span className="sr-only">Edit</span>
-                    <Image
-                      src="/icons/edit.svg"
-                      alt="Edit"
-                      height={16}
-                      width={16}
-                    />
-                  </button> */}
-                  <Edit className="cursor-pointer ml-auto w-4 h-4 text-zinc-500 dark:text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300" />
+                    className="cursor-pointer ml-auto w-4 h-4 text-zinc-500 dark:text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
+                  />
                 </ActionTooltip>
               )
             }
             <ActionTooltip label="Delete" side="top">
-              <Trash className="cursor-pointer ml-auto w-4 h-4 text-zinc-500 dark:text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300" />
+              <Trash
+                className="cursor-pointer ml-auto w-4 h-4 text-zinc-500 dark:text-zinc-400 hover:text-red-600 dark:hover:text-red-300" />
             </ActionTooltip>
           </div>
         )
