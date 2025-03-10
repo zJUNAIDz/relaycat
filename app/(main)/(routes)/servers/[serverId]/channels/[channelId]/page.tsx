@@ -2,7 +2,7 @@ import ChatHeader from "@/features/chat/components/chat-header";
 import { ChatInput } from "@/features/chat/components/chat-input";
 import { ChatMessages } from "@/features/chat/components/chat-messages";
 import { memberService } from "@/features/member/member-service";
-import { API_URL } from "@/shared/lib/constants";
+import { API_URL, SOCKET_URL } from "@/shared/lib/constants";
 import { getAuthTokenOnServer, getCurrentUser } from "@/shared/utils/server";
 import axios from "axios";
 import { redirect } from "next/navigation";
@@ -39,11 +39,14 @@ const ChannelIdPage = async ({ params }: ChannelIdPageProps) => {
   if (!user) {
     return redirect("/auth")
   }
-
+  const token = await getAuthTokenOnServer();
+  if (!token) {
+    return redirect("/auth")
+  }
   const url = `${API_URL}/channels/${channelId}`
   const { data: { channel: { channel } } } = await axios.get(url, {
     headers: {
-      "Authorization": `Bearer ${await getAuthTokenOnServer()}`
+      "Authorization": `Bearer ${token}`
     }
   })
   if (!channel) {
@@ -62,11 +65,11 @@ const ChannelIdPage = async ({ params }: ChannelIdPageProps) => {
       <ChatHeader type="channel" label={channel.name} serverId={serverId} />
       <ChatMessages
         member={member}
-        chatId={channelId}
+        chatId={channel.id}
         name={channel.name}
         type="channel"
         apiUrl={`${API_URL}/messages`}
-        socketUrl={`${API_URL}/socket/messages`}
+        socketUrl={SOCKET_URL}
         socketQuery={{
           channelId,
           serverId,
