@@ -20,47 +20,48 @@ export const useChatSocket = ({
 
   React.useEffect(() => {
     if (!socket) return;
-    socket.on(updateKey, (message: MessageWithMemberWithUser) => {
+
+    const handleUpdateMessage = (message: MessageWithMemberWithUser) => {
       queryClient.setQueryData([queryKey], (oldData: any) => {
         if (!oldData || !oldData.pages || oldData.pages.length === 0) {
-
-          return oldData
+          return oldData;
         }
-        const newData = oldData.pages.map((page: any) => {
-          return page.map((msg: MessageWithMemberWithUser) => {
-            if (msg.id === message.id) {
-              return message;
-            }
-            return msg;
-          })
-        });
+        const newData = oldData.pages.map((page: any) => ({
+          ...page,
+          messages: page.messages.map((msg: MessageWithMemberWithUser) =>
+            msg.id === message.id ? message : msg
+          ),
+        }))
         return {
           ...oldData,
-          pages: newData
-        }
-      })
-    });
-    socket.on(addKey, (message: MessageWithMemberWithUser) => {
+          pages: newData,
+        };
+      });
+    };
+
+    const handleAddMessage = (message: MessageWithMemberWithUser) => {
       queryClient.setQueryData([queryKey], (oldData: any) => {
         if (!oldData || !oldData.pages || oldData.pages.length === 0) {
           return {
-            pages: [[message]]
-          }
+            pages: [{ messages: [message] }],
+          };
         }
-        const newData = [...oldData.pages];
-        newData[0] = [
-          ...newData[0],
-          message
-        ]
+        const newPages = [...oldData.pages];
+        newPages[0].messages = [...newPages[0].messages, message];
         return {
           ...oldData,
-          pages: newData
-        }
-      })
-    });
+          pages: newPages,
+        };
+      });
+    };
+
+    socket.on(updateKey, handleUpdateMessage);
+    socket.on(addKey, handleAddMessage);
+
     return () => {
-      socket.off(addKey);
-      socket.off(updateKey);
-    }
-  }, [socket, queryKey, updateKey, addKey, queryClient])
+      socket.off(updateKey, handleUpdateMessage);
+      socket.off(addKey, handleAddMessage);
+    };
+  }, [socket, queryKey, updateKey, addKey, queryClient]);
+
 }
