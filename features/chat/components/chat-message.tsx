@@ -73,7 +73,6 @@ export const ChatMessage = ({
         url: `${API_URL}/messages/${id}`,
         query: socketQuery,
       });
-      console.log("onMessage token: ", authToken)
       await axios.patch(url, values, {
         headers: {
           Authorization: `Bearer ${authToken}`,
@@ -169,13 +168,13 @@ export const ChatMessage = ({
           {
             !fileUrl && !isEditing && (
               <p className={cn(
-                "text-md text-zinc-800 dark:text-zinc-200 mt-1",
+                "flex flex-col text-md text-zinc-800 dark:text-zinc-200 mt-1",
                 deleted && "italic text-zinc-500 dark:text-zinc-400 text-sm mt-1"
               )}>
                 {!deleted ? content : "This message has been deleted."}
                 {isUpdated && !deleted && (
-                  <span className="text-xs italic text-zinc-500 dark:text-zinc-400">
-                    edited
+                  <span className="text-[0.7rem] italic text-zinc-500 dark:text-zinc-400">
+                    (edited)
                   </span>
                 )}
               </p>
@@ -185,7 +184,7 @@ export const ChatMessage = ({
             !fileUrl && isEditing && (
               <Form {...form}>
                 <form
-                  className="flex items-center w-full gap-x-2 pt-2"
+                  className="flex flex-col w-full gap-x-2 pt-2"
                   onSubmit={form.handleSubmit(onMessageEdit)}
                 >
                   <FormField
@@ -209,11 +208,26 @@ export const ChatMessage = ({
                       )
                     }}
                   />
+                  <div className="flex mt-2 text-xs text-zinc-700 dark:text-zinc-400 gap-1">
+                    <div aria-live="polite" className="sr-only" id="editingInstructions">
+                      Editing mode enabled. Press Escape to cancel or Enter to save.
+                    </div>
+                    press escape to
+                    <button
+                      aria-label="cancel editing message"
+                      onClick={() => setIsEditing(false)} className="text-blue-600 dark:text-blue-400 hover:underline">
+                      cancel
+                    </button>
+                    • enter to
+                    <button
+                      aria-label="save edited message"
+                      type="submit"
+                      className="text-blue-600 dark:text-blue-400 hover:underline" role="button">
+                      save
+                    </button>
+                  </div>
                 </form>
-                <Button size="sm" variant="primary">
-                  Save
-                </Button>
-                <div className="mt-2 text-xs text-zinc-700 dark:text-zinc-400 ">escape to <a className="text-blue-600 dark:text-blue-400 hover:underline" role="button">cancel</a> • enter to <a className="text-blue-600 dark:text-blue-400 hover:underline" role="button" >save</a></div>
+
               </Form>
 
             )
