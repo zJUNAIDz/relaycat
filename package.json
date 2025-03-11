@@ -14,7 +14,9 @@
     "@aws-sdk/client-s3": "^3.679.0",
     "@aws-sdk/s3-request-presigner": "^3.679.0",
     "@hookform/resolvers": "^3.9.0",
-    "@prisma/client": "^6.4.1",
+    "@livekit/components-react": "^2.8.1",
+    "@livekit/components-styles": "^1.1.4",
+    "@prisma/client": "^6.5.0",
     "@prisma/instrumentation": "^6.4.1",
     "@radix-ui/react-avatar": "^1.1.1",
     "@radix-ui/react-dialog": "^1.1.5",
@@ -38,6 +40,8 @@
     "emoji-picker-react": "^4.12.0",
     "framer-motion": "^12.4.2",
     "jose": "^5.9.6",
+    "livekit-server-sdk": "^2.10.2",
+    "lodash": "^4.17.21",
     "lucide-react": "^0.476.0",
     "next": "^15.2.0",
     "next-auth": "^5.0.0-beta.25",
@@ -65,6 +69,7 @@
   "devDependencies": {
     "@aws-sdk/types": "^3.679.0",
     "@prisma/extension-optimize": "^1.1.6",
+    "@types/lodash": "^4.17.16",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
@@ -74,7 +79,8 @@
     "eslint": "^8",
     "eslint-config-next": "14.0.4",
     "postcss": "^8",
-    "prisma": "^6.4.1",
+    "prisma": "^6.5.0",
+    "prismjs": "^1.30.0",
     "tailwindcss": "^3.3.0",
     "typescript": "^5"
   }
