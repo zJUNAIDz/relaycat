@@ -39,10 +39,10 @@ const MemberIdPage = async ({ params }: MemberIdPageProps) => {
         member={currentMember}
         type="conversation"
         chatId={conversationId}
-        apiUrl={`${API_URL}/messages`}
+        apiUrl={`${API_URL}/conversations`}
         socketUrl={SOCKET_URL}
         socketQuery={{
-          channelId: conversationId,
+          conversationId: conversationId,
           serverId: serverId
         }}
         paramKey="conversationId"
@@ -53,7 +53,7 @@ const MemberIdPage = async ({ params }: MemberIdPageProps) => {
         type="conversation"
         apiUrl={`${API_URL}/messages`}
         query={{
-          memberId: targetMember.id,
+          conversationId: conversationId,
           serverId: serverId
         }}
       />
