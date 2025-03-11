@@ -9,7 +9,12 @@ type ChatSocketProps = {
   updateKey: string;
   queryKey: string;
 }
-
+interface QueryData {
+  pageParams: unknown[];
+  pages: {
+    messages: MessageWithMemberWithUser[];
+  }[];
+}
 export const useChatSocket = ({
   addKey,
   updateKey,
@@ -22,7 +27,7 @@ export const useChatSocket = ({
     if (!socket) return;
 
     const handleUpdateMessage = (message: MessageWithMemberWithUser) => {
-      queryClient.setQueryData([queryKey], (oldData: any) => {
+      queryClient.setQueryData([queryKey], (oldData: QueryData) => {
         if (!oldData || !oldData.pages || oldData.pages.length === 0) {
           return oldData;
         }
@@ -40,7 +45,7 @@ export const useChatSocket = ({
     };
 
     const handleAddMessage = (message: MessageWithMemberWithUser) => {
-      queryClient.setQueryData([queryKey], (oldData: any) => {
+      queryClient.setQueryData([queryKey], (oldData: QueryData) => {
         if (!oldData || !oldData.pages || oldData.pages.length === 0) {
           return {
             pages: [{ messages: [message] }],
