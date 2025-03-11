@@ -115,7 +115,6 @@ const TechIcon = ({ icon: Icon, name, color }: any) => (
 );
 
 const Landing = ({ user }: { user: User | null }) => {
-  console.log("user: ", user?.image);
   return (
     <div className="bg-gradient-to-br from-white via-blue-50 to-purple-50 dark:from-gray-900 dark:via-blue-900 dark:to-gray-800 text-gray-900 dark:text-gray-100">
       <FloatingParticles />

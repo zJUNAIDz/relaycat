@@ -44,10 +44,8 @@ const ALLOWED_FILE_TYPES = [
 const MessageFileModal = () => {
   //* component beginning
   const { isOpen, onClose, type, data } = useModal();
-  console.log({ data })
   const { apiUrl, query } = data;
   const isModalOpen = isOpen && type == "messageFile";
-  console.log(`Message file modal is open: ${isModalOpen}`);
   const [file, setFile] = React.useState<File | null>(null);
   const [isLoading, setIsLoading] = React.useState(false);
   const [errorMessage, setErrorMessage] = React.useState("");

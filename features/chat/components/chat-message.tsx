@@ -191,7 +191,6 @@ export const ChatMessage = ({
                     control={form.control}
                     name="content"
                     render={({ field }) => {
-                      console.log({ field })
                       return (
                         <FormItem className="flex-1">
                           <FormControl>

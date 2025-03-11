@@ -40,7 +40,6 @@ const formSchema = z.object({
 const CreateChannelModal = () => {
   //* component beginning
   const { authToken } = useAuth();
-  console.log("createChannel", authToken)
   const { isOpen, onClose, type, data: { channelType } } = useModal();
   const isModalOpen = isOpen && type == "createChannel";
   const [isLoading, setIsLoading] = React.useState(false);

@@ -64,7 +64,6 @@ const InitialModal = () => {
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       setIsLoading(true);
-      console.log({ authToken })
       if (!imageFile) {
         if (!values.imageUrl.length) {
           setErrorMessage("Please upload an image");
