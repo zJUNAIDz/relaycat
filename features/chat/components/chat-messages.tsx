@@ -9,6 +9,7 @@ import { useChatQuery } from "../hooks/chat-query-hook";
 import { useChatSocket } from "../hooks/chat-socket";
 import { ChatMessage } from "./chat-message";
 import { ChatWelcome } from "./chat-welcome";
+import { useChatScroll } from "../hooks/use-chat-scroll";
 
 interface ChatMessagesProps {
   name: string;
@@ -36,9 +37,11 @@ export const ChatMessages = ({
   paramValue,
   type
 }: ChatMessagesProps) => {
-  const queryKey = `chat:${chatId}`
-  const addKey = `chat:${chatId}:messages`
-  const updateKey = `chat:${chatId}:messages:update`
+  const queryKey = `chat:${chatId}`;
+  const addKey = `chat:${chatId}:messages`;
+  const updateKey = `chat:${chatId}:messages:update`;
+  const chatRef = React.useRef<HTMLDivElement>(null);
+  const bottomRef = React.useRef<HTMLDivElement>(null);
   const {
     data,
     fetchNextPage,
@@ -52,12 +55,18 @@ export const ChatMessages = ({
     paramValue
   })
   useChatSocket({ addKey, updateKey, queryKey })
-  const bottomRef = React.useRef<HTMLDivElement>(null);
-  React.useEffect(() => {
-    if (bottomRef.current) {
-      bottomRef.current.scrollIntoView({ behavior: "smooth" })
-    }
-  }, [data])
+  useChatScroll({
+    chatRef,
+    bottomRef,
+    loadMore: fetchNextPage,
+    shouldLoadMore: !isFetchingNextPage && hasNextPage,
+    count: data?.pages?.length ?? 0,
+  })
+  // React.useEffect(() => {
+  //   if (bottomRef.current) {
+  //     bottomRef.current.scrollIntoView({ behavior: "smooth" })
+  //   }
+  // }, [data])
   if (status === "pending") {
     return (
       <div className="flex flex-col flex-1 justify-center items-center">
@@ -69,7 +78,7 @@ export const ChatMessages = ({
     )
   }
   return (
-    <div className="flex-1 flex flex-col py-4 overflow-y-auto">
+    <div ref={chatRef} className="flex-1 flex flex-col py-4 overflow-y-auto">
       {!hasNextPage && <div className="flex-1" />}
       {!hasNextPage && (
         <ChatWelcome
