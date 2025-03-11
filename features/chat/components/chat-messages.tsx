@@ -52,7 +52,12 @@ export const ChatMessages = ({
     paramValue
   })
   useChatSocket({ addKey, updateKey, queryKey })
-
+  const bottomRef = React.useRef<HTMLDivElement>(null);
+  React.useEffect(() => {
+    if (bottomRef.current) {
+      bottomRef.current.scrollIntoView({ behavior: "smooth" })
+    }
+  }, [data])
   if (status === "pending") {
     return (
       <div className="flex flex-col flex-1 justify-center items-center">
@@ -63,35 +68,43 @@ export const ChatMessages = ({
       </div>
     )
   }
-  console.log({ data })
   return (
     <div className="flex-1 flex flex-col py-4 overflow-y-auto">
-      <div className="flex-1" />
-      <ChatWelcome name={name} type={type} />
+      {!hasNextPage && <div className="flex-1" />}
+      {!hasNextPage && (
+        <ChatWelcome
+          name={name}
+          type={type}
+        />
+      )}
+    
       <div>
         {
-          data?.pages.map((group, i) => (
-            <React.Fragment key={i}>
-              {group.length !== 0 && group.map((message: MessageWithMemberWithUser) => (
-                <ChatMessage
-                  key={message.id}
-                  id={message.id}
-                  currentMember={member}
-                  member={message.member}
-                  content={message.content}
-                  fileUrl={message.fileUrl}
-                  deleted={message.deleted}
-                  timestamp={format(new Date(message.createdAt), DATE_FORMAT)}
-                  isUpdated={message.updatedAt !== message.createdAt}
-                  apiUrl={`${apiUrl}/${message.id}`}
-                  socketUrl={socketUrl}
-                  socketQuery={socketQuery}
-                />
-              ))
-              }
-            </React.Fragment>
-          ))
+          data?.pages.map((group, i) => {
+            return (
+              <React.Fragment key={i}>
+                {group.length !== 0 && group.messages.map((message: MessageWithMemberWithUser) => (
+                  <ChatMessage
+                    key={message.id}
+                    id={message.id}
+                    currentMember={member}
+                    member={message.member}
+                    content={message.content}
+                    fileUrl={message.fileUrl}
+                    deleted={message.deleted}
+                    timestamp={format(new Date(message.updatedAt || message.createdAt), DATE_FORMAT)}
+                    isUpdated={message.updatedAt !== message.createdAt}
+                    apiUrl={`${apiUrl}/${message.id}`}
+                    socketUrl={socketUrl}
+                    socketQuery={socketQuery}
+                  />
+                ))
+                }
+              </React.Fragment>
+            )
+          })
         }
+        <div ref={bottomRef} />
       </div>
     </div >
   )
