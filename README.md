@@ -1,1 +1,1 @@
-# Discord Clone using NextJS
+# RelayCat, A Highly Scalable Real-time Communication webapp using NextJS
