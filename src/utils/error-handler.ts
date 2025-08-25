@@ -12,3 +12,19 @@ export const errorhandler = (err: Error, c: Context) => {
     err.name === "ValidationError" ? 400 : 500
   );
 };
+export const generateErrorMessage = (
+  err: unknown,
+  defaultMessage: string,
+  prefix?: string
+) => {
+  let errMessage = defaultMessage;
+  if (err instanceof Error) {
+    errMessage = err.message;
+  } else if (typeof err === "string") {
+    errMessage = err;
+  } else if (err && typeof err === "object") {
+    errMessage = JSON.stringify(err);
+  }
+  console.error(`${prefix} ${errMessage}`);
+  return `${prefix} ${errMessage}`;
+}
