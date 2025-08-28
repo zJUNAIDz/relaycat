@@ -29,6 +29,7 @@ const ServerIdPage = async ({ params }: ServerIdPageProps) => {
     }
   })
   if (!channels) {
+    console.log("No channels found")
     return <DefaultServerPage />;
   }
   return redirect(`/servers/${serverId}/channels/${channels[0].id}`)
