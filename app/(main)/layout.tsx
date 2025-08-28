@@ -2,11 +2,10 @@ import NavigationSidebar from "@/features/server/navigation/navigation-sidebar";
 import { ModalProvider } from "@/shared/providers/modal-provider";
 import { QueryProvider } from "@/shared/providers/query-provider";
 import SocketProvider from "@/shared/providers/socket-provider";
-import { getAuthTokenOnServer } from "@/shared/utils/server";
+import { Ubuntu } from "next/font/google";
+const ubuntuFont = Ubuntu({ subsets: ['latin'], weight: ["300"] })
 const MainLayout: React.FC<{ children: React.ReactNode }> = async ({ children }) => {
-  const authToken = await getAuthTokenOnServer();
-
-  return <div className="h-full">
+  return <div className={`h-full ${ubuntuFont.className}`}>
     <SocketProvider >
       <QueryProvider>
         <ModalProvider />
