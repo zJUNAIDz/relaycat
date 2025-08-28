@@ -24,6 +24,16 @@ const nextConfig = {
         hostname: "lh3.googleusercontent.com",
         pathname: "/**",
       },
+      {
+        protocol: "https",
+        hostname: "cdnb.artstation.com",
+        pathname: "/**",
+      },
+      {
+        protocol:"http",
+        hostname:"localhost",
+        pathname:"/**"
+      }
     ],
   },
 };
