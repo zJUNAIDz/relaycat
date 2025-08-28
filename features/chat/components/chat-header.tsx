@@ -1,6 +1,7 @@
+import { SocketIndicator } from "@/features/socket/components/socket-indicator";
+import { Server } from "@/generated/prisma/client";
 import { MobileToggle } from "@/shared/components/mobile-toggle";
 import { UserAvatar } from "@/shared/components/user-avatar";
-import { Server } from "@prisma/client";
 import { Hash } from "lucide-react";
 import React from "react";
 
@@ -31,6 +32,7 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({ type, label, serverId, imageUrl
       <p className="text-lg text-black dark:text-white/80">
         {label}
       </p>
+      <SocketIndicator />
     </div>
   )
 }

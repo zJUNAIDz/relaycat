@@ -1,12 +1,12 @@
+import { channelService } from "@/features/channel/channel-service";
 import ChatHeader from "@/features/chat/components/chat-header";
 import { ChatInput } from "@/features/chat/components/chat-input";
 import { ChatMessages } from "@/features/chat/components/chat-messages";
 import { memberService } from "@/features/member/member-service";
+import { ChannelType } from "@/generated/prisma/client";
 import { MediaRoom } from "@/shared/components/media-room";
 import { API_URL, SOCKET_URL } from "@/shared/lib/constants";
 import { getAuthTokenOnServer, getCurrentUser } from "@/shared/utils/server";
-import { ChannelType } from "@prisma/client";
-import axios from "axios";
 import { redirect } from "next/navigation";
 interface ChannelIdPageProps {
   params: any
@@ -45,12 +45,7 @@ const ChannelIdPage = async ({ params }: ChannelIdPageProps) => {
   if (!token) {
     return redirect("/auth")
   }
-  const url = `${API_URL}/channels/${channelId}`
-  const { data: { channel: { channel } } } = await axios.get(url, {
-    headers: {
-      "Authorization": `Bearer ${token}`
-    }
-  })
+  const { channel } = await channelService.getChannelById(channelId)
   if (!channel) {
     redirect("/")
   }

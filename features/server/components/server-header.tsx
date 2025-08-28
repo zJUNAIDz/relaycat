@@ -8,7 +8,7 @@ import {
 } from "@/shared/components/ui/dropdown-menu";
 import { useModal } from "@/shared/hooks/use-modal-store";
 import { ServerWithMembersAndUser } from "@/shared/types";
-import { MemberRole } from "@prisma/client";
+import { MemberRole } from "@/generated/prisma/client";
 import {
   ChevronDown,
   DoorOpen,

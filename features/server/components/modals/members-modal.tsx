@@ -26,7 +26,7 @@ import { API_URL } from "@/shared/lib/constants";
 import { useAuth } from "@/shared/providers/auth-provider";
 import { ServerWithMembersAndUser } from "@/shared/types";
 import { capitalizeFirstLetter } from "@/shared/utils/misc";
-import { MemberRole } from "@prisma/client";
+import { MemberRole } from "@/generated/prisma/client";
 import axios from "axios";
 import { Check, Gavel, Loader2, MoreVertical, Shield } from "lucide-react";
 import { useRouter } from "next/navigation";

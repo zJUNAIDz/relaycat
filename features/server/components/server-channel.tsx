@@ -2,7 +2,7 @@
 import { ActionTooltip } from "@/shared/components/action-tooltip";
 import { useModal } from "@/shared/hooks/use-modal-store";
 import { cn } from "@/shared/utils/cn";
-import { Channel, ChannelType, MemberRole, Server } from "@prisma/client";
+import { Channel, ChannelType, MemberRole, Server } from "@/generated/prisma/client";
 import { Edit, Hash, Mic, Trash, Video } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 

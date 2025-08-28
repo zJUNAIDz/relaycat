@@ -1,4 +1,5 @@
 import { auth } from "@/auth";
+import { User } from "@/generated/prisma/client";
 import { API_URL } from "@/shared/lib/constants";
 import { UserAuthStatus, UserProfileResponse } from "@/shared/types";
 import axios from "axios";

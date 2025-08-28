@@ -1,19 +1,15 @@
 "use client"
 import { ServerChannel } from "@/features/server/components/server-channel";
 import { ServerSection } from "@/features/server/components/server-section";
+import { Channel, ChannelType, MemberRole } from "@/generated/prisma/client";
 import { ServerWithMembersAndUser } from "@/shared/types";
-import { Channel, ChannelType, MemberRole } from "@prisma/client";
 interface ChannelListProps {
   channelsGroupedByType: Channel[][];
   role: MemberRole;
   server: ServerWithMembersAndUser;
 }
 
-
 export const ChannelList: React.FC<ChannelListProps> = ({ channelsGroupedByType, role, server }) => {
-
-
-
   return (
     <>
       {

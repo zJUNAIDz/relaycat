@@ -1,6 +1,6 @@
+import { Member, MemberRole, Message } from "@/generated/prisma/client";
 import { ActionTooltip } from "@/shared/components/action-tooltip";
 import { RoleIcon } from "@/shared/components/icons";
-import { Button } from "@/shared/components/ui/button";
 import { Form, FormControl, FormField, FormItem } from "@/shared/components/ui/form";
 import { Input } from "@/shared/components/ui/input";
 import { UserAvatar } from "@/shared/components/user-avatar";
@@ -10,7 +10,6 @@ import { useAuth } from "@/shared/providers/auth-provider";
 import { MemberWithUser } from "@/shared/types";
 import { cn } from "@/shared/utils/cn";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Member, MemberRole, Message } from "@prisma/client";
 import axios from "axios";
 import { Edit, Trash } from "lucide-react";
 import Image from "next/image";

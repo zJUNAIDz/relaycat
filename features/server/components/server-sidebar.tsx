@@ -4,13 +4,14 @@ import { ServerSearch } from "@/features/server/navigation/server-search";
 import { RoleIcon } from "@/shared/components/icons";
 import { ScrollArea } from "@/shared/components/ui/scroll-area";
 import { Separator } from "@/shared/components/ui/separator";
-import { ChannelType, MemberRole } from "@prisma/client";
+import { ChannelType, MemberRole } from "@/generated/prisma/client";
 import { Hash, Mic, Video } from "lucide-react";
 import { redirect } from "next/navigation";
 import React from "react";
 import { serverService } from "../server-service";
 import ServerHeader from "./server-header";
 import { ServerMembersList } from "./server-member-list";
+import { UserFooter } from "./user-footer";
 interface ServerSidebarProps {
   serverId: string;
 }
@@ -104,6 +105,7 @@ const ServerSidebar: React.FC<ServerSidebarProps> = async ({ serverId }) => {
         />
         <ServerMembersList members={server.members} serverId={serverId} />
       </ScrollArea>
+      <UserFooter name={user.name || "Na"} username="NA" imageUrl={user.image} />
     </div>
   );
 };

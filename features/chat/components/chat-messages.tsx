@@ -1,15 +1,15 @@
 "use client"
 
+import { Member } from "@/generated/prisma/client";
 import { MessageWithMemberWithUser } from "@/shared/types";
-import { Member } from "@prisma/client";
 import { format } from "date-fns";
 import { Loader2 } from "lucide-react";
 import React from "react";
 import { useChatQuery } from "../hooks/chat-query-hook";
 import { useChatSocket } from "../hooks/chat-socket";
+import { useChatScroll } from "../hooks/use-chat-scroll";
 import { ChatMessage } from "./chat-message";
 import { ChatWelcome } from "./chat-welcome";
-import { useChatScroll } from "../hooks/use-chat-scroll";
 
 interface ChatMessagesProps {
   name: string;
@@ -40,6 +40,7 @@ export const ChatMessages = ({
   const queryKey = `chat:${chatId}`;
   const addKey = `chat:${chatId}:messages`;
   const updateKey = `chat:${chatId}:messages:update`;
+  const deleteKey = `chat:${chatId}:messages:delete`;
   const chatRef = React.useRef<HTMLDivElement>(null);
   const bottomRef = React.useRef<HTMLDivElement>(null);
   const {
@@ -54,7 +55,7 @@ export const ChatMessages = ({
     paramKey,
     paramValue
   })
-  useChatSocket({ addKey, updateKey, queryKey })
+  useChatSocket({ addKey, updateKey, queryKey, deleteKey })
   useChatScroll({
     chatRef,
     bottomRef,
@@ -62,11 +63,12 @@ export const ChatMessages = ({
     shouldLoadMore: !isFetchingNextPage && hasNextPage,
     count: data?.pages?.length ?? 0,
   })
-  // React.useEffect(() => {
-  //   if (bottomRef.current) {
-  //     bottomRef.current.scrollIntoView({ behavior: "smooth" })
-  //   }
-  // }, [data])
+  React.useEffect(() => {
+    if (bottomRef.current) {
+      bottomRef.current.scrollIntoView({ behavior: "smooth" })
+    }
+  }, [data])
+  console.log({ reversedMessages: data?.pages[0].messages })
   if (status === "pending") {
     return (
       <div className="flex flex-col flex-1 justify-center items-center">
@@ -106,7 +108,7 @@ export const ChatMessages = ({
             </button>
           )
       }
-      <div>
+      <div className="flex flex-col-reverse mt-auto">
         {
           data?.pages.map((group, i) => {
             return (

@@ -1,8 +1,7 @@
+import { Server } from "@/generated/prisma/client";
 import { API_URL } from "@/shared/lib/constants";
 import { ServerWithMembersAndUser, ServerWithMembersOnly, ServerWithMembersUserAndChannels } from "@/shared/types";
-import { getEnv } from "@/shared/utils/env";
 import { getAuthTokenOnServer } from "@/shared/utils/server";
-import { Server } from "@prisma/client";
 import axios, { AxiosResponse } from "axios";
 import queryString from "query-string";
 
@@ -15,7 +14,7 @@ class ServerService {
   async getCurrentUserServers(): Promise<ServerWithMembersAndUser[] | Server[] | null> {
     try {
 
-      const { data: servers }: { data: Server[] } = await axios.get(`${this.API_URL}/servers`,{
+      const { data: servers }: { data: Server[] } = await axios.get(`${this.API_URL}/servers`, {
         headers: {
           "Authorization": `Bearer ${await getAuthTokenOnServer()}`
         }

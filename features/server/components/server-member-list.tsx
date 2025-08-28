@@ -1,7 +1,7 @@
 // "use client"
 import currentProfile from "@/shared/lib/current-profile";
 import { ServerWithMembersAndUser } from "@/shared/types";
-import { Server } from "@prisma/client";
+import { Server } from "@/generated/prisma/client";
 import { ServerMember } from "./server-member";
 import { ServerSection } from "./server-section";
 

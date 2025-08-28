@@ -1,4 +1,5 @@
 "use client"
+import { User } from "@/generated/prisma/client";
 import React from "react";
 
 type AuthContextType = {

@@ -1,5 +1,5 @@
 import { getAuthTokenOnServer } from "@/shared/utils/server";
-import { Member } from "@prisma/client";
+import { Member } from "@/generated/prisma/client";
 import axios from "axios";
 
 class MemberService {

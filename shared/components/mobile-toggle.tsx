@@ -3,7 +3,7 @@ import { Sheet, SheetContent, SheetTrigger } from "./ui/sheet"
 import { Button } from "./ui/button"
 import NavigationSidebar from "@/features/server/navigation/navigation-sidebar"
 import ServerSidebar from "@/features/server/components/server-sidebar"
-import { Server } from "@prisma/client"
+import { Server } from "@/generated/prisma/client"
 
 export const MobileToggle = ({ serverId }: { serverId: Server["id"] }) => {
   return (

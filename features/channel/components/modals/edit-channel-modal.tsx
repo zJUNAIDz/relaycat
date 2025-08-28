@@ -1,5 +1,6 @@
 "use client";
 
+import { ChannelType } from "@/generated/prisma/client";
 import { Button } from "@/shared/components/ui/button";
 import {
   Dialog,
@@ -20,7 +21,6 @@ import { API_URL } from "@/shared/lib/constants";
 import { useAuth } from "@/shared/providers/auth-provider";
 import { capitalizeFirstLetter } from "@/shared/utils/misc";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ChannelType } from "@prisma/client";
 import { DialogTitle } from "@radix-ui/react-dialog";
 import axios from "axios";
 import { useParams, useRouter } from "next/navigation";
