@@ -1,4 +1,4 @@
-import { ChannelType } from "@/generated/prisma/client";
+import { ChannelType } from "../generated/prisma/client";
 import { Hono } from "hono";
 import { channelService } from "../services/channels.service";
 

@@ -1,6 +1,5 @@
 import { Channel, MemberRole, Server, User } from "@/generated/prisma/client";
 import { db } from "../lib/db";
-import { ServerWithChannels } from "../../types";
 
 interface CreateChannelPayload {
   name: Channel["name"];
