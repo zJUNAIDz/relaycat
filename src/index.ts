@@ -23,7 +23,25 @@ app.use(
     credentials: true,
   })
 );
-app.use(jwt({ secret: getEnv("JWT_SECRET") }));
+// app.use(jwt({ secret: getEnv("JWT_SECRET") }));
+app.use(async (c, next) => {
+  const auth = c.req.header("authorization");
+  if (!auth) {
+    const message = "Unauthorized. please include a JWT in the Authorization header";
+    console.error(message);
+    return c.json(
+      { message },
+      401
+    );
+  }
+  const jwtMiddleware = jwt({ secret: getEnv("JWT_SECRET") });
+  try {
+    return await jwtMiddleware(c, next);
+  } catch (err) {
+    console.error("Unauthorized: invalid JWT");
+    return c.json({ message: "Unauthorized: invalid JWT" }, 401);
+  }
+});
 app.use("/static/*", serveStatic({ root: "./" }));
 
 app.route("/s3", s3Routes);
