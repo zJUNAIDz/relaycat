@@ -1,5 +1,4 @@
-import type { } from 'next-auth'
-
+import {User} from "@/generated/prisma/client"
 type UserId = string;
 
 declare module 'next-auth/jwt' {

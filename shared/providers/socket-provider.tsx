@@ -23,7 +23,6 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
   const prevAuthToken = React.useRef<string | null>(null);
 
   React.useEffect(() => {
-    // Only connect if we have a NEW valid token
     if (!authToken || authToken === prevAuthToken.current) return;
 
     prevAuthToken.current = authToken;
@@ -33,9 +32,9 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     const newSocket = ClientIO(SOCKET_URL, {
       path: "/",
       transports: ["websocket"],
-      extraHeaders: {
-        Authorization: `Bearer ${authToken}`
-      }
+      auth: {
+        token: authToken,
+      },
     });
 
     const connectionHandler = () => {
@@ -51,8 +50,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     newSocket.on("connect", connectionHandler);
     newSocket.on("disconnect", disconnectHandler);
 
-    setSocket(prev => {
-      // Disconnect previous socket if exists
+    setSocket((prev) => {
       prev?.disconnect();
       return newSocket;
     });
@@ -63,7 +61,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
       newSocket.off("disconnect", disconnectHandler);
       newSocket.disconnect();
     };
-  }, [authToken]); // Only reconnect when authToken changes
+  }, [authToken]);
 
   return (
     <SocketContext.Provider value={{ socket, isConnected }}>

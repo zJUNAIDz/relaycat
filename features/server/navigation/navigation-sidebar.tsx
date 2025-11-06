@@ -19,7 +19,7 @@ const NavigationSidebar = async () => {
     dark:bg-[#1e1f22] bg-[#e3e5e8] py-3"
     >
       <ScrollArea className="flex flex-1 w-full justify-center items-center ">
-        {servers && servers.map(({ id, name, image }) => (
+        {servers && servers.map(({ id, name, image }) => (  
           <div
             key={id}
             className="mb-4 flex w-full justify-center items-center"

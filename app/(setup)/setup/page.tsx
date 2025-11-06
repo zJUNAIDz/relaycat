@@ -3,6 +3,8 @@ import { serverService } from "@/features/server/server-service";
 import currentProfile from "@/shared/lib/current-profile";
 import { redirect, RedirectType } from "next/navigation";
 
+export const dynamic = "force-dynamic";
+
 const SetupPage = async () => {
   const { profile } = await currentProfile();
   if (!profile) return redirect("/auth", RedirectType.replace);

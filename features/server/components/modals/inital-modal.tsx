@@ -92,7 +92,7 @@ const InitialModal = () => {
         return;
       }
       const { data: { signedUrl, key, bucketName } } = await axios.get(
-        `${API_URL}/s3/uploadNewImage?serverName=${form.getValues("name")}&fileType=${imageFile.type}`, {
+        `${API_URL}/s3/uploads/server-icon?serverName=${form.getValues("name")}&fileType=${imageFile.type}`, {
         withCredentials: true,
         headers: {
           "Content-Type": "application/json",
@@ -105,7 +105,7 @@ const InitialModal = () => {
         setErrorMessage("Error uploading image");
         return;
       }
-      const s3BaseUrl = "https://s3.ap-south-1.amazonaws.com";
+      const s3BaseUrl = process.env.NEXT_PUBLIC_S3_URL;
       const imageUrl = `${s3BaseUrl}/${bucketName}/${key}`;
 
       await axios.put(signedUrl, imageFile, {

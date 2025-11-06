@@ -27,13 +27,14 @@ const MemberIdPage = async ({ params }: MemberIdPageProps) => {
   const targetMember = memberOne.userId === currentMember.userId ? memberTwo : memberOne;
   const conversationId = targetMember.id;
   return (
-    <div className="bg-white dark:bg-[#313338]">
+    <div className=" flex flex-col bg-white dark:bg-[#313338]">
       <ChatHeader
         imageUrl={targetMember.user.image}
         serverId={serverId}
         type="conversation"
         label={targetMember.user.name}
       />
+      <div className="flex-1" />
       <ChatMessages
         name={targetMember.user.name}
         member={currentMember}

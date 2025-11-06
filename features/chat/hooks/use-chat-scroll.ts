@@ -21,8 +21,10 @@ export const useChatScroll = ({
     const topDiv = chatRef?.current;
 
     const handleScroll = () => {
-      const scrollTop = topDiv?.scrollTop;
+      console.log({ scrollHeight: topDiv?.scrollHeight, clientHeight: topDiv?.clientHeight, scrollTop: topDiv?.scrollTop })
 
+      const scrollTop = topDiv?.scrollTop;
+      console.log({ scrollTop })
       if (scrollTop === 0 && shouldLoadMore) {
         loadMore();
       }
@@ -43,19 +45,18 @@ export const useChatScroll = ({
       }
 
       if (!topDiv) return false;
-
-      const distanceFromBottom =
-        topDiv.scrollHeight - topDiv.scrollTop - topDiv.clientHeight;
-
-      return distanceFromBottom <= 100;
+      const distanceFromBottom = topDiv.scrollTop + topDiv.clientHeight;
+      return distanceFromBottom <= topDiv.scrollHeight + 300;
     };
 
-    if (shouldAutoScroll()) {
-      setTimeout(() => {
+    setTimeout(() => {
+      const shouldNow = shouldAutoScroll()
+      console.log({ shouldNow })
+      if (shouldNow) {
         bottomRef.current?.scrollIntoView({
           behavior: "smooth"
         });
-      }, 100);
-    }
-  }, [bottomRef, chatRef, count, hasInitialized]);
+      }
+    }, 100);
+  }, [bottomRef, chatRef, hasInitialized]);
 };

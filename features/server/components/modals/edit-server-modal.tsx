@@ -75,7 +75,7 @@ const EditServerModal = () => {
       }
       //* Get signed url from api
       const { data: { signedUrl, key, bucketName } } = await axios.get(
-        `${API_URL}/s3/uploadNewImage?serverName=${form.getValues("name")}&fileType=${imageFile.type}`, {
+        `${API_URL}/s3/uploads/server-icon?serverName=${form.getValues("name")}&fileType=${imageFile.type}`, {
         headers: {
           "Authorization": `Bearer ${authToken}`
         }

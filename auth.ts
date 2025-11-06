@@ -6,6 +6,7 @@ import Google from "next-auth/providers/google";
 import Github from "next-auth/providers/github";
 import { db } from "@/shared/lib/db";
 import { getEnv } from "@/shared/utils/env";
+import { User } from "@/generated/prisma/client";
 
 
 async function setToken(user: User) {
