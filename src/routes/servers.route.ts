@@ -44,7 +44,6 @@ serverRoutes.patch("/:serverId", async (c) => {
 
 serverRoutes.post("/", async (c) => {
   try {
-    console.log("aayaa")
     const body = await c.req.json();
     const validate = newServerInputValidation(body.name, body.imageUrl);
     if (!validate.success) {
@@ -96,6 +95,7 @@ serverRoutes.patch("/leave", async (c) => {
       serverId,
       userId: user.id,
     });
+    if (!server) return c.json({ error: "server not found" })
     return c.json({ server });
   } catch (err) {
     console.error("[SERVER_LEAVE] ", err);

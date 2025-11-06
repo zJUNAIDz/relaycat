@@ -1,6 +1,6 @@
-import { MemberRole, Prisma, Server, User } from "@/generated/prisma/client";
 import { v4 as uuidv4 } from "uuid";
 import { ServerWithMembersAndUser, ServerWithMembersOnly, ServerWithMembersUserAndChannels } from "../../types";
+import { MemberRole, Prisma, Server, User } from "../generated/prisma/client";
 import { db } from "../lib/db";
 interface CreateServerPayload {
   profile: {
@@ -53,7 +53,7 @@ class ServersService {
   }: {
     serverId: string;
     userId: string;
-  }): Promise<Server> {
+  }): Promise<Server | null> {
     try {
       const server: Server | null = await db.server.update({
         where: {
@@ -75,6 +75,7 @@ class ServersService {
           },
         },
       });
+      if (!server) return null
       return server;
     } catch (err) {
       throw new Error("[ERR_SERVER_SERVICE:leaveServer]: " + err);

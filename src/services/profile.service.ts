@@ -8,8 +8,10 @@ class ProfileService {
         id
       }
     });
+    
     if (!profile) return null
     return profile
   }
+
 }
 export const profileService = new ProfileService();

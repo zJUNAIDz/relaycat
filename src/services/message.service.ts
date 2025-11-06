@@ -1,5 +1,5 @@
-import { Channel, Member, Message } from "@/generated/prisma/client";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
+import { Channel, Member, Message } from "../generated/prisma/client";
 import { db } from "../lib/db";
 import { socketManager } from "../lib/socket-manager";
 
