@@ -3,10 +3,15 @@
     "strict": true,
     "jsx": "react-jsx",
     "jsxImportSource": "hono/jsx",
-    "paths": {
-      "@/*": [
-        "./*"
-      ],
-    }
+      "paths": {
+        "@/*": [
+          "./src/*"
+        ]
+      }
   },
+  //  "exclude": [
+  //   "node_modules",
+  //   "dist",
+  //   ".mastra"
+  // ]
 }
