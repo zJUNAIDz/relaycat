@@ -1,54 +1,44 @@
+import { S3Client } from "@aws-sdk/client-s3";
 import "dotenv/config";
 import { Context, Hono } from "hono";
-import { s3Service } from "../services/S3.service";
+import { policyMap } from "../config/uploads";
+import { S3Service } from "../services/S3.service";
 import { getEnv } from "../utils/env";
 
+const s3Service = new S3Service(new S3Client({
+  endpoint: getEnv("AWS_S3_ENDPOINT"),
+  region: getEnv("AWS_REGION"),
+  forcePathStyle: true,
+  credentials: {
+    accessKeyId: getEnv("AWS_ACCESS_KEY_ID"),
+    secretAccessKey: getEnv("AWS_SECRET_ACCESS_KEY"),
+  },
+}), getEnv("AWS_S3_BUCKET_NAME"))
+
 const s3Routes = new Hono();
-s3Routes.get("/uploadNewImage", async (c: Context) => {
+s3Routes.get("/uploads/:uploadType", async (c: Context) => {
   const { serverName, fileType } = c.req.query();
+
   if (!serverName || serverName.trim() === "") {
     return c.json({ error: "serverName is required" }, 400);
   }
 
-  if (!fileType || fileType.trim() === "")
+  if (!fileType || fileType.trim() === "") {
     return c.json({ error: "fileType is required" }, 400);
-
-  const fileExtension = fileType.split("/")[1];
-  if (!["png", "jpg", "jpeg", "webp", "pdf", "gif"].includes(fileExtension)) {
-    return c.json({ error: "fileType is not supported" }, 400);
-  }
-  const key = `${serverName}-${crypto.randomUUID()}.${fileExtension}`;
-  const bucketName = getEnv("AWS_S3_BUCKET_NAME");
-
-
-  const { data, error } = await s3Service.getUploadNewImageUrl(key, fileType);
-  if (error) return c.json({ error }, 500);
-  const signedUrl = data?.signedUrl;
-  if (!signedUrl) return c.json({ error: "Error getting signed url" }, 500);
-  return c.json({ signedUrl, key, bucketName });
-});
-
-s3Routes.get("/signed-url", async (c) => {
-  const { fileName, fileType } = c.req.query();
-  if (!fileName || fileName.trim() === "") {
-    return c.json({ error: "serverName is required" }, 400);
   }
 
-  if (!fileType || fileType.trim() === "")
-    return c.json({ error: "fileType is required" }, 400);
+  const uploadType = c.req.param("uploadType");
+  const policy = policyMap[uploadType];
 
-  const fileExtension = fileType.split("/")[1];
-  if (!["png", "jpg", "jpeg", "webp", "pdf", "gif"].includes(fileExtension)) {
-    return c.json({ error: "fileType is not supported" }, 400);
+  if (!policy) {
+    return c.json({ error: "Invalid upload type" }, 400);
   }
-  const key = `${fileName}-${crypto.randomUUID()}.${fileExtension}`;
-  const bucketName = getEnv("AWS_S3_BUCKET_NAME");
 
-
-  const { data, error } = await s3Service.getUploadNewImageUrl(key, fileType);
-  if (error) return c.json({ error }, 500);
-  const signedUrl = data?.signedUrl;
-  if (!signedUrl) return c.json({ error: "Error getting signed url" }, 500);
+  const response = await s3Service.generatePresignedUrl(serverName, fileType, policy);
+  if (!response.success) {
+    return c.json({ error: response.error }, 500);
+  }
+  const { signedUrl, bucketName, key } = response.data;
   return c.json({ signedUrl, key, bucketName });
 });
 

@@ -1,57 +1,72 @@
 import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import "dotenv/config";
-import { getEnv } from "../utils/env";
+import { generateErrorMessage } from "../utils/error-handler";
+import { UploadPolicy } from "../config/uploads";
 
-interface getSignedUrlResponse {
+type getSignedUrlResponse = {
+  success: true;
   data: {
-    signedUrl: string | null;
+    signedUrl: string;
     bucketName: string;
-  } | null;
-  success: boolean;
-  error: {
-    message: string;
-  } | null;
+    key: string
+  };
+  error: null;
+} | {
+  success: false;
+  data: null;
+  error: { message: string }
+};
+interface S3ServiceOptions {
+  allowedFileTypes?: string[];
+  signedUrlExpirationSeconds?: number;
 }
 
-class S3Service {
-  private s3Client = new S3Client({
-    region: getEnv("AWS_REGION"),
-    credentials: {
-      accessKeyId: getEnv("AWS_ACCESS_KEY_ID"),
-      secretAccessKey: getEnv("AWS_SECRET_ACCESS_KEY"),
-    },
-  });
-  private bucketName = getEnv("AWS_S3_BUCKET_NAME");
-  private static readonly ALLOWED_FILE_TYPES = [
-    "image/png",
-    "image/jpeg",
-    "image/gif",
-    "image/jpg",
-    "image/webp",
-  ];
+
+export class S3Service {
+
+  private ALLOWED_FILE_TYPES: string[];
+  private SIGNED_URL_EXPIRATION_SECONDS: number;
+  constructor(
+    private readonly s3Client: S3Client,
+    private readonly bucketName: string,
+    private readonly options: S3ServiceOptions = {},
+  ) {
+    this.ALLOWED_FILE_TYPES = this.options.allowedFileTypes ?? [
+      "image/png",
+      "image/jpeg",
+      "image/gif",
+      "image/jpg",
+      "image/webp",
+    ];
+    this.SIGNED_URL_EXPIRATION_SECONDS = this.options.signedUrlExpirationSeconds ?? 1 * 60 * 60; // 1 hour default
+  }
+
+
   /**
    * Returns a signed url for uploading a new image
-   * @param key  The key of the object
+   * @param fileName  The key of the object
    * @param fileType  The type of the file
    * @returns { data: {signedUrl:string, bucketName:string} | null, error: string | null }
-   * @example getUploadNewImageUrl("my-bucket", "my-key", "image/png") => { signedUrl: "https://my-bucket.s3.amazonaws.com/my-key", error: null } || { signedUrl: null, error: "File type not supported" }
+   * @example getUploadNewImageUrl("my-bucket", "my-key", "image/png") => { signedUrl: "https://amazonaws.com/my-bucket.s3/my-key", error: null } || { signedUrl: null, error: "File type not supported" }
    */
-  async getUploadNewImageUrl(
-    key: string,
-    fileType: string
+  async generatePresignedUrl(
+    fileName: string,
+    fileType: string,
+    policy: UploadPolicy
   ): Promise<getSignedUrlResponse> {
-    if (!S3Service.ALLOWED_FILE_TYPES.includes(fileType)) {
+    if (!policy.allowedFileTypes.includes(fileType)) {
       return {
         data: null,
         success: false,
         error: {
           message:
-            "File type not supported. must be one of these [png, jpeg, gif, jpg, webp] ",
+            `File type not supported. Must be one of these [${policy.allowedFileTypes.join(", ")}]`,
         },
       };
     }
     try {
+      const key = `${policy.pathPrefix}${fileName}-${crypto.randomUUID()}.${fileType.split("/")[1]}`;
       const command = new PutObjectCommand({
         Bucket: this.bucketName,
         Key: key,
@@ -59,26 +74,26 @@ class S3Service {
       });
 
       const signedUrl = await getSignedUrl(this.s3Client, command, {
-        expiresIn: 3600,
+        expiresIn: policy.signedUrlExpirationSeconds,
+
       });
       return {
         data: {
           signedUrl,
           bucketName: this.bucketName,
+          key
         },
         success: true,
         error: null,
       };
-    } catch (err) {
-      console.error("[getUploadUrl] ", err);
+    } catch (err: unknown) {
       return {
         data: null,
         success: false,
         error: {
-          message: `[s3Service/getUploadImageUrlError] getting signed url: ${err}`,
+          message: generateErrorMessage(err, "An unknown error occurred while generating the signed URL.", "[s3Service/getUploadImageUrlError]"),
         },
       };
     }
   }
-}
-export const s3Service = new S3Service();
+}  
