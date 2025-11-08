@@ -5,12 +5,12 @@ import { Form, FormControl, FormField, FormItem } from "@/shared/components/ui/f
 import { Input } from "@/shared/components/ui/input";
 import { UserAvatar } from "@/shared/components/user-avatar";
 import { useModal } from "@/shared/hooks/use-modal-store";
+import axiosClient from "@/shared/lib/axios-client";
 import { API_URL } from "@/shared/lib/constants";
 import { useAuth } from "@/shared/providers/auth-provider";
 import { MemberWithUser } from "@/shared/types";
 import { cn } from "@/shared/utils/cn";
 import { zodResolver } from "@hookform/resolvers/zod";
-import axios from "axios";
 import { Edit, Trash } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -55,7 +55,7 @@ export const ChatMessage = ({
 }: ChatMessageProps) => {
 
   const [isEditing, setIsEditing] = React.useState(false);
-  const { authToken, isLoading: isLoadingAuth, error } = useAuth()
+  const { isLoading: isLoadingAuth, error } = useAuth()
   const router = useRouter();
   const { onOpen } = useModal();
   const form = useForm<z.infer<typeof formSchema>>({
@@ -72,11 +72,7 @@ export const ChatMessage = ({
         url: `${API_URL}/messages/${id}`,
         query: socketQuery,
       });
-      await axios.patch(url, values, {
-        headers: {
-          Authorization: `Bearer ${authToken}`,
-        }
-      })
+      await axiosClient.patch(url, values)
 
       setIsEditing(false);
     } catch (err) {
@@ -115,7 +111,6 @@ export const ChatMessage = ({
   const isImage = !isPDF && fileUrl;
   if (isLoadingAuth) return <div>Loading...</div>;
   if (error) return <div>Error: {error}</div>;
-  if (!authToken) return <div>Unauthorized</div>;
   return (
     <div className="relative group flex items-center hover:bg-black/5 p-4 transition w-full">
       <div className="group flex gap-x-2 items-start w-full">

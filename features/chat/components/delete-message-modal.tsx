@@ -8,8 +8,7 @@ import {
   DialogTitle
 } from "@/shared/components/ui/dialog";
 import { useModal } from "@/shared/hooks/use-modal-store";
-import { useAuth } from "@/shared/providers/auth-provider";
-import axios from "axios";
+import axiosClient from "@/shared/lib/axios-client";
 import { useRouter } from "next/navigation";
 import qs from "query-string";
 import React from "react";
@@ -25,18 +24,13 @@ const DeleteMessageModal = () => {
   const router = useRouter()
   const isModalOpen = isOpen && type == "deleteMessage";
   const [isLoading, setIsLoading] = React.useState(false);
-  const { authToken } = useAuth();
   const deleteMessage = async () => {
     try {
       setIsLoading(true)
       const url = qs.stringifyUrl({
         url: apiUrl || "",
       })
-      await axios.delete(url, {
-        headers: {
-          Authorization: `Bearer ${authToken}`
-        }
-      })
+      await axiosClient.delete(url)
       onClose()
       router.refresh()
     } catch (err) {

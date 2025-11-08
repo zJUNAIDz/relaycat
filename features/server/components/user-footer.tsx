@@ -1,5 +1,4 @@
 "use client"
-import { ProfileModal } from "@/features/profile/components/profile-modal";
 import { Popover, PopoverContent, PopoverTrigger } from "@/shared/components/ui/popover";
 import { Skeleton } from "@/shared/components/ui/skeleton";
 import { UserAvatar } from "@/shared/components/user-avatar";
@@ -43,13 +42,7 @@ export const UserFooter = ({ name, username, imageUrl }: UserFooterProps) => {
         </PopoverTrigger>
         <PopoverContent className="ml-10 p-0 h-[530px] w-[350px] ">
           {
-            [<ProfileModal
-              key={1}
-              name={profile.name || "N/A"}
-              username={profile.name || "N/A"}
-              avatar={profile.image || DEFAULT_SERVER_IMAGE_URL}
-              bannerColor="#2FBC3C"
-            />]
+            //TODO: make profile component
           }
         </PopoverContent>
       </Popover>

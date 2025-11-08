@@ -1,3 +1,4 @@
+import axiosClient from "@/shared/lib/axios-client";
 import { useAuth } from "@/shared/providers/auth-provider";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import axios from "axios";
@@ -16,13 +17,11 @@ export const useChatQuery = ({
   paramKey,
   paramValue
 }: ChatQueryProps) => {
-  const { authToken, isLoading, error } = useAuth();
+  const { isLoading, session } = useAuth();
 
   const fetchMessages = async ({ pageParam = undefined }) => {
     // Add runtime validation (safety net)
-    if (!authToken) {
-      throw new Error("No authentication token available");
-    }
+
 
     const url = qs.stringifyUrl({
       url: apiUrl,
@@ -32,11 +31,7 @@ export const useChatQuery = ({
       }
     }, { skipNull: true });
 
-    const { data } = await axios.get(url, {
-      headers: {
-        "Authorization": `Bearer ${authToken}`
-      }
-    });
+    const { data } = await axiosClient.get(url);
 
     return data;
   };
@@ -53,7 +48,7 @@ export const useChatQuery = ({
     initialPageParam: undefined,
     getNextPageParam: (lastPage) => lastPage.nextCursor,
     refetchInterval: false,
-    enabled: !isLoading && !!authToken // Only enable when token is available
+    enabled: !isLoading && !!session// Only enable when token is available
   });
 
   return {

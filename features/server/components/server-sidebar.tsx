@@ -1,10 +1,10 @@
-import { auth } from "@/auth";
 import { ChannelList } from "@/features/channel/components/channels-list";
 import { ServerSearch } from "@/features/server/navigation/server-search";
+import { ChannelType, MemberRole } from "@/generated/prisma/client";
 import { RoleIcon } from "@/shared/components/icons";
 import { ScrollArea } from "@/shared/components/ui/scroll-area";
 import { Separator } from "@/shared/components/ui/separator";
-import { ChannelType, MemberRole } from "@/generated/prisma/client";
+import { authClient } from "@/shared/lib/auth-client";
 import { Hash, Mic, Video } from "lucide-react";
 import { redirect } from "next/navigation";
 import React from "react";
@@ -29,8 +29,10 @@ const roleIconMap = {
 }
 
 const ServerSidebar: React.FC<ServerSidebarProps> = async ({ serverId }) => {
-  const user = await auth().then((session) => session?.user);
-  if (!user) return redirect("/auth");
+  const { data, error } = await authClient.getSession();
+  if (error) {
+    return redirect("/auth");
+  }
 
   const server = await serverService.getServer(serverId, ["user", "channels"])
   if (!server) return redirect("/setup");
@@ -46,7 +48,7 @@ const ServerSidebar: React.FC<ServerSidebarProps> = async ({ serverId }) => {
   );
   const members = server?.members;
   const role = server.members.find(
-    (member) => member.userId === user.id
+    (member) => member.userId === data?.user.id
   )?.role;
   if (!role) return redirect("/auth");
   return (
@@ -105,7 +107,7 @@ const ServerSidebar: React.FC<ServerSidebarProps> = async ({ serverId }) => {
         />
         <ServerMembersList members={server.members} serverId={serverId} />
       </ScrollArea>
-      <UserFooter name={user.name || "Na"} username="NA" imageUrl={user.image} />
+      <UserFooter name={data?.user.name ?? "Na"} username="NA" imageUrl={data?.user.image ?? ""} />
     </div>
   );
 };

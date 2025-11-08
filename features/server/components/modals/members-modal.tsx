@@ -1,5 +1,6 @@
 "use client";
 
+import { MemberRole } from "@/generated/prisma/client";
 import { RoleIcon } from "@/shared/components/icons";
 import { Button } from "@/shared/components/ui/button";
 import {
@@ -22,12 +23,10 @@ import {
 import { ScrollArea } from "@/shared/components/ui/scroll-area";
 import { UserAvatar } from "@/shared/components/user-avatar";
 import { useModal } from "@/shared/hooks/use-modal-store";
+import axiosClient from "@/shared/lib/axios-client";
 import { API_URL } from "@/shared/lib/constants";
-import { useAuth } from "@/shared/providers/auth-provider";
 import { ServerWithMembersAndUser } from "@/shared/types";
 import { capitalizeFirstLetter } from "@/shared/utils/misc";
-import { MemberRole } from "@/generated/prisma/client";
-import axios from "axios";
 import { Check, Gavel, Loader2, MoreVertical, Shield } from "lucide-react";
 import { useRouter } from "next/navigation";
 import qs from "query-string";
@@ -44,7 +43,6 @@ const MembersModal = () => {
   } = useModal();
   const router = useRouter()
   const [loadingId, setLoadingId] = React.useState("")
-  const { authToken } = useAuth()
   const { server } = data as { server: ServerWithMembersAndUser };
   const isModalOpen = isOpen && type == "members";
   const membersCount = server?.members?.length || 0;
@@ -59,11 +57,7 @@ const MembersModal = () => {
           memberId
         }
       })
-      const { data } = await axios.delete(url, {
-        headers: {
-          Authorization: `Bearer ${authToken}`
-        }
-      })
+      const { data } = await axiosClient.delete(url)
       router.refresh()
       onOpen("members", { server: data.server })
     } catch (err) {
@@ -83,11 +77,7 @@ const MembersModal = () => {
           memberId
         }
       })
-      const { data } = await axios.patch<{ server: ServerWithMembersAndUser }>(url, { serverId: server.id, memberId, role }, {
-        headers: {
-          Authorization: `Bearer ${authToken}`
-        }
-      })
+      const { data } = await axiosClient.patch<{ server: ServerWithMembersAndUser }>(url, { serverId: server.id, memberId, role })
 
       router.refresh()
       onOpen("members", { server: data.server })

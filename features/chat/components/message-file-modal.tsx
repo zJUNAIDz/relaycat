@@ -15,9 +15,9 @@ import {
   FormItem
 } from "@/shared/components/ui/form";
 import { useModal } from "@/shared/hooks/use-modal-store";
+import axiosClient from "@/shared/lib/axios-client";
 // import { api } from "@/lib/api-client";
 import { API_URL, DEFAULT_SERVER_IMAGE_URL } from "@/shared/lib/constants";
-import { useAuth } from "@/shared/providers/auth-provider";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios, { AxiosError } from "axios";
 import { useRouter } from "next/navigation";
@@ -49,7 +49,6 @@ const MessageFileModal = () => {
   const [file, setFile] = React.useState<File | null>(null);
   const [isLoading, setIsLoading] = React.useState(false);
   const [errorMessage, setErrorMessage] = React.useState("");
-  const { authToken } = useAuth();
 
   const router = useRouter();
   const form = useForm({
@@ -88,15 +87,7 @@ const MessageFileModal = () => {
         return;
       }
 
-      const { data: { signedUrl, key, bucketName } } = await axios.get(
-        `${API_URL}/s3/uploads/server-icon?fileType=${file.type}`, {
-        withCredentials: true,
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${authToken}`,
-        }
-      }
-      );
+      const { data: { signedUrl, key, bucketName } } = await axiosClient.get(`${API_URL}/s3/uploads/server-icon?fileType=${file.type}`);
 
       if (!signedUrl || !key || !bucketName) {
         setErrorMessage("Error uploading image");
@@ -108,14 +99,7 @@ const MessageFileModal = () => {
       await axios.put(signedUrl, file, {
         headers: { "Content-Type": file.type },
       });
-      await axios.post(apiUrl, {
-        imageUrl,
-      }, {
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${authToken}`,
-        }
-      });
+      await axiosClient.post(apiUrl, { imageUrl });
       resetForm();
       router.refresh();
       onClose();

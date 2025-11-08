@@ -1,7 +1,7 @@
 import DefaultServerPage from "@/features/server/components/default-server-page";
+import axiosClient from "@/shared/lib/axios-client";
 import { API_URL } from "@/shared/lib/constants";
-import { getAuthTokenOnServer, getCurrentUser } from "@/shared/utils/server";
-import axios from "axios";
+import { getCurrentUser } from "@/shared/utils/server";
 import { redirect } from "next/navigation";
 import queryString from "query-string";
 interface ServerIdPageProps {
@@ -23,11 +23,7 @@ const ServerIdPage = async ({ params }: ServerIdPageProps) => {
       serverId,
     }
   })
-  const { data: { channels } } = await axios.get(url, {
-    headers: {
-      "Authorization": `Bearer ${await getAuthTokenOnServer()}`
-    }
-  })
+  const { data: { channels } } = await axiosClient.get(url)
   if (!channels) {
     console.log("No channels found")
     return <DefaultServerPage />;

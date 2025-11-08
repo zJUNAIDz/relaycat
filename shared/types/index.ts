@@ -1,4 +1,5 @@
-import { Channel, Member, Message, Server, User } from "@/generated/prisma/client";
+import { Channel, Member, Message, Server, } from "@/generated/prisma/client";
+import { User } from "@/shared/lib/auth-client";
 
 export type ServerWithMembersAndUser = Server & {
   members: (Member & { user: User })[];

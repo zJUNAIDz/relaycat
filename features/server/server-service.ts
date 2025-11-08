@@ -1,8 +1,8 @@
 import { Server } from "@/generated/prisma/client";
+import axiosClient from "@/shared/lib/axios-client";
 import { API_URL } from "@/shared/lib/constants";
 import { ServerWithMembersAndUser, ServerWithMembersOnly, ServerWithMembersUserAndChannels } from "@/shared/types";
-import { getAuthTokenOnServer } from "@/shared/utils/server";
-import axios, { AxiosResponse } from "axios";
+import { AxiosResponse } from "axios";
 import queryString from "query-string";
 
 class ServerService {
@@ -14,11 +14,7 @@ class ServerService {
   async getCurrentUserServers(): Promise<ServerWithMembersAndUser[] | Server[] | null> {
     try {
 
-      const { data: servers }: { data: Server[] } = await axios.get(`${this.API_URL}/servers`, {
-        headers: {
-          "Authorization": `Bearer ${await getAuthTokenOnServer()}`
-        }
-      });
+      const { data: servers }: { data: Server[] } = await axiosClient.get(`${this.API_URL}/servers`);
       if (!servers) return null
       return servers;
     } catch (err) {
@@ -42,19 +38,13 @@ class ServerService {
         },
       })
 
-      const token = await getAuthTokenOnServer();
       const { data: server }:
         AxiosResponse<
           | Server
           | ServerWithMembersOnly
           | ServerWithMembersAndUser
           | ServerWithMembersUserAndChannels
-        > = await axios.get(url, {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-
-        })
+        > = await axiosClient.get(url)
       return server
     } catch (err) {
       console.error("[SERVER_SERVICE:getServer] ", err)
@@ -63,14 +53,9 @@ class ServerService {
   }
   async joinServerByInviteCode(inviteCode: string): Promise<{ serverId: Server["id"] | null, error: string | null }> {
     try {
-      const token = await getAuthTokenOnServer();
       const endpoint = `${this.API_URL}/servers/join/invite`
 
-      const { data: { serverId, error } }: AxiosResponse<{ serverId: Server["id"] | null, error: string | null }> = await axios.patch(endpoint, { inviteCode }, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      })
+      const { data: { serverId, error } }: AxiosResponse<{ serverId: Server["id"] | null, error: string | null }> = await axiosClient.patch(endpoint, { inviteCode })
 
       if (!serverId) return { serverId: null, error }
       return { serverId, error: null }

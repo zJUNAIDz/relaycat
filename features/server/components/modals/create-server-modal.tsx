@@ -16,8 +16,8 @@ import {
 } from "@/shared/components/ui/form";
 import { Input } from "@/shared/components/ui/input";
 import { useModal } from "@/shared/hooks/use-modal-store";
+import axiosClient from "@/shared/lib/axios-client";
 import { API_URL, DEFAULT_SERVER_IMAGE_URL } from "@/shared/lib/constants";
-import { useAuth } from "@/shared/providers/auth-provider";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DialogDescription, DialogTitle } from "@radix-ui/react-dialog";
 import axios, { AxiosError } from "axios";
@@ -43,7 +43,6 @@ const CreateServerModal = () => {
   const [imageFile, setImageFile] = React.useState<File | null>(null);
   const [isLoading, setIsLoading] = React.useState(false);
   const [errorMessage, setErrorMessage] = React.useState("");
-  const { authToken } = useAuth();
 
   const router = useRouter();
   const form = useForm({
@@ -72,13 +71,9 @@ const CreateServerModal = () => {
           return;
         }
         if (values.imageUrl === DEFAULT_SERVER_IMAGE_URL) {
-          await axios.post(`${API_URL}/servers`, {
+          await axiosClient.post(`${API_URL}/servers`, {
             name: values.name,
             imageUrl: values.imageUrl,
-          }, {
-            headers: {
-              "Authorization": `Bearer ${authToken}`
-            }
           });
           resetForm();
           router.refresh();
@@ -94,14 +89,7 @@ const CreateServerModal = () => {
         setErrorMessage("No image found")
         return;
       }
-      const { data: { signedUrl, key, bucketName } } = await axios.get(
-        `${API_URL}/s3/uploads/server-icon?serverName=${form.getValues("name")}&fileType=${imageFile.type}`, {
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${authToken}`,
-        }
-      }
-      );
+      const { data: { signedUrl, key, bucketName } } = await axiosClient.get(`${API_URL}/s3/uploads/server-icon?serverName=${form.getValues("name")}&fileType=${imageFile.type}`);
 
       if (!signedUrl || !key || !bucketName) {
         setErrorMessage("Error uploading image");
@@ -113,14 +101,9 @@ const CreateServerModal = () => {
       await axios.put(signedUrl, imageFile, {
         headers: { "Content-Type": imageFile.type },
       });
-      await axios.post(`${API_URL}/servers`, {
+      await axiosClient.post(`${API_URL}/servers`, {
         name: values.name,
         imageUrl,
-      }, {
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${authToken}`,
-        }
       });
 
       resetForm();

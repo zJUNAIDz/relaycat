@@ -16,6 +16,7 @@ import {
 } from "@/shared/components/ui/form";
 import { Input } from "@/shared/components/ui/input";
 import { useModal } from "@/shared/hooks/use-modal-store";
+import axiosClient from "@/shared/lib/axios-client";
 import { API_URL, DEFAULT_SERVER_IMAGE_URL } from "@/shared/lib/constants";
 import { useAuth } from "@/shared/providers/auth-provider";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -43,7 +44,6 @@ const EditServerModal = () => {
   const { isOpen, onClose, type, data: { server } } = useModal();
   const isModalOpen = isOpen && type == "editServer";
   const [imageFile, setImageFile] = React.useState<File | null>(null);
-  const { authToken } = useAuth()
 
   const router = useRouter();
   const form = useForm({
@@ -58,29 +58,17 @@ const EditServerModal = () => {
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       if (!imageFile) {
-        await axios.patch(`${API_URL}/servers/${server?.id}`, {
+        await axiosClient.patch(`${API_URL}/servers/${server?.id}`, {
           name: values.name,
           imageUrl: values?.imageUrl,
-        },
-          {
-            headers: {
-              "Authorization": `Bearer ${authToken}`
-            }
-          }
-        );
+        });
         form.reset();
         router.refresh();
         window.location.reload();
         return;
       }
       //* Get signed url from api
-      const { data: { signedUrl, key, bucketName } } = await axios.get(
-        `${API_URL}/s3/uploads/server-icon?serverName=${form.getValues("name")}&fileType=${imageFile.type}`, {
-        headers: {
-          "Authorization": `Bearer ${authToken}`
-        }
-      }
-      );
+      const { data: { signedUrl, key, bucketName } } = await axiosClient.get(`${API_URL}/s3/uploads/server-icon?serverName=${form.getValues("name")}&fileType=${imageFile.type}`);
       //* Upload file to S3
       // await fetch(signedUrl, {
       //   method: "PUT",
@@ -90,15 +78,10 @@ const EditServerModal = () => {
       await axios.put(signedUrl, imageFile, {
         headers: { "Content-Type": imageFile.type },
       });
-      await axios.patch(`${API_URL}/servers/${server?.id}`, {
+      await axiosClient.patch(`${API_URL}/servers/${server?.id}`, {
         name: values.name,
         imageUrl: `https://s3.ap-south-1.amazonaws.com/${bucketName}/${key}`,
-      },
-        {
-          headers: {
-            "Authorization": `Bearer ${authToken}`
-          }
-        });
+      });
       form.reset();
       router.refresh();
       window.location.reload();

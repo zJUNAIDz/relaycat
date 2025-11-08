@@ -6,43 +6,16 @@ import { memberService } from "@/features/member/member-service";
 import { ChannelType } from "@/generated/prisma/client";
 import { MediaRoom } from "@/shared/components/media-room";
 import { API_URL, SOCKET_URL } from "@/shared/lib/constants";
-import { getAuthTokenOnServer, getCurrentUser } from "@/shared/utils/server";
+import { getCurrentUser } from "@/shared/utils/server";
 import { redirect } from "next/navigation";
 interface ChannelIdPageProps {
   params: any
 }
 
-
-// export async function generateMetadata({ params }: ChannelIdPageProps) {
-//   const { channelId } = await params
-//   // const channel = await db.channel.findUnique({
-//   //   where: {
-//   //     id: channelId,
-//   //   },
-//   //   include: {
-//   //     server: {
-//   //       select: {
-//   //         name: true,
-//   //       }
-//   //     }
-//   //   }
-//   // })
-
-//   return {
-//     title: "channel"
-//     // title: `#${channel?.name} | ${channel?.server.name} `,
-//   }
-// }
-
-
 const ChannelIdPage = async ({ params }: ChannelIdPageProps) => {
   const { serverId, channelId } = await params
   const user = await getCurrentUser();
   if (!user) {
-    return redirect("/auth")
-  }
-  const token = await getAuthTokenOnServer();
-  if (!token) {
     return redirect("/auth")
   }
   const { channel } = await channelService.getChannelById(channelId)
