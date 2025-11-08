@@ -17,23 +17,22 @@ const SocketContext = React.createContext<SocketContextType>({
 export const useSocket = () => React.useContext(SocketContext);
 
 export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
-  const { authToken } = useAuth();
   const [socket, setSocket] = React.useState<Socket | null>(null);
   const [isConnected, setIsConnected] = React.useState(false);
-  const prevAuthToken = React.useRef<string | null>(null);
+  const { session } = useAuth()
 
   React.useEffect(() => {
-    if (!authToken || authToken === prevAuthToken.current) return;
 
-    prevAuthToken.current = authToken;
-
+    if (!session) {
+      throw new Error("no user found for socket")
+    }
     console.log("Initializing socket connection...");
 
     const newSocket = ClientIO(SOCKET_URL, {
       path: "/",
       transports: ["websocket"],
       auth: {
-        token: authToken,
+        token: session.token,
       },
     });
 
@@ -61,7 +60,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
       newSocket.off("disconnect", disconnectHandler);
       newSocket.disconnect();
     };
-  }, [authToken]);
+  }, [session]);
 
   return (
     <SocketContext.Provider value={{ socket, isConnected }}>

@@ -1,16 +1,12 @@
-import { getAuthTokenOnServer } from "@/shared/utils/server";
 import { Member } from "@/generated/prisma/client";
+import axiosClient from "@/shared/lib/axios-client";
 import axios from "axios";
 
 class MemberService {
   private API_URL = process.env.NEXT_PUBLIC_API_URL!;
   async getMemberById(memberId: Member["id"]): Promise<{ member: Member, error: null } | { member: null, error: string }> {
     try {
-      const { data: { member, error } } = await axios.get(`${this.API_URL}/members/${memberId}`, {
-        headers: {
-          "Authorization": `Bearer ${await getAuthTokenOnServer()}`
-        }
-      })
+      const { data: { member, error } } = await axiosClient.get(`${this.API_URL}/members/${memberId}`)
       if (error) {
         return { member: null, error }
       }
@@ -25,11 +21,7 @@ class MemberService {
   }
   async getMemberByUserId(userId: Member["userId"]): Promise<{ member: Member, error: null } | { member: null, error: string }> {
     try {
-      const { data: { member, error } } = await axios.get(`${this.API_URL}/members/user/${userId}`, {
-        headers: {
-          "Authorization": `Bearer ${await getAuthTokenOnServer()}`
-        }
-      })
+      const { data: { member, error } } = await axios.get(`${this.API_URL}/members/user/${userId}`)
       if (error) {
         return { member: null, error }
       }
@@ -44,11 +36,7 @@ class MemberService {
   }
   async getMembersByServerId(serverId: string): Promise<{ members: Member[], error: null } | { member: null, error: string }> {
     try {
-      const { data: { members, error } } = await axios.get(`${this.API_URL}/members/server/${serverId}`, {
-        headers: {
-          "Authorization": `Bearer ${await getAuthTokenOnServer()}`
-        }
-      })
+      const { data: { members, error } } = await axiosClient.get(`${this.API_URL}/members/server/${serverId}`)
       if (error) {
         return { member: null, error }
       }

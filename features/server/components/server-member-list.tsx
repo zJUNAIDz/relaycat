@@ -1,9 +1,9 @@
 // "use client"
-import currentProfile from "@/shared/lib/current-profile";
 import { ServerWithMembersAndUser } from "@/shared/types";
 import { Server } from "@/generated/prisma/client";
 import { ServerMember } from "./server-member";
 import { ServerSection } from "./server-section";
+import { getCurrentUser } from "@/shared/utils/server";
 
 interface ServerMembersListProps {
   members: ServerWithMembersAndUser["members"]
@@ -11,8 +11,8 @@ interface ServerMembersListProps {
 }
 export const ServerMembersList: React.FC<ServerMembersListProps> = async ({ members, serverId }) => {
   //TODO: fix this
-  const { profile } = await currentProfile();
-  const profileId = profile?.id || "";
+  const user = await getCurrentUser();
+  const profileId = user?.id || "";
   //* Impossible edge case
   if (!members?.length) return <div>No members</div>
   return (
@@ -21,6 +21,7 @@ export const ServerMembersList: React.FC<ServerMembersListProps> = async ({ memb
         sectionType="members"
         label="Members"
       />
+      {/*TODO: Fix this  */}
       <div className="flex flex-col gap-1">
         {
           !!members?.length && members.map(member => (

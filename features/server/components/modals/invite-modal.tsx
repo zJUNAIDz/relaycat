@@ -10,9 +10,8 @@ import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
 import { useModal } from "@/shared/hooks/use-modal-store";
 import { useOrigin } from "@/shared/hooks/use-origin";
+import axiosClient from "@/shared/lib/axios-client";
 import { API_URL } from "@/shared/lib/constants";
-import { useAuth } from "@/shared/providers/auth-provider";
-import axios from "axios";
 import { Check, Copy, RefreshCw } from "lucide-react";
 import React from "react";
 
@@ -29,7 +28,6 @@ const InviteModal = () => {
     data: { server },
   } = useModal();
   const origin = useOrigin();
-  const { authToken } = useAuth();
   const isModalOpen = isOpen && type == "invite";
   const inviteUrl = `${origin}/invite/${server?.inviteCode}`;
 
@@ -41,12 +39,7 @@ const InviteModal = () => {
   const onGenerate = async () => {
     try {
       setIsLoading(true);
-      const response = await axios.patch(
-        `${API_URL}/servers/${server?.id}/invite-code`, {}, {
-        headers: {
-          "Authorization": `Bearer ${authToken}`,
-        }
-      });
+      const response = await axiosClient.patch(`${API_URL}/servers/${server?.id}/invite-code`);
       // router.refresh()
       onOpen("invite", { server: response.data.server });
     } catch (err) {

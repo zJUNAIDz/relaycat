@@ -1,6 +1,6 @@
 import ServerSidebar from "@/features/server/components/server-sidebar";
 import { serverService } from "@/features/server/server-service";
-import currentProfile from "@/shared/lib/current-profile";
+import { getCurrentUser } from "@/shared/utils/server";
 import { redirect } from "next/navigation";
 
 interface ServerIdLayoutProps {
@@ -13,8 +13,8 @@ const ServerIdLayout: React.FC<ServerIdLayoutProps> = async ({
   children,
   params,
 }) => {
-  const { profile } = await currentProfile();
-  if (!profile) return redirect("/auth");
+  const user = await getCurrentUser();
+  if (!user) return redirect("/auth");
 
   const { serverId } = await params;
   const server = await serverService.getServer(serverId)

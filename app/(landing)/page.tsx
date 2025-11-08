@@ -1,13 +1,11 @@
-import { getCurrentUser } from "@/shared/utils/server"
-import Landing from "./landing"
 import { Metadata } from "next";
+import Landing from "./landing";
 export const metadata: Metadata = {
   title: "RelayCat | Fast. Connected. Inspired."
 }
 const LandingPage = async () => {
-  const user = await getCurrentUser();
   return (
-    <Landing user={user} />
+    <Landing />
   )
 }
 export default LandingPage;

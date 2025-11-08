@@ -8,9 +8,8 @@ import {
   DialogTitle
 } from "@/shared/components/ui/dialog";
 import { useModal } from "@/shared/hooks/use-modal-store";
+import axiosClient from "@/shared/lib/axios-client";
 import { API_URL } from "@/shared/lib/constants";
-import { useAuth } from "@/shared/providers/auth-provider";
-import axios from "axios";
 import { useRouter } from "next/navigation";
 import qs from "query-string";
 import React from "react";
@@ -26,7 +25,6 @@ const LeaveServerModal = () => {
   const router = useRouter()
   const isModalOpen = isOpen && type == "leaveServer";
   const [isLoading, setIsLoading] = React.useState(false);
-  const { authToken } = useAuth();
   const leaveServer = async () => {
     try {
       setIsLoading(true)
@@ -36,13 +34,7 @@ const LeaveServerModal = () => {
           serverId: server?.id
         }
       })
-      await axios.patch(url, {
-        serverId: server?.id
-      }, {
-        headers: {
-          Authorization: `Bearer ${authToken}`
-        }
-      })
+      await axiosClient.patch(url, { serverId: server?.id })
       onClose()
       router.refresh()
       router.push("/")

@@ -1,17 +1,12 @@
 import { Channel } from "@/generated/prisma/client";
+import axiosClient from "@/shared/lib/axios-client";
 import { API_URL } from "@/shared/lib/constants";
-import { getAuth } from "@/shared/utils/server";
-import axios, { AxiosError, AxiosResponse } from "axios";
+import { AxiosError, AxiosResponse } from "axios";
 
 class ChannelService {
   async getChannelById(channelId: Channel["id"]) {
-    const { apiToken } = await getAuth()
     try {
-      const { data: { channel } }: AxiosResponse<{ channel: Channel | null }> = await axios.get(`${API_URL}/channels/${channelId}`, {
-        headers: {
-          "Authorization": `Bearer ${apiToken}`
-        }
-      })
+      const { data: { channel } }: AxiosResponse<{ channel: Channel | null }> = await axiosClient.get(`${API_URL}/channels/${channelId}`)
       if (!channel) {
         return { channel: null, error: "Channel not found" }
       }

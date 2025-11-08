@@ -1,53 +1,51 @@
 "use client"
-import { User } from "@/generated/prisma/client";
 import React from "react";
+import { authClient, Session, User } from "../lib/auth-client";
 
 type AuthContextType = {
-  authToken: string | null;
   user: User | null;
+  session: Session | null;
   isLoading: boolean;
   error: string | null;
 };
 
 const AuthContext = React.createContext<AuthContextType>({
-  authToken: null,
   user: null,
+  session: null,
   isLoading: true,
   error: null,
 });
 
-export const useAuth = () => React.useContext(AuthContext);
+export const useAuth = () => {
+
+  const ctx = React.useContext(AuthContext)
+  if (!ctx) throw new Error("useAuth must be used within AuthProvider")
+  return ctx;
+};
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const [authToken, setAuthToken] = React.useState<string | null>(null);
   const [user, setUser] = React.useState<User | null>(null);
+  const [session, setSession] = React.useState<Session | null>(null)
   const [isLoading, setIsLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
 
   React.useEffect(() => {
-    setIsLoading(true)
-    const fetchToken = async () => {
+    (async () => {
       try {
-        const response = await fetch('/api/get-token');
-        const data = await response.json();
-        if (data.success) {
-          setAuthToken(data.token);
-          setUser(data.user);
-        } else {
-          setError(data.error || "Failed to fetch token");
-        }
+        const { data, error } = await authClient.getSession() // better auth client
+        if (error) setError(error.message ?? "Error while fetching session")
+        setUser(data?.user ?? null);
+        setSession(data?.session ?? null)
       } catch (err) {
         setError("Network error - failed to fetch token");
       } finally {
         setIsLoading(false);
       }
-    };
-
-    fetchToken();
+    })();
   }, []);
 
   return (
-    <AuthContext.Provider value={{ authToken, user, isLoading, error }}>
+    <AuthContext.Provider value={{ user, session, isLoading, error }}>
       {children}
     </AuthContext.Provider>
   );

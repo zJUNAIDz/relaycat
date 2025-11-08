@@ -17,12 +17,11 @@ import {
 import { Input } from "@/shared/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/components/ui/select";
 import { useModal } from "@/shared/hooks/use-modal-store";
+import axiosClient from "@/shared/lib/axios-client";
 import { API_URL } from "@/shared/lib/constants";
-import { useAuth } from "@/shared/providers/auth-provider";
 import { capitalizeFirstLetter } from "@/shared/utils/misc";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DialogTitle } from "@radix-ui/react-dialog";
-import axios from "axios";
 import { useParams, useRouter } from "next/navigation";
 import qs from "query-string";
 import React from "react";
@@ -41,7 +40,6 @@ const EditChannelModal = () => {
   //* component beginning
   const { isOpen, onClose, type, data: { channel } } = useModal();
   const isModalOpen = isOpen && type == "editChannel";
-  const { authToken } = useAuth();
   const [isLoading, setIsLoading] = React.useState(false);
   const [errorMessage, setErrorMessage] = React.useState("");
   const { serverId } = useParams<{ serverId: string }>()
@@ -68,11 +66,7 @@ const EditChannelModal = () => {
 
       })
 
-      await axios.patch(url, { ...values, serverId }, {
-        headers: {
-          Authorization: `Bearer ${authToken}`
-        }
-      })
+      await axiosClient.patch(url, { ...values, serverId })
       form.reset()
       router.refresh()
       onClose()

@@ -2,7 +2,7 @@
 'use client';
 
 import { ModeToggle } from '@/shared/components/mode-toggle';
-import { logout } from '@/shared/lib/actions';
+import { authClient } from '@/shared/lib/auth-client';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { HiLogout } from 'react-icons/hi';
@@ -40,7 +40,7 @@ export default function LogOutPage() {
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              onClick={() => logout()}
+              onClick={() => authClient.signOut()}
               className="w-full bg-red-600 hover:bg-red-700 text-white py-3 rounded-lg font-medium transition-colors"
             >
               Sign out
