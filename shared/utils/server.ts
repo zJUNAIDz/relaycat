@@ -1,13 +1,12 @@
-import { auth } from "@/auth";
+import { authClient } from "@/shared/lib/auth-client";
 
-export const getAuthTokenOnServer = async () => {
-  const session = await auth()
-  const token = session?.apiToken
-  if (token) return token
-  throw new Error("No token found")
-};
 export const getCurrentUser = async () => {
-  const session = await auth()
-  if (!session) return null
-  return session.user
+  try {
+    const { data, error } = await authClient.getSession();
+    if (error) return null;
+    return data?.user || null;
+  } catch (err) {
+    console.warn("getCurrentUser: authClient.getSession() failed during build/prerender", err);
+    return null;
+  }
 }
