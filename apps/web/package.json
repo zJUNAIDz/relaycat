@@ -1,5 +1,5 @@
 {
-  "name": "relaycat",
+  "name": "web",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -8,6 +8,7 @@
     "standalone": "node .next/standalone/server.js",
     "start": "next start",
     "lint": "next lint",
+    "check-types": "next typegen && tsc --noEmit",
     "test": "jest"
   },
   "dependencies": {
