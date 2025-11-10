@@ -1,0 +1,17 @@
+{
+	"folders": [
+		{
+			"path": "relaycat-client"
+		},
+		{
+			"path": "relaycat-server"
+		}
+	],
+	"settings": {
+		"files.autoSave": "afterDelay",
+		"editor.fontSize": 14,
+		"WillLuke.nextjs.addTypesOnSave": true,
+		"WillLuke.nextjs.hasPrompted": true,
+		"postman.settings.dotenv-detection-notification-visibility": false
+	}
+}
