@@ -9,7 +9,7 @@ import {
 } from "@/shared/components/ui/dialog";
 import { useModal } from "@/shared/hooks/use-modal-store";
 import axiosClient from "@/shared/lib/axios-client";
-import { API_URL } from "@/shared/lib/constants";
+import { API_URL, DEFAULT_APP_PAGE } from "@/shared/lib/constants";
 import { useRouter } from "next/navigation";
 import qs from "query-string";
 import React from "react";
@@ -38,7 +38,7 @@ const DeleteServerModal = () => {
       await axiosClient.delete(url)
       onClose()
       router.refresh()
-      router.push("/setup")
+      router.push(DEFAULT_APP_PAGE)
     } catch (err) {
       console.error("[DELETE_SERVER_MODAL] ", err)
     } finally {

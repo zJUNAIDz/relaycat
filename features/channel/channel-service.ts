@@ -4,7 +4,7 @@ import { API_URL } from "@/shared/lib/constants";
 import { AxiosError, AxiosResponse } from "axios";
 
 class ChannelService {
-  async getChannelById(channelId: Channel["id"]) {
+  async getChannelById(channelId: string) {
     try {
       const { data: { channel } }: AxiosResponse<{ channel: Channel | null }> = await axiosClient.get(`${API_URL}/channels/${channelId}`)
       if (!channel) {

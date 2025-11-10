@@ -1,11 +1,12 @@
 "use client";
 
 import { authClient } from "@/shared/lib/auth-client";
+import { DEFAULT_APP_PAGE } from "@/shared/lib/constants";
 import { useAuth } from "@/shared/providers/auth-provider";
 import { motion } from "framer-motion";
 import { Inter, Space_Grotesk } from "next/font/google";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { HiArrowRight } from "react-icons/hi";
 
 const spaceGrotesk = Space_Grotesk({ subsets: ["latin"], weight: ["700"] });
@@ -16,8 +17,21 @@ const AuthScreen = ({ isLoginParam }: {
 }) => {
   const router = useRouter();
   const [isLogin, setIsLogin] = useState(isLoginParam);
-  const { user } = useAuth();
-  if (!user) router.replace("/setup");
+  const { user, isLoading } = useAuth();
+
+  useEffect(() => {
+    if (user) {
+      router.replace(DEFAULT_APP_PAGE);
+    }
+  }, [user, router]);
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (user) {
+    return null;
+  }
 
   return (
     <div className={`${inter.className} min-h-screen flex items-center justify-center bg-neutral-50 dark:bg-neutral-900`}>

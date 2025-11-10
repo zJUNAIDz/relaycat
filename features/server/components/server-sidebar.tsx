@@ -12,6 +12,7 @@ import { serverService } from "../server-service";
 import ServerHeader from "./server-header";
 import { ServerMembersList } from "./server-member-list";
 import { UserFooter } from "./user-footer";
+import { DEFAULT_APP_PAGE } from "@/shared/lib/constants";
 interface ServerSidebarProps {
   serverId: string;
 }
@@ -35,7 +36,7 @@ const ServerSidebar: React.FC<ServerSidebarProps> = async ({ serverId }) => {
   }
 
   const server = await serverService.getServer(serverId, ["user", "channels"])
-  if (!server) return redirect("/setup");
+  if (!server) return redirect(DEFAULT_APP_PAGE);
 
   const textChannels = server?.channels.filter(
     (channel) => channel.type === ChannelType.TEXT

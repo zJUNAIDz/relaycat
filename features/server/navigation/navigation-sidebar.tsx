@@ -1,16 +1,11 @@
 import { ModeToggle } from "@/shared/components/mode-toggle";
 import { ScrollArea } from "@/shared/components/ui/scroll-area";
 import { Separator } from "@/shared/components/ui/separator";
-import { getCurrentUser } from "@/shared/utils/server";
-import { redirect } from "next/navigation";
 import { serverService } from "../server-service";
 import { NavigationAction } from "./navigation-action";
 import NavigationItem from "./navigation-item";
 
 const NavigationSidebar = async () => {
-  const user = await getCurrentUser();
-  if (!user) return redirect("/auth");
-
   const servers = await serverService.getCurrentUserServers();
 
   return (

@@ -3,6 +3,7 @@
 
 import { ModeToggle } from '@/shared/components/mode-toggle';
 import { authClient } from '@/shared/lib/auth-client';
+import { DEFAULT_APP_PAGE } from '@/shared/lib/constants';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { HiLogout } from 'react-icons/hi';
@@ -46,7 +47,7 @@ export default function LogOutPage() {
               Sign out
             </motion.button>
 
-            <Link href="/setup">
+            <Link href={DEFAULT_APP_PAGE}>
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
