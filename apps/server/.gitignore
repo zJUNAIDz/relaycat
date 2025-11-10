@@ -1,0 +1,8 @@
+# deps
+node_modules/
+.env
+.env.*
+.vscode/
+settings.json
+generated/
+dist/ 
