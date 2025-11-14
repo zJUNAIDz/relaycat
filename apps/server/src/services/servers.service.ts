@@ -1,213 +1,310 @@
-import { v4 as uuidv4 } from "uuid";
-import { ServerWithMembersAndUser, ServerWithMembersOnly, ServerWithMembersUserAndChannels } from "../../types";
-import { MemberRole, Prisma, Server, User } from "../generated/prisma/client";
-import { db } from "../lib/db";
-interface CreateServerPayload {
-  profile: {
-    id: string;
-    name: string;
-    email: string;
-    imageUrl: string;
-  };
-  serverName: string;
-  serverImageUrl: string;
-}
+import { db } from "@/db";
+// import { db as dbb } from "@/lib/db";
+import { User } from "@/db/schema/auth-schema";
+import { channels, ChannelType } from "@/db/schema/channel";
+import { MemberRole, members } from "@/db/schema/member";
+import { ServerInput, servers, type Server } from "@/db/schema/server";
+import { and, eq, not, notExists } from "drizzle-orm";
 
 class ServersService {
-  async createServer({
-    profile,
-    serverName,
-    serverImageUrl,
-  }: CreateServerPayload) {
+  async createServer(
+    userId: string,
+    serverData: ServerInput
+  ): Promise<Server | null> {
     try {
-      if (!serverName || !serverImageUrl) {
-        throw new Error("Name and image URL are required");
-      }
-      // Create server
-      const server: Server | null = await db.server.create({
-        data: {
-          name: serverName,
-          userId: profile.id,
-          image: serverImageUrl,
-          inviteCode: uuidv4(),
-          channels: {
-            create: [{ name: "general", userId: profile.id }],
-          },
-          members: {
-            create: [{ userId: profile.id, role: MemberRole.ADMIN }],
-          },
-        },
-      });
-      if (!server) {
-        throw new Error("Failed to create server");
-      }
-      return server;
+      const server: Server | null = await db
+        .transaction(async (tx) => {
+          const [newServer] = await tx
+            .insert(servers)
+            .values(serverData)
+            .returning();
+          await tx.insert(channels).values({
+            name: "#general",
+            serverId: newServer.id,
+            type: ChannelType.TEXT,
+          });
+          await tx.insert(members).values({
+            userId,
+            role: MemberRole.ADMIN,
+            serverId: newServer.id,
+          });
+          return newServer;
+        })
+        .catch((err) => {
+          console.error("[ERR_SERVERS_SERVICE:createServer]: ", err);
+          return null;
+        });
+
+      return server ?? null;
     } catch (err) {
       throw new Error("Internal Server Error: " + err);
     }
   }
 
-  async leaveServer({
-    serverId,
-    userId,
-  }: {
-    serverId: string;
-    userId: string;
-  }): Promise<Server | null> {
+  async leaveServer(serverId: string, userId: string): Promise<boolean> {
     try {
-      const server: Server | null = await db.server.update({
-        where: {
-          id: serverId,
-          userId: {
-            not: userId,
-          },
-          members: {
-            some: {
-              userId: userId,
-            },
-          },
-        },
-        data: {
-          members: {
-            deleteMany: {
-              userId: userId,
-            },
-          },
-        },
-      });
-      if (!server) return null
-      return server;
+      // const server: Server | null = await dbb.server.update({
+      //   where: {
+      //     id: serverId,
+      //     userId: {
+      //       not: userId,
+      //     },
+      //     members: {
+      //       some: {
+      //         userId: userId,
+      //       },
+      //     },
+      //   },
+      //   data: {
+      //     members: {
+      //       deleteMany: {
+      //         userId: userId,
+      //       },
+      //     },
+      //   },
+      // });
+      const member = await db.delete(members).where(
+        and(
+          eq(members.serverId, serverId), //* Target the server
+          eq(members.userId, userId), //* Make sure the user is a member
+          not(eq(members.role, MemberRole.ADMIN)) //* Prevent admin from leaving
+        )
+      );
+      // If no rows were deleted, the user was not a member or was the admin
+      if (member.rowCount === 0) {
+        return false;
+      }
+      return true;
     } catch (err) {
       throw new Error("[ERR_SERVER_SERVICE:leaveServer]: " + err);
     }
   }
 
-  async getServer(serverId: Server["id"], userId: User["id"], options: ["members"]): Promise<{ server: ServerWithMembersOnly | null, error: string | null }>;
-  async getServer(serverId: Server["id"], userId: User["id"], options: ["user", "members"] | ["user"]): Promise<{ server: ServerWithMembersAndUser | null, error: string | null }>;
-  async getServer(serverId: Server["id"], userId: User["id"], options: ["user", "members", "channels"] | ["user", "channels"]): Promise<{ server: ServerWithMembersUserAndChannels | null, error: string | null }>
-  async getServer(serverId: Server["id"], userId: User["id"], options: string[]): Promise<{ server: Server | null, error: string | null }>;
+  // async getServer(
+  //   serverId: Server["id"],
+  //   userId: User["id"],
+  //   options: ["members"]
+  // ): Promise<{ server: ServerWithMembersOnly | null; error: string | null }>;
+  // async getServer(
+  //   serverId: Server["id"],
+  //   userId: User["id"],
+  //   options: ["user", "members"] | ["user"]
+  // ): Promise<{ server: ServerWithMembersAndUser | null; error: string | null }>;
+  // async getServer(
+  //   serverId: Server["id"],
+  //   userId: User["id"],
+  //   options: ["user", "members", "channels"] | ["user", "channels"]
+  // ): Promise<{
+  //   server: ServerWithMembersUserAndChannels | null;
+  //   error: string | null;
+  // }>;
+  // async getServer(
+  //   serverId: Server["id"],
+  //   userId: User["id"],
+  //   options: string[]
+  // ): Promise<{ server: Server | null; error: string | null }>;
 
-  async getServer(serverId: Server["id"], userId: User["id"], options: string[]): Promise<{
-    server: ServerWithMembersAndUser | ServerWithMembersOnly | Server | null,
-    error: string | null
-  }> {
+  async getServer(serverId: Server["id"], userId: User["id"]) {
     try {
-      const server: ServerWithMembersAndUser | Server | null = await db.server.findUnique({
-        where: {
-          id: serverId,
-          members: {
-            some: {
-              userId
-            }
+      // const server: ServerWithMembersAndUser | Server | null =
+      //   await dbb.server.findUnique({
+      //     where: {
+      //       id: serverId,
+      //       members: {
+      //         some: {
+      //           userId,
+      //         },
+      //       },
+      //     },
+      //     include: {
+      //       members:
+      //         options.includes("members") || options.includes("user")
+      //           ? {
+      //               include: {
+      //                 user: options.includes("user") ? true : false,
+      //               },
+      //               orderBy: {
+      //                 role: "asc",
+      //               },
+      //             }
+      //           : false,
+      //       channels: options.includes("channels") ? true : false,
+      //     },
+      //   });
+      const rows = await db
+        .select()
+        .from(servers)
+        .leftJoin(members, eq(members.serverId, servers.id))
+        .leftJoin(channels, eq(channels.serverId, servers.id))
+        .where(and(eq(servers.id, serverId), eq(members.userId, userId)));
+      if (rows.length === 0) {
+        return null;
+      }
+      const grouped = rows.reduce(
+        (acc, row) => {
+          const server = row.servers;
+          const member = row.members;
+          const channel = row.channels;
+
+          if (!acc[server.id]) {
+            acc[server.id] = {
+              ...server,
+              members: [],
+              channels: [],
+            };
           }
+          acc[server.id].members.push(member);
+          acc[server.id].channels.push(channel);
+          return acc;
         },
-        include: {
-          members: (options.includes("members") || options.includes("user")) ? {
-            include: {
-              user: options.includes("user") ? true : false,
-            },
-            orderBy: {
-              role: "asc",
-            }
-          } : false,
-          channels: (options.includes("channels")) ? true : false
-        }
-      })
-      if (!server) {
-        return { server: null, error: `server with id: ${serverId} not found` }
-      }
-      return { server, error: null }
+        {} as Record<string, any>
+      );
+      return Object.values(grouped)[0];
     } catch (err) {
-      if (err instanceof Prisma.PrismaClientKnownRequestError) {
-        return { server: null, error: err.message }
-      }
-      throw new Error("[ERR_SERVER_SERVICE:getServerById] " + err)
+      throw new Error("[ERR_SERVER_SERVICE:getServer] " + err);
     }
   }
 
-  async getServersByUserId(userId: string, options: string[]) {
+  async getServersByUserId(userId: string) {
     try {
-      const servers = await db.server.findMany({
-        where: {
-          members: {
-            some: {
-              userId
-            }
-          },
-        },
-      })
-      if (!servers) return null
-      return servers
+      const rows = await db
+        .select({
+          server: servers,
+        })
+        .from(servers)
+        .innerJoin(members, eq(servers.id, members.serverId))
+        .where(eq(members.userId, userId))
+        .catch((err) => {
+          console.error("[ERR_SERVER_SERVICE:getServerByUserId] ", err);
+          return [];
+        });
+      // const grouped = rows.reduce(
+      //   (acc, row) => {
+      //     const server = row.servers;
+      //     const member = row.members;
+
+      //     if (!acc[server.id]) {
+      //       acc[server.id] = {
+      //         ...server,
+      //         members: [],
+      //       };
+      //     }
+
+      //     acc[server.id].members.push(member);
+      //     return acc;
+      //   },
+      //   {} as Record<string, any>
+      // );
+      // return Object.values(grouped);
+      return rows.map((row) => row.server);
     } catch (err) {
-      throw new Error("[ERR_SERVER_SERVICE:getServerByUserId] " + err)
+      throw new Error("[ERR_SERVER_SERVICE:getServerByUserId] " + err);
     }
   }
 
-  async updateServerInviteCode({ serverId, userId, inviteCode }: { serverId: string, userId: string, inviteCode: string }) {
+  async updateServerInviteCode(
+    serverId: string,
+    userId: string,
+    inviteCode: string
+  ) {
     try {
-      const server: Server = await db.server.update({
-        where: {
-          id: serverId,
+      await db
+        .update(servers)
+        .set({ inviteCode })
+        .where(eq(servers.id, serverId))
+        .catch((err) => {
+          console.error(
+            "[ERR_SERVER_SERVICE:updateServerInviteCode - update] ",
+            err
+          );
+          return false;
+        });
+      return true;
+    } catch (err) {
+      console.error("[ERR_SERVER_SERVICE:updateServerInviteCode] " + err);
+      return false;
+    }
+  }
+
+  async joinServerFromInviteCode(
+    userId: string,
+    inviteCode: string
+  ): Promise<boolean> {
+    try {
+      const success = await db.transaction(async (tx) => {
+        //* check if this user have permis
+        const server = await tx
+          .select({ id: servers.id })
+          .from(servers)
+          .where(
+            and(
+              eq(servers.inviteCode, inviteCode),
+              notExists(
+                tx
+                  .select()
+                  .from(members)
+                  .where(
+                    and(
+                      eq(members.id, userId),
+                      eq(servers.id, members.serverId)
+                    )
+                  )
+              )
+            )
+          )
+          .limit(1);
+        if (server.length === 0) return false; // user exists or invalid code
+        await tx.insert(members).values({
+          serverId: server[0].id,
           userId,
-        },
-        data: {
-          inviteCode,
-        },
+        });
+
+        return true;
       });
-      if (!server) return null
-      return server
+      return success;
     } catch (err) {
-      throw new Error("[ERR_SERVER_SERVICE:updateServerInviteCode] " + err)
+      console.error("[ERR_SERVER_SERVICE:joinServerFromInviteCode] ", err);
+      return false;
     }
   }
 
-  async joinServerFromInviteCode(userId: string, inviteCode: string) {
+  async editServer(serverId: string, data: Partial<Server>) {
     try {
-      const { id } = await db.server.update({
-        where: {
-          inviteCode,
-          members: {
-            none: {
-              userId
-            }
-          }
-        },
-        data: {
-          members: {
-            create: {
-              userId
-            }
-          }
-        },
-        select: {
-          id: true
-        }
-      })
-      return id
-    } catch (err) {
-      return null
-    }
-  }
-
-
-  async editServer(serverId: Server["id"], name: string, imageUrl: string): Promise<{ server: Server | null, error: string | null }> {
-    try {
-      const server = await db.server.update({
-        where: {
-          id: serverId,
-        },
-        data: {
-          name,
-          image: imageUrl,
-        },
-      })
+      const server = await db
+        .update(servers)
+        .set(data)
+        .where(eq(servers.id, serverId))
+        .returning();
       if (!server) {
-        return { server: null, error: "server not found" }
+        return { server: null, error: "server not found" };
       }
-      return { server, error: null }
+      return { server, error: null };
     } catch (err) {
-      console.error("[ERR_SERVER_SERVICE:editServer] ", err)
-      return { server: null, error: "server error" }
+      console.error("[ERR_SERVER_SERVICE:editServer] ", err);
+      return { server: null, error: "server error" };
+    }
+  }
+  async deleteServer(serverId: string, userId: string) {
+    try {
+      //* check if userId is Member and Admin of server serverId
+      const member = await db
+        .select()
+        .from(members)
+        .where(
+          and(
+            eq(members.serverId, serverId),
+            eq(members.userId, userId),
+            eq(members.role, MemberRole.ADMIN)
+          )
+        );
+      if (member.length === 0) {
+        return false; //* not found or not authorized
+      }
+      await db.delete(servers).where(eq(servers.id, serverId));
+      return true;
+    } catch (err) {
+      console.error("[ERR_SERVER_SERVICE:deleteServer] ", err);
+      return false;
     }
   }
 }
