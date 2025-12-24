@@ -1,135 +1,166 @@
-# Turborepo starter
+# RelayCat 🐱
 
-This Turborepo starter is maintained by the Turborepo core team.
+RelayCat is a full-stack, real-time chat application inspired by Discord. It allows users to create servers, join channels (text, audio, video), and communicate in real-time with friends and communities. Built with modern web technologies for high performance and scalability.
 
-## Using this example
+## ✨ Features
 
-Run the following command:
+-   **Real-time Messaging**: Instant messaging powered by Socket.io.
+-   **Servers & Channels**: Create and customize servers.
+-   **Voice & Video Calls**: High-quality voice and video chat integration using LiveKit.
+-   **Role-Based Access Control**: Manage permissions with roles (Guest, Moderator, Admin).
+-   **Direct Messages**: Private 1:1 conversations with other users.
+-   **File Sharing**: Upload and share images, PDFs, and other files (powered by AWS S3).
+<!-- -   **Emoji Reactions**: React to messages with emojis. -->
+-   **Invite System**: Generate unique invite codes to grow your community.
+-   **Authentication**: Secure login via Google (and other providers) using Better Auth.
+-   **Responsive Design**: Fully responsive UI built with Tailwind CSS and Shadcn UI.
+-   **Dark/Light Mode**: Themed interface for comfortable viewing.
 
-```sh
-npx create-turbo@latest
+## 🛠️ Tech Stack
+
+### Frontend (`apps/web`)
+-   **Framework**: [Next.js 15](https://nextjs.org/) (App Router)
+-   **Language**: TypeScript
+-   **Styling**: [Tailwind CSS](https://tailwindcss.com/), [Shadcn UI](https://shadcn.com/), [Lucide React](https://lucide.dev/) (Icons)
+-   **State Management**: [Zustand](https://github.com/pmndrs/zustand), [TanStack Query](https://tanstack.com/query/latest)
+-   **Real-time**: [Socket.io Client](https://socket.io/), [LiveKit](https://livekit.io/) (WebRTC)
+-   **Forms**: React Hook Form, Zod
+-   **Animations**: Framer Motion
+
+### Backend (`apps/server`)
+-   **Runtime**: [Bun](https://bun.sh/)
+-   **Framework**: [Hono](https://hono.dev/)
+-   **Language**: TypeScript
+-   **Database**: PostgreSQL
+-   **ORM**: [Drizzle ORM](https://orm.drizzle.team/)
+-   **Authentication**: [Better Auth](https://better-auth.com/)
+-   **Real-time**: Socket.io
+-   **Storage**: AWS S3 (via AWS SDK)
+-   **Validation**: Zod
+
+### Monorepo & Tooling
+-   **Monorepo Manager**: [TurboRepo](https://turbo.build/)
+-   **Package Manager**: Bun
+
+## 🚀 Getting Started
+
+Follow these instructions to set up the project locally.
+
+### Prerequisites
+
+-   [Node.js](https://nodejs.org/) (v18+)
+-   [Bun](https://bun.sh/) (v1.0+)
+-   [Docker](https://www.docker.com/) & Docker Compose
+
+### Installation
+
+1.  **Clone the repository**
+    ```bash
+    git clone https://github.com/zJUNAIDz/relaycat.git
+    cd relaycat
+    ```
+
+2.  **Install dependencies**
+    ```bash
+    bun install
+    ```
+
+3.  **Environment Setup**
+
+    Create `.env` files in `apps/web` and `apps/server` based on the examples.
+
+    **`apps/web/.env`**:
+    ```env
+    NEXT_PUBLIC_SITE_URL=http://localhost:3000
+    NEXT_PUBLIC_API_URL=http://localhost:8000
+    
+    # LiveKit (for Voice/Video)
+    NEXT_PUBLIC_LIVEKIT_URL=wss://your-project.livekit.cloud
+    LIVEKIT_API_KEY=your_api_key
+    LIVEKIT_API_SECRET=your_api_secret
+    ```
+
+    **`apps/server/.env`**:
+    ```env
+    PORT=8000
+    CLIENT_URL=http://localhost:3000
+    DATABASE_URL=postgresql://postgres:postgres@localhost:5432/relaycat
+
+    # Authentication (Better Auth)
+    BETTER_AUTH_SECRET=your_secret_key
+    BETTER_AUTH_URL=http://localhost:8000 # or your api url
+    GOOGLE_CLIENT_ID=your_google_client_id
+    GOOGLE_CLIENT_SECRET=your_google_client_secret
+
+    # AWS S3 (for Uploads)
+    AWS_ACCESS_KEY_ID=your_access_key
+    AWS_SECRET_ACCESS_KEY=your_secret_key
+    AWS_REGION=your_region
+    AWS_BUCKET_NAME=your_bucket_name
+    ```
+
+4.  **Start Infrastructure (Docker)**
+
+    Use the provided `docker-compose.yml` to start the PostgreSQL database.
+
+    Run the database:
+    ```bash
+    docker-compose up -d
+    ```
+
+5.  **Database Migration**
+
+    Push the Drizzle schema to the database.
+
+    ```bash
+    # From root or apps/server
+    cd apps/server
+    bun run db:push
+    ```
+
+6.  **Run the Application**
+
+    Start both the frontend and backend in development mode using Turbo.
+
+    ```bash
+    # From root
+    bun run dev
+    ```
+
+    -   Frontend: [http://localhost:3000](http://localhost:3000)
+    -   Backend: [http://localhost:8000](http://localhost:8000)
+
+## 📂 Project Structure
+
+```
+relaycat/
+├── apps/
+│   ├── server/          # Hono backend API, Socket.io & Better Auth
+│   │   ├── src/
+│   │   │   ├── db/      # Drizzle ORM schema & config
+│   │   │   ├── routes/  # API routes
+│   │   │   ├── socket/  # Socket.io handlers
+│   │   │   └── ...
+│   └── web/             # Next.js frontend (Client)
+│       ├── app/         # App Router pages & layouts
+│       ├── components/  # Reusable UI components
+│       ├── features/    # Feature-based modules (chat, server, etc.)
+│       └── ...
+├── packages/            # Shared packages (config, ui, etc.)
+├── turbo.json           # TurboRepo configuration
+└── package.json         # Root dependencies
 ```
 
-## What's inside?
+## 🤝 Contributing
 
-This Turborepo includes the following packages/apps:
+Contributions are welcome! Please feel free to submit a Pull Request.
 
-### Apps and Packages
+1.  Fork the project
+2.  Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3.  Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4.  Push to the branch (`git push origin feature/AmazingFeature`)
+5.  Open a Pull Request
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
+## 📄 License
 
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
-
-### Utilities
-
-This Turborepo has some additional tools already setup for you:
-
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
-
-### Build
-
-To build all apps and packages, run the following command:
-
-```
-cd my-turborepo
-
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build
-yarn dlx turbo build
-pnpm exec turbo build
-```
-
-You can build a specific package by using a [filter](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters):
-
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build --filter=docs
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build --filter=docs
-yarn exec turbo build --filter=docs
-pnpm exec turbo build --filter=docs
-```
-
-### Develop
-
-To develop all apps and packages, run the following command:
-
-```
-cd my-turborepo
-
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev
-yarn exec turbo dev
-pnpm exec turbo dev
-```
-
-You can develop a specific package by using a [filter](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters):
-
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev --filter=web
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev --filter=web
-yarn exec turbo dev --filter=web
-pnpm exec turbo dev --filter=web
-```
-
-### Remote Caching
-
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
-
-Turborepo can use a technique known as [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
-
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
-
-```
-cd my-turborepo
-
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo login
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo login
-yarn exec turbo login
-pnpm exec turbo login
-```
-
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
-
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
-
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo link
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo link
-yarn exec turbo link
-pnpm exec turbo link
-```
-
-## Useful Links
-
-Learn more about the power of Turborepo:
-
-- [Tasks](https://turborepo.com/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.com/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.com/docs/reference/configuration)
-- [CLI Usage](https://turborepo.com/docs/reference/command-line-reference)
+This project is licensed under the MIT License.
