@@ -13,15 +13,39 @@ class ChannelService {
     return ChannelService.instance;
   }
 
-  async createChannel(channel: ChannelInput): Promise<Channel | null> {
+  async createChannel(
+    channel: ChannelInput,
+    userId: string,
+  ): Promise<Channel | null> {
     try {
-      const [newChannel] = await db
-        .insert(channels)
-        .values(channel)
-        .returning();
-      if (!newChannel) {
-        return null;
-      }
+      const newChannel = await db.transaction(async (tx) => {
+        const [server] = await tx
+          .select()
+          .from(servers)
+          .where(eq(servers.id, channel.serverId))
+          .limit(1);
+        if (!server) {
+          return null;
+        }
+        const [member] = await tx
+          .select()
+          .from(members)
+          .where(
+            and(eq(members.serverId, server.id), eq(members.userId, userId)),
+          )
+          .limit(1);
+        if (!member) {
+          return null;
+        }
+        const [newChannel] = await tx
+          .insert(channels)
+          .values(channel)
+          .returning();
+        if (!newChannel) {
+          return null;
+        }
+        return newChannel;
+      });
       return newChannel;
     } catch (err) {
       return null;
