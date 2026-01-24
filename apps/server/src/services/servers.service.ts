@@ -1,15 +1,18 @@
 import { db } from "@/db";
-// import { db as dbb } from "@/lib/db";
-import { User } from "@/db/schema/auth-schema";
 import { channels, ChannelType } from "@/db/schema/channel";
 import { MemberRole, members } from "@/db/schema/member";
-import { ServerInput, servers, type Server } from "@/db/schema/server";
+import {
+  ServerInput,
+  servers,
+  ServerWithMembersAndChannels,
+  type Server,
+} from "@/db/schema/server";
 import { and, eq, not, notExists } from "drizzle-orm";
 
 class ServersService {
   async createServer(
     userId: string,
-    serverData: ServerInput
+    serverData: ServerInput,
   ): Promise<Server | null> {
     try {
       const server: Server | null = await db
@@ -43,32 +46,12 @@ class ServersService {
 
   async leaveServer(serverId: string, userId: string): Promise<boolean> {
     try {
-      // const server: Server | null = await dbb.server.update({
-      //   where: {
-      //     id: serverId,
-      //     userId: {
-      //       not: userId,
-      //     },
-      //     members: {
-      //       some: {
-      //         userId: userId,
-      //       },
-      //     },
-      //   },
-      //   data: {
-      //     members: {
-      //       deleteMany: {
-      //         userId: userId,
-      //       },
-      //     },
-      //   },
-      // });
       const member = await db.delete(members).where(
         and(
           eq(members.serverId, serverId), //* Target the server
           eq(members.userId, userId), //* Make sure the user is a member
-          not(eq(members.role, MemberRole.ADMIN)) //* Prevent admin from leaving
-        )
+          not(eq(members.role, MemberRole.ADMIN)), //* Prevent admin from leaving
+        ),
       );
       // If no rows were deleted, the user was not a member or was the admin
       if (member.rowCount === 0) {
@@ -80,57 +63,8 @@ class ServersService {
     }
   }
 
-  // async getServer(
-  //   serverId: Server["id"],
-  //   userId: User["id"],
-  //   options: ["members"]
-  // ): Promise<{ server: ServerWithMembersOnly | null; error: string | null }>;
-  // async getServer(
-  //   serverId: Server["id"],
-  //   userId: User["id"],
-  //   options: ["user", "members"] | ["user"]
-  // ): Promise<{ server: ServerWithMembersAndUser | null; error: string | null }>;
-  // async getServer(
-  //   serverId: Server["id"],
-  //   userId: User["id"],
-  //   options: ["user", "members", "channels"] | ["user", "channels"]
-  // ): Promise<{
-  //   server: ServerWithMembersUserAndChannels | null;
-  //   error: string | null;
-  // }>;
-  // async getServer(
-  //   serverId: Server["id"],
-  //   userId: User["id"],
-  //   options: string[]
-  // ): Promise<{ server: Server | null; error: string | null }>;
-
-  async getServer(serverId: Server["id"], userId: User["id"]) {
+  async getServer(serverId: Server["id"], userId: string) {
     try {
-      // const server: ServerWithMembersAndUser | Server | null =
-      //   await dbb.server.findUnique({
-      //     where: {
-      //       id: serverId,
-      //       members: {
-      //         some: {
-      //           userId,
-      //         },
-      //       },
-      //     },
-      //     include: {
-      //       members:
-      //         options.includes("members") || options.includes("user")
-      //           ? {
-      //               include: {
-      //                 user: options.includes("user") ? true : false,
-      //               },
-      //               orderBy: {
-      //                 role: "asc",
-      //               },
-      //             }
-      //           : false,
-      //       channels: options.includes("channels") ? true : false,
-      //     },
-      //   });
       const rows = await db
         .select()
         .from(servers)
@@ -140,11 +74,12 @@ class ServersService {
       if (rows.length === 0) {
         return null;
       }
-      const grouped = rows.reduce(
+
+      const grouped: Record<string, ServerWithMembersAndChannels> = rows.reduce(
         (acc, row) => {
-          const server = row.servers;
-          const member = row.members;
-          const channel = row.channels;
+          const server = row.servers as Server;
+          const member = row.members ?? null;
+          const channel = row.channels ?? null;
 
           if (!acc[server.id]) {
             acc[server.id] = {
@@ -153,11 +88,12 @@ class ServersService {
               channels: [],
             };
           }
-          acc[server.id].members.push(member);
-          acc[server.id].channels.push(channel);
+
+          if (member) acc[server.id].members.push(member);
+          if (channel) acc[server.id].channels.push(channel);
           return acc;
         },
-        {} as Record<string, any>
+        {} as Record<string, ServerWithMembersAndChannels>,
       );
       return Object.values(grouped)[0];
     } catch (err) {
@@ -173,29 +109,7 @@ class ServersService {
         })
         .from(servers)
         .innerJoin(members, eq(servers.id, members.serverId))
-        .where(eq(members.userId, userId))
-        .catch((err) => {
-          console.error("[ERR_SERVER_SERVICE:getServerByUserId] ", err);
-          return [];
-        });
-      // const grouped = rows.reduce(
-      //   (acc, row) => {
-      //     const server = row.servers;
-      //     const member = row.members;
-
-      //     if (!acc[server.id]) {
-      //       acc[server.id] = {
-      //         ...server,
-      //         members: [],
-      //       };
-      //     }
-
-      //     acc[server.id].members.push(member);
-      //     return acc;
-      //   },
-      //   {} as Record<string, any>
-      // );
-      // return Object.values(grouped);
+        .where(eq(members.userId, userId));
       return rows.map((row) => row.server);
     } catch (err) {
       throw new Error("[ERR_SERVER_SERVICE:getServerByUserId] " + err);
@@ -205,20 +119,13 @@ class ServersService {
   async updateServerInviteCode(
     serverId: string,
     userId: string,
-    inviteCode: string
+    inviteCode: string,
   ) {
     try {
       await db
         .update(servers)
         .set({ inviteCode })
-        .where(eq(servers.id, serverId))
-        .catch((err) => {
-          console.error(
-            "[ERR_SERVER_SERVICE:updateServerInviteCode - update] ",
-            err
-          );
-          return false;
-        });
+        .where(eq(servers.id, serverId));
       return true;
     } catch (err) {
       console.error("[ERR_SERVER_SERVICE:updateServerInviteCode] " + err);
@@ -228,7 +135,7 @@ class ServersService {
 
   async joinServerFromInviteCode(
     userId: string,
-    inviteCode: string
+    inviteCode: string,
   ): Promise<boolean> {
     try {
       const success = await db.transaction(async (tx) => {
@@ -246,11 +153,11 @@ class ServersService {
                   .where(
                     and(
                       eq(members.id, userId),
-                      eq(servers.id, members.serverId)
-                    )
-                  )
-              )
-            )
+                      eq(servers.id, members.serverId),
+                    ),
+                  ),
+              ),
+            ),
           )
           .limit(1);
         if (server.length === 0) return false; // user exists or invalid code
@@ -294,8 +201,8 @@ class ServersService {
           and(
             eq(members.serverId, serverId),
             eq(members.userId, userId),
-            eq(members.role, MemberRole.ADMIN)
-          )
+            eq(members.role, MemberRole.ADMIN),
+          ),
         );
       if (member.length === 0) {
         return false; //* not found or not authorized
