@@ -34,13 +34,12 @@ class ServersService {
           return newServer;
         })
         .catch((err) => {
-          console.error("[ERR_SERVERS_SERVICE:createServer]: ", err);
           return null;
         });
 
       return server ?? null;
     } catch (err) {
-      throw new Error("Internal Server Error: " + err);
+      return null;
     }
   }
 
@@ -59,7 +58,7 @@ class ServersService {
       }
       return true;
     } catch (err) {
-      throw new Error("[ERR_SERVER_SERVICE:leaveServer]: " + err);
+      return false;
     }
   }
 
@@ -97,7 +96,7 @@ class ServersService {
       );
       return Object.values(grouped)[0];
     } catch (err) {
-      throw new Error("[ERR_SERVER_SERVICE:getServer] " + err);
+      return null;
     }
   }
 
@@ -112,7 +111,7 @@ class ServersService {
         .where(eq(members.userId, userId));
       return rows.map((row) => row.server);
     } catch (err) {
-      throw new Error("[ERR_SERVER_SERVICE:getServerByUserId] " + err);
+      return null;
     }
   }
 
@@ -128,7 +127,6 @@ class ServersService {
         .where(eq(servers.id, serverId));
       return true;
     } catch (err) {
-      console.error("[ERR_SERVER_SERVICE:updateServerInviteCode] " + err);
       return false;
     }
   }
@@ -170,7 +168,6 @@ class ServersService {
       });
       return success;
     } catch (err) {
-      console.error("[ERR_SERVER_SERVICE:joinServerFromInviteCode] ", err);
       return false;
     }
   }
@@ -183,12 +180,11 @@ class ServersService {
         .where(eq(servers.id, serverId))
         .returning();
       if (!server) {
-        return { server: null, error: "server not found" };
+        return null;
       }
-      return { server, error: null };
+      return server;
     } catch (err) {
-      console.error("[ERR_SERVER_SERVICE:editServer] ", err);
-      return { server: null, error: "server error" };
+      return null;
     }
   }
   async deleteServer(serverId: string, userId: string) {
@@ -210,7 +206,6 @@ class ServersService {
       await db.delete(servers).where(eq(servers.id, serverId));
       return true;
     } catch (err) {
-      console.error("[ERR_SERVER_SERVICE:deleteServer] ", err);
       return false;
     }
   }
