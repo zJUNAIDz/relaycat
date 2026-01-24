@@ -1,8 +1,8 @@
 {
   "name": "server",
   "scripts": {
-    "dev": "clear && bun run --hot src/index.ts",
-    "build": "bunx prisma migrate deploy && bunx prisma generate && bun build --target=bun --minify src/index.ts --outdir dist/",
+    "dev": "bun run --hot src/index.ts | bunx pino-pretty --colorize",
+    "build": "bun build --target=bun --minify src/index.ts --outdir dist/",
     "start": "bun run dist/index.js"
   },
   "dependencies": {
@@ -19,6 +19,7 @@
     "drizzle-zod": "^0.8.3",
     "hono": "^4.10.6",
     "pg": "^8.16.3",
+    "pino-loki": "^3.0.0",
     "socket.io": "^4.8.1",
     "utf-8-validate": "^6.0.5",
     "uuid": "^11.1.0",
