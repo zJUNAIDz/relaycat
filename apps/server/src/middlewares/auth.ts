@@ -1,11 +1,11 @@
 import { auth } from "@/lib/auth";
+import { logger } from "@/lib/logger";
 import { AppContext } from "@/types";
 import { Context } from "hono";
 
-//TODO: Refactor to better null value handling 
 export const setAuthContext = async (
   c: Context<AppContext>,
-  next: () => Promise<void>
+  next: () => Promise<void>,
 ) => {
   const session = await auth.api.getSession({ headers: c.req.raw.headers });
   if (!session) {
@@ -21,7 +21,7 @@ export const setAuthContext = async (
 
 export const requireAuth = async (
   c: Context<AppContext>,
-  next: () => Promise<void>
+  next: () => Promise<void>,
 ) => {
   const user = c.get("user");
   const session = c.get("session");
