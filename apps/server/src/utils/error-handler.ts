@@ -1,7 +1,10 @@
+import { logger } from "better-auth/*";
 import { Context } from "hono";
 
 export const errorhandler = (err: Error, c: Context) => {
   console.error("[error handler]: ", err);
+  const log = c.get("logger") ?? logger;
+  log.error({ err }, "[ROUTE_ERROR_HANDLER]");
   return c.json(
     {
       error: err.message

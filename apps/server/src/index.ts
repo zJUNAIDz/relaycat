@@ -16,6 +16,7 @@ import serversRoutes from "./routes/servers.route";
 import { AppContext } from "./types";
 import { getEnv } from "./utils/env";
 import { errorhandler } from "./utils/error-handler";
+import { loggerMiddleware } from "./middlewares/logger";
 
 const app = new Hono<AppContext>();
 const clientUrl = getEnv("CLIENT_URL");
@@ -24,7 +25,7 @@ app.use(
   cors({
     origin: clientUrl,
     credentials: true,
-  })
+  }),
 );
 app.on(["GET", "POST"], "/api/auth/*", (c) => auth.handler(c.req.raw));
 app.use("*", setAuthContext);
@@ -47,12 +48,14 @@ publicApp.get("/health", async (c) => {
 app.use("/static/*", serveStatic({ root: "./" }));
 
 const protectedApp = new Hono<AppContext>();
+protectedApp.use("*", setAuthContext);
 protectedApp.use("*", requireAuth);
+protectedApp.use("*", loggerMiddleware); 
 
 //* PROTECTED ROUTES
 
 protectedApp.route("/s3", s3Routes);
-protectedApp.route("profiles", profilesRoute);
+protectedApp.route("/profiles", profilesRoute);
 protectedApp.route("/servers", serversRoutes);
 protectedApp.route("/members", membersRoutes);
 protectedApp.route("/channels", channelsRoute);
@@ -61,6 +64,7 @@ protectedApp.route("/messages", messagesRoute);
 protectedApp.get("/", (c) => {
   return c.html(`<h1>禁止</h1>`);
 });
+
 app.route("/public", publicApp);
 app.route("/api", protectedApp);
 app.onError(errorhandler);
