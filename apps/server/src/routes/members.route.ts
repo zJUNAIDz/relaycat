@@ -1,133 +1,75 @@
+import {
+  possibleMemberRoles
+} from "@/db/schema/member";
+import { membersService } from "@/services/members.service";
+import { AppContext } from "@/types";
 import { Hono } from "hono";
-import { db } from "../lib/db";
-import { membersService } from "../services/members.service";
+import z from "zod";
 
-const membersRoutes = new Hono();
-
+const membersRoutes = new Hono<AppContext>();
 
 membersRoutes.get("/:memberId", async (c) => {
-  try {
-    const memberId = c.req.param("memberId");
-    const { member, error } = await membersService.getMemberById(memberId)
-    if (error) {
-      return c.json({ error }, 404);
-    }
-    return c.json({ member });
-  } catch (err) {
-    console.error("[MEMBERS_ID_GET] ", err);
-    return c.json({ error: "Internal Server Error" }, 500);
+  const memberId = c.req.param("memberId");
+  const member = await membersService.getMemberById(memberId);
+  if (!member) {
+    return c.json({ error: "Member not found" }, 404);
   }
-})
+  return c.json({ member });
+});
 
 membersRoutes.get("/user/:userId", async (c) => {
-  try {
-    const userId = c.req.param("userId");
-    const { member, error } = await membersService.getMemberByUserId(userId)
-    if (error) return c.json({ error })
-    return c.json({ member });
-  } catch (err) {
-    console.error("[MEMBERS_ID_GET] ", err);
-    return c.json({ error: "Internal Server Error" }, 500);
-  }
-})
+  const userId = c.req.param("userId");
+  const member = await membersService.getMemberByUserId(userId);
+  if (!member) return c.json({ error: "Member not found" }, 404);
+  return c.json({ member });
+});
 
 membersRoutes.get("/server/:serverId", async (c) => {
-  try {
-    const serverId = c.req.param("serverId");
-    const { members, error } = await membersService.getMembersByServerId(serverId)
-    return c.json({ members });
-  } catch (err) {
-    console.error("[MEMBERS_ID_GET] ", err);
-    return c.json({ error: "Internal Server Error" }, 500);
-  }
+  const serverId = c.req.param("serverId");
+  const members = await membersService.getMembersByServerId(serverId);
+  if (!members) return c.json({ error: "Members not found" }, 404);
+  return c.json({ members });
 });
 
 membersRoutes.patch("/changeRole", async (c) => {
-  try {
-    const { role, serverId, memberId } = await c.req.json();
-    if (!serverId) {
-      return c.json({ error: "Server ID is required" }, 400);
-    }
-    if (!memberId) {
-      return c.json({ error: "Member ID is required" }, 400);
-    }
-    if (!role) {
-      return c.json({ error: "Role is required" }, 400);
-    }
-    const { user: { id: userId } } = c.get("jwtPayload")
-    const server = await db.server.update({
-      where: {
-        id: serverId,
-        userId: userId,
-      },
-      data: {
-        members: {
-          update: {
-            where: {
-              id: memberId,
-              userId: {
-                not: userId,
-              },
-            },
-            data: {
-              role,
-            },
-          },
-        },
-      },
-      include: {
-        members: {
-          include: {
-            user: true,
-          },
-          orderBy: {
-            role: "asc",
-          },
-        },
-      },
-    });
-    return c.json({ server });
-  } catch (err) {
-    console.error("[MEMBERS_ID_PATCH] ", err);
-    return c.json({ error: "Internal Server Error" }, 500);
+  const parsedBody = z
+    .object({
+      role: z.enum(possibleMemberRoles),
+      memberId: z.string(),
+    })
+    .safeParse(await c.req.json());
+  if (!parsedBody.success) {
+    return c.json(
+      { error: "Invalid request body", details: parsedBody.error.errors },
+      400,
+    );
   }
+  const { role, memberId } = parsedBody.data;
+  const member = await membersService.changeMemberRole(
+    memberId,
+    c.get("user").id,
+    role,
+  );
+  if (!member) {
+    return c.json({ error: "Unable to change member role" }, 403);
+  }
+  return c.json(member);
 });
 
 membersRoutes.delete("/kick", async (c) => {
-  try {
-    const memberId = c.req.query("memberId");
-    if (!memberId) {
-      return c.json({ error: "Member ID is required" }, 400);
-    }
-    const serverId = c.req.query("serverId");
-    const server = await db.server.update({
-      where: {
-        id: serverId,
-        userId: c.get("jwtPayload").id,
-      },
-      data: {
-        members: {
-          deleteMany: {
-            id: memberId,
-            userId: {
-              not: c.get("jwtPayload").id,
-            },
-          },
-        },
-      },
-      include: {
-        members: {
-          include: {
-            user: true,
-          },
-        },
-      },
-    });
-    return c.json({ server });
-  } catch (err) {
-    console.error("[MEMBERS_ID_PATCH] ", err);
-    return c.json({ error: "Internal Server Error" }, 500);
+  const memberId = c.req.query("memberId");
+  if (!memberId) {
+    return c.json({ error: "Member ID is required" }, 400);
   }
+  const currentUserId = c.get("user").id;
+  const success = await membersService.deleteMemberById(
+    memberId,
+    currentUserId,
+  );
+  if (!success) {
+    return c.json({ error: "Unable to kick member" }, 403);
+  }
+  return c.status(204);
 });
 
 export default membersRoutes;
