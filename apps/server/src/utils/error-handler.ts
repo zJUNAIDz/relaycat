@@ -1,4 +1,4 @@
-import { logger } from "better-auth/*";
+import { logger } from "@/lib/logger";
 import { Context } from "hono";
 
 export const errorhandler = (err: Error, c: Context) => {

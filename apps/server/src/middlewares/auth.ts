@@ -1,5 +1,4 @@
 import { auth } from "@/lib/auth";
-import { logger } from "@/lib/logger";
 import { AppContext } from "@/types";
 import { Context } from "hono";
 
