@@ -1,4 +1,3 @@
-import { db } from "@/db";
 import { auth } from "@/lib/auth";
 import { socketManager } from "@/lib/socket-manager";
 import { requireAuth, setAuthContext } from "@/middlewares/auth";
@@ -7,6 +6,7 @@ import channelsRoute from "@/modules/channels/route";
 import serverRoutes from "@/modules/guilds/route";
 import membersRoutes from "@/modules/members/route";
 import profilesRoute from "@/routes/profiles.route";
+import { publicRoute } from "@/routes/public.route";
 import s3Routes from "@/routes/s3.route";
 import { AppContext } from "@/types";
 import { getEnv } from "@/utils/env";
@@ -17,40 +17,25 @@ import { serveStatic } from "hono/bun";
 import { cors } from "hono/cors";
 
 const app = new Hono<AppContext>();
-const clientUrl = getEnv("CLIENT_URL");
+const CLIENT_URL = getEnv("CLIENT_URL");
 app.use(
   "*",
   cors({
-    origin: clientUrl,
+    origin: CLIENT_URL,
     credentials: true,
   }),
 );
 app.on(["GET", "POST"], "/api/auth/*", (c) => auth.handler(c.req.raw));
 app.use("*", setAuthContext);
 
-//* PUBLIC ROUTES
-const publicApp = new Hono<AppContext>();
-publicApp.get("/health", async (c) => {
-  //CHECK DB CONNECTION
-  let dbConnected = true;
-  await db.execute(`SELECT 1`).catch(() => {
-    dbConnected = false;
-  });
-  return c.json({
-    endpoint: "ok",
-    dbConnected,
-    user: c.get("user") || null,
-    session: c.get("session") || null,
-  });
-});
+//* STATIC FILES SERVING
 app.use("/static/*", serveStatic({ root: "./" }));
 
+//* PROTECTED ROUTES
 const protectedApp = new Hono<AppContext>();
 protectedApp.use("*", setAuthContext);
 protectedApp.use("*", requireAuth);
 protectedApp.use("*", loggerMiddleware);
-
-//* PROTECTED ROUTES
 
 protectedApp.route("/s3", s3Routes);
 protectedApp.route("/profiles", profilesRoute);
@@ -63,7 +48,7 @@ protectedApp.get("/", (c) => {
   return c.html(`<h1>禁止</h1>`);
 });
 
-app.route("/public", publicApp);
+app.route("/public", publicRoute);
 app.route("/api", protectedApp);
 app.onError(errorhandler);
 export default {
