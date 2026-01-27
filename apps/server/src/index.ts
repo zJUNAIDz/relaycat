@@ -59,8 +59,8 @@ protectedApp.route("/profiles", profilesRoute);
 protectedApp.route("/servers", serversRoutes);
 protectedApp.route("/members", membersRoutes);
 protectedApp.route("/channels", channelsRoute);
-protectedApp.route("/conversations", conversationsRoute);
-protectedApp.route("/messages", messagesRoute);
+// protectedApp.route("/conversations", conversationsRoute);
+// protectedApp.route("/messages", messagesRoute);
 protectedApp.get("/", (c) => {
   return c.html(`<h1>禁止</h1>`);
 });

@@ -1,11 +1,12 @@
 import { ChannelInsertSchema } from "@/db/schema/channel";
+import { logger } from "@/lib/logger";
 import { AppContext } from "@/types";
 import { Hono } from "hono";
 import { channelService } from "../services/channels.service";
-import { serversService } from "@/services/servers.service";
-import { logger } from "@/lib/logger";
+import messageRoute from "./messages.route";
 
 const channelsRoute = new Hono<AppContext>();
+channelsRoute.route("/:channelId/messages", messageRoute);
 
 channelsRoute.get("/", async (c) => {
   const { serverId } = c.req.query();
