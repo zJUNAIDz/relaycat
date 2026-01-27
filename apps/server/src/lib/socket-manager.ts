@@ -1,6 +1,7 @@
 import { Server as SocketIOServer } from "socket.io";
 import { createServer } from "http";
 import { instrument } from "@socket.io/admin-ui";
+import { getEnv } from "@/utils/env";
 class SocketManager {
   private static instance: SocketManager;
   public io: SocketIOServer;
@@ -12,11 +13,12 @@ class SocketManager {
       path: "/",
       cors: {
         origin: ["http://localhost:3000", "https://admin.socket.io"],
-        credentials: true
-      }
+        credentials: true,
+      },
     });
-    this.httpServer.listen(4000, () => {
-      console.log(`Socket.IO server listening on 4000`);
+    const port = getEnv("WS_PORT") || 4001;
+    this.httpServer.listen(port, () => {
+      console.log(`Socket.IO server listening on ${port}`);
     });
     this.initializeSocket();
   }
