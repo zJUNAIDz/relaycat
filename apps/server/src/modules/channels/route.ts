@@ -2,8 +2,8 @@ import { ChannelInsertSchema } from "@/db/schema/channel";
 import { logger } from "@/lib/logger";
 import { AppContext } from "@/types";
 import { Hono } from "hono";
-import { channelService } from "../services/channels.service";
-import messageRoute from "./messages.route";
+import { channelService } from "./service";
+import messageRoute from "@/modules/messages/route";
 
 const channelsRoute = new Hono<AppContext>();
 channelsRoute.route("/:channelId/messages", messageRoute);

@@ -8,9 +8,9 @@ import {
   messages,
 } from "@/db/schema/message";
 import { servers } from "@/db/schema/server";
-import { cursorSchema, Result } from "@/types";
 import { and, desc, eq, gt, lt } from "drizzle-orm";
 import z from "zod/v4";
+import { cursorSchema, Result } from "./types";
 
 class MessageService {
   private MESSAGE_BATCH = 10;

@@ -1,6 +1,6 @@
 import { Server, serverInsertSchema } from "@/db/schema/server";
 import { logger } from "@/lib/logger";
-import { serversService } from "@/services/servers.service";
+import { serversService } from "@/modules/guilds/service";
 import { AppContext } from "@/types";
 import { randomUUIDv7 } from "bun";
 import { Hono } from "hono";

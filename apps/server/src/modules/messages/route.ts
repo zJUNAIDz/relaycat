@@ -1,6 +1,6 @@
 import { MessageCreateSchema } from "@/db/schema/message";
 import { socketManager } from "@/lib/socket-manager";
-import { messageService } from "@/services/message.service";
+import { messageService } from "@/modules/messages/service";
 import { AppContext, cursorSchema } from "@/types";
 import { Hono } from "hono";
 import z from "zod/v4";

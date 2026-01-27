@@ -1,7 +1,7 @@
 import {
   possibleMemberRoles
 } from "@/db/schema/member";
-import { membersService } from "@/services/members.service";
+import { membersService } from "@/modules/members/service";
 import { AppContext } from "@/types";
 import { Hono } from "hono";
 import z from "zod";
