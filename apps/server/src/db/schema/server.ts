@@ -1,11 +1,12 @@
-import { pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import { randomUUIDv7 } from "bun";
 import { sql } from "drizzle-orm";
+import { pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { Channel } from "./channel";
 import { Member } from "./member";
 
 export const servers = pgTable("servers", {
-  id: uuid("id").defaultRandom().primaryKey(),
+  id: uuid("id").default(randomUUIDv7()).primaryKey(),
   name: text("name").notNull(),
   image: text("image"),
   inviteCode: text("invite_code")
@@ -21,6 +22,6 @@ export type Server = typeof servers.$inferSelect;
 export type ServerInput = typeof servers.$inferInsert;
 
 export type ServerWithMembersAndChannels = Server & {
-        members: Member[];
-        channels: Channel[];
-      };
+  members: Member[];
+  channels: Channel[];
+};

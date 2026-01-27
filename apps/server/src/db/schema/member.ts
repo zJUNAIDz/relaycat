@@ -1,12 +1,14 @@
+import { randomUUIDv7 } from "bun";
 import { pgEnum, text, timestamp, uuid } from "drizzle-orm/pg-core";
 import { pgTable } from "drizzle-orm/pg-core/table";
-import { servers } from "./server";
 import { user } from "./auth-schema";
+import { servers } from "./server";
 
 export const possibleMemberRoles = ["ADMIN", "MODERATOR", "MEMBER"] as const;
 export const memberRole = pgEnum("member_role", possibleMemberRoles);
 export const members = pgTable("members", {
-  id: uuid("id").defaultRandom().primaryKey(),
+  id: uuid("id").default(randomUUIDv7()).primaryKey(),
+
   userId: text("user_id")
     .references(() => user.id)
     .notNull(),
@@ -27,5 +29,8 @@ export const MemberRole = possibleMemberRoles.reduce(
     acc[role] = role;
     return acc;
   },
-  {} as Record<(typeof possibleMemberRoles)[number], (typeof possibleMemberRoles)[number]>,
+  {} as Record<
+    (typeof possibleMemberRoles)[number],
+    (typeof possibleMemberRoles)[number]
+  >,
 );

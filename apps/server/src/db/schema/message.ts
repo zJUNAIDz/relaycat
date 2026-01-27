@@ -1,10 +1,11 @@
+import { randomUUIDv7 } from "bun";
 import { boolean, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { channels } from "./channel";
 import { Member, members } from "./member";
 
 export const messages = pgTable("messages", {
-  id: uuid("id").defaultRandom().primaryKey(),
+  id: uuid("id").default(randomUUIDv7()).primaryKey(),
   content: text("content"),
   mentions: text("mentions").array().default([]),
   mentionRoles: text("mention_roles").array().default([]),
