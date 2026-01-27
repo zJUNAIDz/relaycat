@@ -1,71 +1,115 @@
+import { MessageCreateSchema } from "@/db/schema/message";
+import { socketManager } from "@/lib/socket-manager";
+import { messageService } from "@/services/message.service";
+import { AppContext, cursorSchema } from "@/types";
 import { Hono } from "hono";
-import { messageService } from "../services/message.service";
+import z from "zod/v4";
 
-const messageRoute = new Hono();
+const messageRoute = new Hono<AppContext>();
 
 messageRoute.get("/", async (c) => {
-  const channelId = c.req.query("channelId");
-  const conversationId = c.req.query("conversationId");
-  if ((!channelId || channelId.trim() === "") && (!conversationId || conversationId.trim() === "")) {
-    return c.json({ error: "Channel Id or conversation Id is required" }, 400);
+  const channelId = z
+    .string({ error: "channelId param is missing" })
+    .safeParse(c.req.query("channelId"));
+  if (channelId.success === false) {
+    return c.json({ error: channelId.error.message }, 400);
   }
-  const cursor = c.req.query("cursor");
-  if (channelId) {
-    const { messages, nextCursor, error } = await messageService.getMessagesByChannelId(channelId, cursor);
-    return c.json({ messages, nextCursor });
+
+  const cursor = cursorSchema.safeParse(c.req.query());
+  if (!cursor.success) {
+    return c.json({ error: cursor.error.message }, 400);
   }
-  return c.json({ messages: [] }, 201)
-  // if (conversationId) {
-  //   const { messages } = await messageService.getMessagesByConversationId(conversationId);
-  //   return c.json(messages);
-  // }
-})
+
+  const res = await messageService.getMessagesByChannelId(
+    channelId.data,
+    c.get("user").id,
+    cursor.data,
+  );
+  if (res.ok === false) {
+    return c.json({ error: res.error }, 400);
+  }
+
+  return c.json(res.data);
+});
 
 messageRoute.post("/", async (c) => {
-  const { content } = await c.req.json();
-  const { channelId, memberId } = c.req.query();
-  const { user: { id: userId } } = c.get("jwtPayload");
-  if (!userId) {
-    return c.json({ error: "User not found" }, 400);
+  const messageInput = MessageCreateSchema.safeParse(await c.req.json());
+  if (!messageInput.success) {
+    return c.json(
+      { error: messageInput.error, message: "no message input found" },
+      400,
+    );
   }
-  if (!content || content.trim() === "") {
-    return c.json({ error: "Content is required" }, 400);
+
+  const channelId = z.string().safeParse(c.req.param("channelId"));
+  if (channelId.success === false) {
+    return c.json({ error: channelId.error.message }, 400);
   }
-  if (!channelId || channelId.trim() === "") {
-    return c.json({ error: "Channel ID is required" }, 400);
+
+  const user = c.get("user");
+
+  const res = await messageService.createMessage(
+    messageInput.data,
+    channelId.data,
+    user.id,
+  );
+  if (res.ok === false) {
+    return c.json({ error: res.error }, 400);
   }
-  if (!memberId || memberId.trim() === "") {
-    return c.json({ error: "Member ID is required" }, 400);
-  }
-  console.log({ content, channelId, memberId });
-  const { message, error } = await messageService.createMessage(content, channelId, memberId);
-  if (error) {
-    return c.json({ error }, 400);
-  }
-  return c.json(message);
-})
+
+  socketManager.io.emit(`chat:${channelId.data}:messages`, res.data);
+
+  return c.json(res.data);
+});
 
 messageRoute.patch("/:messageId", async (c) => {
-  const { messageId } = c.req.param();
-  const { channelId } = c.req.query();
-  const { content } = await c.req.json();
-  const { user: { id: userId } } = c.get("jwtPayload");
-  if (!userId) {
-    return c.json({ error: "User not found" }, 400);
+  const messageId = z.string().safeParse(c.req.param("messageId"));
+  if (messageId.success === false) {
+    return c.json({ error: messageId.error.message }, 400);
   }
-  if (!content || content.trim() === "") {
+  const channelId = z.string().safeParse(c.req.query("channelId"));
+  if (channelId.success === false) {
+    return c.json({ error: channelId.error.message }, 400);
+  }
+  const messageInput = MessageCreateSchema.safeParse(await c.req.json());
+  if (!messageInput.success) {
+    return c.json(
+      { error: messageInput.error, message: "no message input found" },
+      400,
+    );
+  }
+  const user = c.get("user")!;
+  if (!messageInput.data.content || messageInput.data.content.trim() === "") {
     return c.json({ error: "Content is required" }, 400);
   }
-  const { message } = await messageService.updateMessage(messageId, channelId, content);
+  const message = await messageService.updateMessage(
+    messageId.data,
+    user.id,
+    messageInput.data,
+  );
+  socketManager.io.emit(`chat:${channelId.data}:messages:update`, message);
   return c.json(message);
-})
+});
+
 messageRoute.delete("/:messageId", async (c) => {
-  const { messageId } = c.req.param();
-  const { user: { id: userId } } = c.get("jwtPayload");
-  if (!userId) {
-    return c.json({ error: "User not found" }, 400);
+  const params = z
+    .object({
+      messageId: z.string(),
+      channelId: z.string(),
+    })
+    .safeParse(c.req.param());
+  if (!params.success) {
+    return c.json({ error: params.error.message }, 400);
   }
-  const { message } = await messageService.softDeleteMessage(messageId);
+  const user = c.get("user")!;
+  const message = await messageService.softDeleteMessage(
+    params.data.messageId,
+    user.id,
+  );
+  socketManager.io.emit(
+    `chat:${params.data.channelId}:messages:delete`,
+    message,
+  );
   return c.json(message);
 });
 export default messageRoute;
