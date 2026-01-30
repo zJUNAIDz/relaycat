@@ -1,10 +1,11 @@
 import { db } from "@/db";
+import * as authSchema from "@/db/schema/auth-schema";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import * as authSchema from "../db/schema/auth-schema";
+import { sendPasswordResetEmail, sendVerificationEmail, sendWelcomeEmail } from "./mail";
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
-    provider: "pg", // or "mysql", "sqlite"
+    provider: "pg",
     schema: authSchema,
   }),
   trustedOrigins: process.env.AUTH_TRUSTED_ORIGINS
@@ -13,8 +14,8 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
     sendResetPassword: async ({ user, token, url }, request) => {
-      //TODO: SEND MAIL
-      console.log(`password reset for user: ${user}\n url:${url}`);
+      sendPasswordResetEmail(user, url);
+      console.log(`password reset for user: ${user.email}\n url:${url}`);
     },
   },
   socialProviders: {
@@ -31,10 +32,11 @@ export const auth = betterAuth({
   },
   emailVerification: {
     sendVerificationEmail: async (data, request) => {
-      //TODO: SEND MAIL
+      sendVerificationEmail(data.user, data.url);
       console.log(data);
     },
     afterEmailVerification: async (user, request) => {
+      sendWelcomeEmail(user);
       console.log(`${user.email} logged in successfully`);
     },
     sendOnSignUp: true,
@@ -47,6 +49,6 @@ export const auth = betterAuth({
   development: process.env.NODE_ENV !== "production",
   advanced: {
     cookiePrefix: "auth",
-    disableOriginCheck: true,
+    useSecureCookies: true,
   },
 });
