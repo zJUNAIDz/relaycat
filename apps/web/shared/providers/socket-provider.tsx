@@ -1,7 +1,7 @@
 "use client"
 import React from "react";
 import { io as ClientIO, Socket } from "socket.io-client";
-import { SOCKET_URL } from "../lib/constants";
+import { CONFIG } from "@/shared/lib/config";
 import { useAuth } from "./auth-provider";
 
 type SocketContextType = {
@@ -28,7 +28,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     }
     console.log("Initializing socket connection...");
 
-    const newSocket = ClientIO(SOCKET_URL, {
+    const newSocket = ClientIO(CONFIG.SOCKET_URL, {
       path: "/",
       transports: ["websocket"],
       auth: {

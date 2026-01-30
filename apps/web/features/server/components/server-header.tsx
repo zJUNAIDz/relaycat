@@ -79,7 +79,7 @@ const ServerHeader: React.FC<ServerHeaderProps> = ({ server, role }) => {
           }
           {
             (isAdmin || isModerator) && (
-              <DropdownMenuSeparator className="h-[1px]" />
+              <DropdownMenuSeparator className="h-1" />
             )
           }
           {!isAdmin && (

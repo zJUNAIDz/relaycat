@@ -6,7 +6,7 @@ import { Input } from "@/shared/components/ui/input";
 import { UserAvatar } from "@/shared/components/user-avatar";
 import { useModal } from "@/shared/hooks/use-modal-store";
 import axiosClient from "@/shared/lib/axios-client";
-import { API_URL } from "@/shared/lib/constants";
+import { CONFIG } from "@/shared/lib/config";
 import { useAuth } from "@/shared/providers/auth-provider";
 import { MemberWithUser } from "@/shared/types";
 import { cn } from "@/shared/utils/cn";
@@ -69,7 +69,7 @@ export const ChatMessage = ({
   const onMessageEdit = async (values: z.infer<typeof formSchema>) => {
     try {
       const url = queryString.stringifyUrl({
-        url: `${API_URL}/messages/${id}`,
+        url: `${CONFIG.API_URL}/messages/${id}`,
         query: socketQuery,
       });
       await axiosClient.patch(url, values)

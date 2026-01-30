@@ -5,6 +5,7 @@ import { RoleIcon } from "@/shared/components/icons";
 import { ScrollArea } from "@/shared/components/ui/scroll-area";
 import { Separator } from "@/shared/components/ui/separator";
 import { authClient } from "@/shared/lib/auth-client";
+import { PAGE_ROUTES } from "@/shared/lib/routes";
 import { Hash, Mic, Video } from "lucide-react";
 import { redirect } from "next/navigation";
 import React from "react";
@@ -12,7 +13,6 @@ import { serverService } from "../server-service";
 import ServerHeader from "./server-header";
 import { ServerMembersList } from "./server-member-list";
 import { UserFooter } from "./user-footer";
-import { DEFAULT_APP_PAGE } from "@/shared/lib/constants";
 interface ServerSidebarProps {
   serverId: string;
 }
@@ -30,13 +30,14 @@ const roleIconMap = {
 }
 
 const ServerSidebar: React.FC<ServerSidebarProps> = async ({ serverId }) => {
+  // @ts-ignore
   const { data, error } = await authClient.getSession();
   if (error) {
-    return redirect("/auth");
+    return redirect(PAGE_ROUTES.AUTH);
   }
 
   const server = await serverService.getServer(serverId, ["user", "channels"])
-  if (!server) return redirect(DEFAULT_APP_PAGE);
+  if (!server) return redirect(PAGE_ROUTES.HOME);
 
   const textChannels = server?.channels.filter(
     (channel) => channel.type === ChannelType.TEXT
@@ -51,7 +52,7 @@ const ServerSidebar: React.FC<ServerSidebarProps> = async ({ serverId }) => {
   const role = server.members.find(
     (member) => member.userId === data?.user.id
   )?.role;
-  if (!role) return redirect("/auth");
+  if (!role) return redirect(PAGE_ROUTES.AUTH);
   return (
     <div className="flex flex-col h-full text-primary w-full dark:bg-[#2B2D31] bg-[#F2F3F5]">
       <ServerHeader server={server} role={role} />

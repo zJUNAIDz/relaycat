@@ -1,11 +1,12 @@
 import { ModeToggle } from "@/shared/components/mode-toggle"
+import { PAGE_ROUTES } from "@/shared/lib/routes"
 import { motion } from "framer-motion"
 import { Link } from "lucide-react"
 import { HiArrowLeft, HiExclamation } from "react-icons/hi"
 
 const AuthErrorComponent = ({ getErrorMessage }: { getErrorMessage: () => string }) => {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 dark:from-gray-900 dark:via-blue-900 dark:to-gray-800 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-linear-to-br from-gray-50 to-blue-50 dark:from-gray-900 dark:via-blue-900 dark:to-gray-800 flex items-center justify-center p-4">
       <motion.div
         className="w-full max-w-md bg-white dark:bg-gray-800/50 backdrop-blur-xl rounded-2xl border border-black/10 dark:border-white/10 shadow-xl p-8"
         initial={{ scale: 0.95, opacity: 0 }}
@@ -38,7 +39,7 @@ const AuthErrorComponent = ({ getErrorMessage }: { getErrorMessage: () => string
             <p className="text-gray-600 dark:text-gray-300">{getErrorMessage()}</p>
           </div>
 
-          <Link href="/auth" className="w-full">
+          <Link href={PAGE_ROUTES.AUTH} className="w-full">
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}

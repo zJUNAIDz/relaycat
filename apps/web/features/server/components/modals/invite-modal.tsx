@@ -11,7 +11,7 @@ import { Label } from "@/shared/components/ui/label";
 import { useModal } from "@/shared/hooks/use-modal-store";
 import { useOrigin } from "@/shared/hooks/use-origin";
 import axiosClient from "@/shared/lib/axios-client";
-import { API_URL } from "@/shared/lib/constants";
+import { CONFIG } from "@/shared/lib/config";
 import { Check, Copy, RefreshCw } from "lucide-react";
 import React from "react";
 
@@ -39,7 +39,7 @@ const InviteModal = () => {
   const onGenerate = async () => {
     try {
       setIsLoading(true);
-      const response = await axiosClient.patch(`${API_URL}/servers/${server?.id}/invite-code`);
+      const response = await axiosClient.patch(`${CONFIG.API_URL}/servers/${server?.id}/invite-code`);
       // router.refresh()
       onOpen("invite", { server: response.data.server });
     } catch (err) {

@@ -4,7 +4,7 @@ import Link from "next/link";
 
 const ErrorPage = () => {
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-900 dark:to-gray-800 text-gray-900 dark:text-gray-100 p-4">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-linear-to-br from-blue-50 to-purple-50 dark:from-gray-900 dark:to-gray-800 text-gray-900 dark:text-gray-100 p-4">
       <div className="text-center space-y-6">
         {/* Animated 404 Text */}
         <div className="text-9xl font-bold animate-bounce">

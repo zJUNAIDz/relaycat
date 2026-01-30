@@ -2,7 +2,7 @@ import { cn } from "@/shared/utils/cn";
 import { Avatar, AvatarImage } from "@/shared/components/ui/avatar";
 
 interface UserAvatarProps {
-  src?: string;
+  src?: string ;
   className?: string;
 }
 

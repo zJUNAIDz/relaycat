@@ -3,14 +3,14 @@
 
 import { ModeToggle } from '@/shared/components/mode-toggle';
 import { authClient } from '@/shared/lib/auth-client';
-import { DEFAULT_APP_PAGE } from '@/shared/lib/constants';
+import { PAGE_ROUTES } from '@/shared/lib/routes';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { HiLogout } from 'react-icons/hi';
 
 export default function LogOutPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 dark:from-gray-900 dark:via-blue-900 dark:to-gray-800 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-linear-to-br from-gray-50 to-blue-50 dark:from-gray-900 dark:via-blue-900 dark:to-gray-800 flex items-center justify-center p-4">
       <motion.div
         className="w-full max-w-md bg-white dark:bg-gray-800/50 backdrop-blur-xl rounded-2xl border border-black/10 dark:border-white/10 shadow-xl p-8"
         initial={{ scale: 0.95, opacity: 0 }}
@@ -47,7 +47,7 @@ export default function LogOutPage() {
               Sign out
             </motion.button>
 
-            <Link href={DEFAULT_APP_PAGE}>
+            <Link href={PAGE_ROUTES.HOME}>
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}

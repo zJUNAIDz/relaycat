@@ -17,7 +17,7 @@ import {
 import { Input } from "@/shared/components/ui/input";
 import { useModal } from "@/shared/hooks/use-modal-store";
 import axiosClient from "@/shared/lib/axios-client";
-import { API_URL, DEFAULT_SERVER_IMAGE_URL } from "@/shared/lib/constants";
+import { CONFIG } from "@/shared/lib/config";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DialogDescription, DialogTitle } from "@radix-ui/react-dialog";
 import axios, { AxiosError } from "axios";
@@ -31,7 +31,7 @@ const formSchema = z.object({
   name: z.string().min(1, {
     message: "Server name is required.",
   }),
-  imageUrl: z.string().optional().default(DEFAULT_SERVER_IMAGE_URL),
+  imageUrl: z.string().optional().default(CONFIG.DEFAULT_SERVER_IMAGE_URL),
 });
 
 
@@ -50,7 +50,7 @@ const CreateServerModal = () => {
     defaultValues: {
       name: "",
       imageUrl:
-        DEFAULT_SERVER_IMAGE_URL,
+        CONFIG.DEFAULT_SERVER_IMAGE_URL,
     },
   });
 
@@ -58,7 +58,7 @@ const CreateServerModal = () => {
   const resetForm = () => {
     form.reset({
       name: "",
-      imageUrl: DEFAULT_SERVER_IMAGE_URL,
+      imageUrl: CONFIG.DEFAULT_SERVER_IMAGE_URL,
     });
     setImageFile(null);
   }
@@ -70,8 +70,8 @@ const CreateServerModal = () => {
           setErrorMessage("Please upload an image");
           return;
         }
-        if (values.imageUrl === DEFAULT_SERVER_IMAGE_URL) {
-          await axiosClient.post(`${API_URL}/servers`, {
+        if (values.imageUrl === CONFIG.DEFAULT_SERVER_IMAGE_URL) {
+          await axiosClient.post(`${CONFIG.API_URL}/servers`, {
             name: values.name,
             imageUrl: values.imageUrl,
           });
@@ -82,14 +82,14 @@ const CreateServerModal = () => {
         }
 
         //* impossible edge case
-        if (values.imageUrl !== DEFAULT_SERVER_IMAGE_URL) {
+        if (values.imageUrl !== CONFIG.DEFAULT_SERVER_IMAGE_URL) {
           setErrorMessage("Image Url is not valid. please refresh the page");
           return;
         }
         setErrorMessage("No image found")
         return;
       }
-      const { data: { signedUrl, key, bucketName } } = await axiosClient.get(`${API_URL}/s3/uploads/server-icon?serverName=${form.getValues("name")}&fileType=${imageFile.type}`);
+      const { data: { signedUrl, key, bucketName } } = await axiosClient.get(`${CONFIG.API_URL}/s3/uploads/server-icon?serverName=${form.getValues("name")}&fileType=${imageFile.type}`);
 
       if (!signedUrl || !key || !bucketName) {
         setErrorMessage("Error uploading image");
@@ -101,7 +101,7 @@ const CreateServerModal = () => {
       await axios.put(signedUrl, imageFile, {
         headers: { "Content-Type": imageFile.type },
       });
-      await axiosClient.post(`${API_URL}/servers`, {
+      await axiosClient.post(`${CONFIG.API_URL}/servers`, {
         name: values.name,
         imageUrl,
       });
@@ -150,8 +150,8 @@ const CreateServerModal = () => {
                       <FormControl>
                         <FileUpload
                           type="image"
-                          value={field.value}
-                          defaultValue={DEFAULT_SERVER_IMAGE_URL}
+                          value={field.value as string}
+                          defaultValue={CONFIG.DEFAULT_SERVER_IMAGE_URL}
                           onChange={
                             (previewUrl, file) => {
                               field.onChange(previewUrl);

@@ -17,8 +17,7 @@ import {
 import { Input } from "@/shared/components/ui/input";
 import { useModal } from "@/shared/hooks/use-modal-store";
 import axiosClient from "@/shared/lib/axios-client";
-import { API_URL, DEFAULT_SERVER_IMAGE_URL } from "@/shared/lib/constants";
-import { useAuth } from "@/shared/providers/auth-provider";
+import { CONFIG } from "@/shared/lib/config";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DialogDescription, DialogTitle } from "@radix-ui/react-dialog";
 import axios from "axios";
@@ -35,7 +34,7 @@ const formSchema = z.object({
   //TODO: remove this requirement and use fallback image if not specified
   imageUrl: z.string().min(1, {
     message: "Server image is required.",
-  }).default(DEFAULT_SERVER_IMAGE_URL),
+  }).default(CONFIG.DEFAULT_SERVER_IMAGE_URL),
 });
 
 const EditServerModal = () => {
@@ -50,7 +49,7 @@ const EditServerModal = () => {
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
-      imageUrl: DEFAULT_SERVER_IMAGE_URL,
+      imageUrl: CONFIG.DEFAULT_SERVER_IMAGE_URL,
     },
   });
 
@@ -58,7 +57,7 @@ const EditServerModal = () => {
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       if (!imageFile) {
-        await axiosClient.patch(`${API_URL}/servers/${server?.id}`, {
+        await axiosClient.patch(`${CONFIG.API_URL}/servers/${server?.id}`, {
           name: values.name,
           imageUrl: values?.imageUrl,
         });
@@ -68,7 +67,7 @@ const EditServerModal = () => {
         return;
       }
       //* Get signed url from api
-      const { data: { signedUrl, key, bucketName } } = await axiosClient.get(`${API_URL}/s3/uploads/server-icon?serverName=${form.getValues("name")}&fileType=${imageFile.type}`);
+      const { data: { signedUrl, key, bucketName } } = await axiosClient.get(`${CONFIG.API_URL}/s3/uploads/server-icon?serverName=${form.getValues("name")}&fileType=${imageFile.type}`);
       //* Upload file to S3
       // await fetch(signedUrl, {
       //   method: "PUT",
@@ -78,7 +77,7 @@ const EditServerModal = () => {
       await axios.put(signedUrl, imageFile, {
         headers: { "Content-Type": imageFile.type },
       });
-      await axiosClient.patch(`${API_URL}/servers/${server?.id}`, {
+      await axiosClient.patch(`${CONFIG.API_URL}/servers/${server?.id}`, {
         name: values.name,
         imageUrl: `https://s3.ap-south-1.amazonaws.com/${bucketName}/${key}`,
       });

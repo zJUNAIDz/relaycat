@@ -16,7 +16,7 @@ import {
 } from "@/shared/components/ui/form";
 import { Input } from "@/shared/components/ui/input";
 import axiosClient from "@/shared/lib/axios-client";
-import { API_URL, DEFAULT_SERVER_IMAGE_URL } from "@/shared/lib/constants";
+import { CONFIG } from "@/shared/lib/config";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DialogDescription, DialogTitle } from "@radix-ui/react-dialog";
 import axios, { AxiosError } from "axios";
@@ -32,7 +32,7 @@ const formSchema = z.object({
   //TODO: remove this requirement and use fallback image if not specified
   imageUrl: z
     .string()
-    .default(DEFAULT_SERVER_IMAGE_URL),
+    .default(CONFIG.DEFAULT_SERVER_IMAGE_URL),
 });
 
 const InitialModal = () => {
@@ -42,7 +42,7 @@ const InitialModal = () => {
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
-      imageUrl: DEFAULT_SERVER_IMAGE_URL,
+      imageUrl: CONFIG.DEFAULT_SERVER_IMAGE_URL,
     },
   });
   const [imageFile, setImageFile] = React.useState<File | null>(null);
@@ -56,7 +56,7 @@ const InitialModal = () => {
   const resetForm = () => {
     form.reset({
       name: "",
-      imageUrl: DEFAULT_SERVER_IMAGE_URL,
+      imageUrl: CONFIG.DEFAULT_SERVER_IMAGE_URL,
     });
     setImageFile(null);
   }
@@ -68,8 +68,8 @@ const InitialModal = () => {
           setErrorMessage("Please upload an image");
           return;
         }
-        if (values.imageUrl === DEFAULT_SERVER_IMAGE_URL) {
-          await axiosClient.post(`${API_URL}/servers`, {
+        if (values.imageUrl === CONFIG.DEFAULT_SERVER_IMAGE_URL) {
+          await axiosClient.post(`${CONFIG.API_URL}/servers`, {
             name: values.name,
             imageUrl: values.imageUrl,
           });
@@ -79,14 +79,14 @@ const InitialModal = () => {
         }
 
         //* impossible edge case
-        // if (values.imageUrl !== DEFAULT_SERVER_IMAGE_URL) {
+        // if (values.imageUrl !== CONFIG.DEFAULT_SERVER_IMAGE_URL) {
         //   setErrorMessage("Image Url is not valid. please refresh the page");
         //   return;
         // }
         setErrorMessage("No image found")
         return;
       }
-      const { data: { signedUrl, key, bucketName } } = await axiosClient.get(`${API_URL}/s3/uploads/server-icon?serverName=${form.getValues("name")}&fileType=${imageFile.type}`);
+      const { data: { signedUrl, key, bucketName } } = await axiosClient.get(`${CONFIG.API_URL}/s3/uploads/server-icon?serverName=${form.getValues("name")}&fileType=${imageFile.type}`);
 
       if (!signedUrl || !key || !bucketName) {
         setErrorMessage("Error uploading image");
@@ -98,7 +98,7 @@ const InitialModal = () => {
       await axios.put(signedUrl, imageFile, {
         headers: { "Content-Type": imageFile.type },
       });
-      await axiosClient.post(`${API_URL}/servers`, {
+      await axiosClient.post(`${CONFIG.API_URL}/servers`, {
         name: values.name,
         imageUrl,
       });
@@ -141,7 +141,7 @@ const InitialModal = () => {
                       <FormControl>
                         <FileUpload
                           type="image"
-                          defaultValue={DEFAULT_SERVER_IMAGE_URL}
+                          defaultValue={CONFIG.DEFAULT_SERVER_IMAGE_URL}
                           value={field.value}
                           onChange={(previewUrl, file) => {
                             field.onChange(previewUrl);

@@ -16,8 +16,8 @@ import {
 } from "@/shared/components/ui/form";
 import { useModal } from "@/shared/hooks/use-modal-store";
 import axiosClient from "@/shared/lib/axios-client";
+import { CONFIG } from "@/shared/lib/config";
 // import { api } from "@/lib/api-client";
-import { API_URL, DEFAULT_SERVER_IMAGE_URL } from "@/shared/lib/constants";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios, { AxiosError } from "axios";
 import { useRouter } from "next/navigation";
@@ -54,7 +54,7 @@ const MessageFileModal = () => {
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      fileUrl: DEFAULT_SERVER_IMAGE_URL,
+      fileUrl: CONFIG.DEFAULT_SERVER_IMAGE_URL,
     },
   });
 
@@ -70,7 +70,7 @@ const MessageFileModal = () => {
 
   const resetForm = () => {
     form.reset({
-      fileUrl: DEFAULT_SERVER_IMAGE_URL,
+      fileUrl: CONFIG.DEFAULT_SERVER_IMAGE_URL,
     });
     setFile(null);
   }
@@ -87,7 +87,7 @@ const MessageFileModal = () => {
         return;
       }
 
-      const { data: { signedUrl, key, bucketName } } = await axiosClient.get(`${API_URL}/s3/uploads/server-icon?fileType=${file.type}`);
+      const { data: { signedUrl, key, bucketName } } = await axiosClient.get(`${CONFIG.API_URL}/s3/uploads/server-icon?fileType=${file.type}`);
 
       if (!signedUrl || !key || !bucketName) {
         setErrorMessage("Error uploading image");
@@ -145,7 +145,7 @@ const MessageFileModal = () => {
                         <FileUpload
                           type="messageFile"
                           value={field.value}
-                          defaultValue={DEFAULT_SERVER_IMAGE_URL}
+                          defaultValue={CONFIG.DEFAULT_SERVER_IMAGE_URL}
                           onChange={
                             (previewUrl, file) => {
                               field.onChange(previewUrl);

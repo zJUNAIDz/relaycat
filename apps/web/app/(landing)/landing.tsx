@@ -1,6 +1,7 @@
 "use client";
 import { Button } from "@/shared/components/ui/button";
 import { authClient, User } from "@/shared/lib/auth-client";
+import { PAGE_ROUTES } from "@/shared/lib/routes";
 import { useAuth } from "@/shared/providers/auth-provider";
 import { motion } from "framer-motion";
 import { Inter, Space_Grotesk } from "next/font/google";
@@ -27,7 +28,7 @@ const Landing = () => {
 const Navbar = ({ isLoading, user }: { isLoading: boolean; user: User | null }) => {
   return (
     <motion.nav
-      className="fixed w-full opacity-1 z-999  top-0 backdrop-blur-md z-50 py-4 px-6 md:px-12 flex justify-between items-center bg-white/80 dark:bg-neutral-900/80 border-b border-neutral-200 dark:border-neutral-800"
+      className="fixed w-full opacity-1 top-0 backdrop-blur-md z-50 py-4 px-6 md:px-12 flex justify-between items-center bg-white/80 dark:bg-neutral-900/80 border-b border-neutral-200 dark:border-neutral-800"
     >
       <motion.div
         className={`text-xl ${spaceGrotesk.className} tracking-tight text-neutral-800 dark:text-neutral-200`}
@@ -54,11 +55,11 @@ const HeroSection = () => {
       >
         <h1 className={`${spaceGrotesk.className} text-5xl md:text-7xl mb-6 text-neutral-900 dark:text-neutral-100`}>
           Modern Communication
-          <span className="block mt-4 pb-1 bg-gradient-to-r from-sky-500 via-purple-500 to-blue-600 bg-clip-text text-transparent">
+          <span className="block mt-4 pb-1 bg-linear-to-r from-sky-500 via-purple-500 to-blue-600 bg-clip-text text-transparent">
             Reimagined
           </span>
         </h1>
-        <div className="absolute inset-x-0 -bottom-6 h-1 bg-gradient-to-r from-sky-500/30 via-purple-500/30 to-blue-600/30 rounded-full" />
+        <div className="absolute inset-x-0 -bottom-6 h-1 bg-linear-to-r from-sky-500/30 via-purple-500/30 to-blue-600/30 rounded-full" />
       </motion.div>
 
       <motion.p
@@ -75,8 +76,8 @@ const HeroSection = () => {
         className="inline-flex flex-col sm:flex-row gap-4"
       >
         <Link
-          href="/auth"
-          className="group inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-br from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 rounded-xl text-white shadow-lg hover:shadow-xl transition-all"
+          href={PAGE_ROUTES.AUTH}
+          className="group inline-flex items-center gap-3 px-8 py-4 bg-linear-to-br from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 rounded-xl text-white shadow-lg hover:shadow-xl transition-all"
         >
           <span>Get Started</span>
           <span className="group-hover:translate-x-1 transition-transform">→</span>
@@ -111,7 +112,7 @@ const AuthPanel = ({ isLoading, user }: { isLoading: boolean; user: User | null 
         />
         <Button
           onClick={() => authClient.signOut()}
-          className="px-4 py-2.5 bg-gradient-to-br from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 text-sm rounded-lg shadow-sm"
+          className="px-4 py-2.5 bg-linear-to-br from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 text-sm rounded-lg shadow-sm"
         >
           Sign out
         </Button>
@@ -122,14 +123,14 @@ const AuthPanel = ({ isLoading, user }: { isLoading: boolean; user: User | null 
   return (
     <div className="flex gap-3 ml-4">
       <Link
-        href="/auth"
+        href={PAGE_ROUTES.AUTH}
         className="px-4 py-2.5 text-sm rounded-lg border border-neutral-300 hover:border-sky-500 bg-white/50 dark:bg-neutral-800/50 backdrop-blur-sm transition-colors"
       >
         Login
       </Link>
       <Link
-        href="/auth"
-        className="px-4 py-2.5 bg-gradient-to-br from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 text-sm rounded-lg text-white shadow-sm"
+        href={PAGE_ROUTES.AUTH}
+        className="px-4 py-2.5 bg-linear-to-br from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 text-sm rounded-lg text-white shadow-sm"
       >
         Get Started
       </Link>

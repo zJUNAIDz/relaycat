@@ -24,14 +24,14 @@ import { ScrollArea } from "@/shared/components/ui/scroll-area";
 import { UserAvatar } from "@/shared/components/user-avatar";
 import { useModal } from "@/shared/hooks/use-modal-store";
 import axiosClient from "@/shared/lib/axios-client";
-import { API_URL } from "@/shared/lib/constants";
+import { CONFIG } from "@/shared/lib/config";
 import { ServerWithMembersAndUser } from "@/shared/types";
 import { capitalizeFirstLetter } from "@/shared/utils/misc";
 import { Check, Gavel, Loader2, MoreVertical, Shield } from "lucide-react";
 import { useRouter } from "next/navigation";
 import qs from "query-string";
 import React from "react";
-
+//TODO: fix User and Session imports
 
 const MembersModal = () => {
   const {
@@ -51,7 +51,7 @@ const MembersModal = () => {
     try {
       setLoadingId(memberId)
       const url = qs.stringifyUrl({
-        url: `${API_URL}/members/kick`,
+        url: `${CONFIG.API_URL}/members/kick`,
         query: {
           serverId: server?.id,
           memberId
@@ -71,7 +71,7 @@ const MembersModal = () => {
     try {
       setLoadingId(memberId)
       const url = qs.stringifyUrl({
-        url: `${API_URL}/members/changeRole`,
+        url: `${CONFIG.API_URL}/members/changeRole`,
         query: {
           serverId: server?.id,
           memberId
@@ -100,7 +100,7 @@ const MembersModal = () => {
           {membersCount ? membersCount === 1 ? `${membersCount} Member` : `${membersCount} Members` : "No members"}
         </DialogDescription>
         <div className="p-6">
-          <ScrollArea className="mt-8 max-h-[100rem] pr-6">
+          <ScrollArea className="mt-8 max-h-400 pr-6">
             {server?.members && (
               server?.members.map(member => (
                 <div key={member.id} className="flex items-center gap-x-2 mb-6">

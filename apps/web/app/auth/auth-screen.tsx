@@ -1,7 +1,7 @@
 "use client";
 
-import { authClient } from "@/shared/lib/auth-client";
-import { DEFAULT_APP_PAGE } from "@/shared/lib/constants";
+import { signIn } from "@/shared/lib/auth-client";
+import { PAGE_ROUTES } from "@/shared/lib/routes";
 import { useAuth } from "@/shared/providers/auth-provider";
 import { motion } from "framer-motion";
 import { Inter, Space_Grotesk } from "next/font/google";
@@ -12,6 +12,7 @@ import { HiArrowRight } from "react-icons/hi";
 const spaceGrotesk = Space_Grotesk({ subsets: ["latin"], weight: ["700"] });
 const inter = Inter({ subsets: ["latin"], weight: ["400", "600"] });
 
+const providers = [{ name: "Google", id: "google" }, { name: "GitHub", id: "github" }];
 const AuthScreen = ({ isLoginParam }: {
   isLoginParam: boolean
 }) => {
@@ -21,7 +22,7 @@ const AuthScreen = ({ isLoginParam }: {
 
   useEffect(() => {
     if (user) {
-      router.replace(DEFAULT_APP_PAGE);
+      router.replace(PAGE_ROUTES.HOME);
     }
   }, [user, router]);
 
@@ -101,18 +102,15 @@ const AuthScreen = ({ isLoginParam }: {
               </div>
 
               <div className="grid grid-cols-2 gap-4">
-                {['Google', 'GitHub'].map((provider) => (
+                {providers.map((provider) => (
                   <motion.button
-                    key={provider}
-                    onClick={() => authClient.signIn.social({
-                      provider: provider.toLowerCase(),
-                      callbackURL: "/"
-                    })}
+                    key={provider.id}
+                    onClick={() => signIn(provider.id)}
                     whileHover={{ scale: 1.02 }}
                     className="flex items-center justify-center gap-2 py-2.5 bg-neutral-100 dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 hover:border-sky-500 dark:hover:border-sky-600 transition-colors"
                     type="button"
                   >
-                    <span className="text-neutral-600 dark:text-neutral-400">{provider}</span>
+                    <span className="text-neutral-600 dark:text-neutral-400">{provider.name}</span>
                   </motion.button>
                 ))}
               </div>

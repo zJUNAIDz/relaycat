@@ -10,7 +10,7 @@ import {
 } from "@/shared/components/ui/dialog";
 import { useModal } from "@/shared/hooks/use-modal-store";
 import axiosClient from "@/shared/lib/axios-client";
-import { API_URL } from "@/shared/lib/constants";
+import { CONFIG } from "@/shared/lib/config";
 import { useRouter } from "next/navigation";
 import qs from "query-string";
 import React from "react";
@@ -30,7 +30,7 @@ const DeleteChannelModal = () => {
     try {
       setIsLoading(true)
       const url = qs.stringifyUrl({
-        url: `${API_URL}/channels/${channel?.id}`,
+        url: `${CONFIG.API_URL}/channels/${channel?.id}`,
       })
       await axiosClient.delete(url);
       onClose()

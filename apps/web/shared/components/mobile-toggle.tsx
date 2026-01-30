@@ -1,11 +1,12 @@
-import { Menu } from "lucide-react"
-import { Sheet, SheetContent, SheetTrigger } from "./ui/sheet"
-import { Button } from "./ui/button"
-import NavigationSidebar from "@/features/server/navigation/navigation-sidebar"
 import ServerSidebar from "@/features/server/components/server-sidebar"
-import { Server } from "@/generated/prisma/client"
+import NavigationSidebar from "@/features/server/navigation/navigation-sidebar"
+import { Menu } from "lucide-react"
+import { useAppContextStore } from "../stores/use-app-store"
+import { Button } from "./ui/button"
+import { Sheet, SheetContent, SheetTrigger } from "./ui/sheet"
 
-export const MobileToggle = ({ serverId }: { serverId: Server["id"] }) => {
+export const MobileToggle = () => {
+  const ctx = useAppContextStore()  
   return (
     <Sheet>
       <SheetTrigger asChild>
@@ -17,7 +18,17 @@ export const MobileToggle = ({ serverId }: { serverId: Server["id"] }) => {
         <div className="w-[72px]">
           <NavigationSidebar />
         </div>
-        <ServerSidebar serverId={serverId} />
+        {
+          ctx.currentServerId ? (
+            <ServerSidebar serverId={ctx.currentServerId} />
+          ) : (
+            <div className="flex-1 flex items-center justify-center">
+              <p className="text-zinc-500 dark:text-zinc-400">
+                Select a server to view its channels
+              </p>
+            </div>
+          )
+        }
       </SheetContent>
     </Sheet>
   )

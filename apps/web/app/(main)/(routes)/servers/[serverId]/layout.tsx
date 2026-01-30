@@ -1,6 +1,6 @@
 import ServerSidebar from "@/features/server/components/server-sidebar";
 import { serverService } from "@/features/server/server-service";
-import { DEFAULT_APP_PAGE } from "@/shared/lib/constants";
+import { PAGE_ROUTES } from "@/shared/lib/routes";
 import { getCurrentUser } from "@/shared/utils/server";
 import { redirect } from "next/navigation";
 
@@ -21,7 +21,7 @@ const ServerIdLayout: React.FC<ServerIdLayoutProps> = async ({
   const server = await serverService.getServer(serverId)
 
 
-  if (!server) redirect(DEFAULT_APP_PAGE);
+  if (!server) redirect(PAGE_ROUTES.HOME);
 
   return (
     <div className="h-full">

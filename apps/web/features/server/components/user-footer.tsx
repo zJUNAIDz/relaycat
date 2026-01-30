@@ -2,7 +2,6 @@
 import { Popover, PopoverContent, PopoverTrigger } from "@/shared/components/ui/popover";
 import { Skeleton } from "@/shared/components/ui/skeleton";
 import { UserAvatar } from "@/shared/components/user-avatar";
-import { DEFAULT_SERVER_IMAGE_URL } from "@/shared/lib/constants";
 import { useAuth } from "@/shared/providers/auth-provider";
 interface UserFooterProps {
   name: string;
