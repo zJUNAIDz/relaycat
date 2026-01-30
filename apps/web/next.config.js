@@ -1,4 +1,7 @@
 /** @type {import('next').NextConfig} */
+const withbundleAnalyzer = require("@next/bundle-analyzer")({
+  enabled: process.env.ANALYZE === "true",
+});
 const nextConfig = {
   output: "standalone",
   images: {
@@ -30,10 +33,10 @@ const nextConfig = {
         pathname: "/**",
       },
       {
-        protocol:"http",
-        hostname:"localhost",
-        pathname:"/**"
-      }
+        protocol: "http",
+        hostname: "localhost",
+        pathname: "/**",
+      },
     ],
   },
 };
