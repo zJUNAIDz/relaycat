@@ -27,6 +27,7 @@
   },
   "devDependencies": {
     "@prisma/client": "^6.19.2",
+    "@sendgrid/mail": "^8.1.6",
     "@types/bun": "latest",
     "@types/pg": "^8.16.0",
     "@types/socket.io": "^3.0.2",
