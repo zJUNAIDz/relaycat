@@ -39,7 +39,7 @@ export const UserFooter = ({ name, username, imageUrl }: UserFooterProps) => {
             </div>
           </div>
         </PopoverTrigger>
-        <PopoverContent className="ml-10 p-0 h-[530px] w-[350px] ">
+        <PopoverContent className="ml-10 p-0 h-132.5 w-87.5 ">
           {
             //TODO: make profile component
           }
