@@ -2,7 +2,8 @@ import { db } from "@/db";
 import * as authSchema from "@/db/schema/auth-schema";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { sendPasswordResetEmail, sendVerificationEmail, sendWelcomeEmail } from "./mail";
+import { logger } from "./logger";
+import { mailService } from "./mail";
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
     provider: "pg",
@@ -14,8 +15,11 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
     sendResetPassword: async ({ user, token, url }, request) => {
-      sendPasswordResetEmail(user, url);
-      console.log(`password reset for user: ${user.email}\n url:${url}`);
+      mailService.sendPasswordResetEmail({
+        to: [user.email],
+        resetLink: url,
+      });
+      logger.info({ user, url, request }, "password reset requested");
     },
   },
   socialProviders: {
@@ -32,12 +36,22 @@ export const auth = betterAuth({
   },
   emailVerification: {
     sendVerificationEmail: async (data, request) => {
-      sendVerificationEmail(data.user, data.url);
-      console.log(data);
+      await mailService.sendVerificationEmail({
+        to: [data.user.email],
+        verificationLink: data.url,
+      });
+      logger.info({ data, request }, "verification email sent");
     },
     afterEmailVerification: async (user, request) => {
-      sendWelcomeEmail(user);
-      console.log(`${user.email} logged in successfully`);
+      const baseUrl = process.env.CLIENT_URL || "http://localhost:3000";
+      await mailService.sendWelcomeEmail({
+        to: [user.email],
+        username: user.name || "User",
+        actionUrl: `${baseUrl}/channels/me`,
+        loginUrl: `${baseUrl}/login`,
+        guideUrl: `${baseUrl}/guide`,
+      });
+      logger.info({ user, request }, "logged in successfully");
     },
     sendOnSignUp: true,
     autoSignInAfterVerification: true,
