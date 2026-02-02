@@ -1,6 +1,6 @@
 import "dotenv/config";
 // Database (Drizzle)
-import "@/lib/db";
+import "@/db";
 // WebSocket server (Socket.IO singleton)
 import "@/lib/socket-manager";
 
