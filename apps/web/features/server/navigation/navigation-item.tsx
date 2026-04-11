@@ -1,10 +1,10 @@
 "use client";
 
-import { useParams, useRouter } from "next/navigation";
-import { cn } from "@/shared/utils/cn";
+import defaultServerImage from "@/public/placeholder.webp";
 import { ActionTooltip } from "@/shared/components/action-tooltip";
+import { cn } from "@/shared/utils/cn";
 import Image from "next/image";
-
+import { useParams, useRouter } from "next/navigation";
 interface NavigationItemProps {
   id: string;
   name: string;
@@ -17,8 +17,8 @@ const NavigationItem: React.FC<NavigationItemProps> = ({
 
   const params = useParams();
   const router = useRouter();
-  const onClickServerIcon = () => (params?.serverId !== id ? router.push(`/servers/${id}`) : null);
-
+  const onClickServerIcon = () => (params?.serverId !== id ? router.push(`/channels/${id}`) : null);
+  // console.log("imageUrl", imageUrl)
   return (
     <ActionTooltip
       side="right"
@@ -27,19 +27,19 @@ const NavigationItem: React.FC<NavigationItemProps> = ({
     >
       <button onClick={onClickServerIcon} className="group relative flex items-center w-full justify-between">
         <div className={cn(
-          "absolute left-0  bg-primary rounded-r-full transition-all w-[4px]",
-          params?.serverId !== id && "group-hover:h-[24px]",
-          params?.serverId === id ? "h-[40px]" : "h-[8px]"
+          "absolute left-0  bg-primary rounded-r-full transition-all w-1",
+          params?.serverId !== id && "group-hover:h-6",
+          params?.serverId === id ? "h-10" : "h-2"
         )} />
         <div
           className={cn(
-            "relative group flex  mx-3 h-[48px] w-[48px] rounded-[24px] group-hover:rounded-[16px] transition-all overflow-hidden",
-            params?.serverId !== "bg-primary/10 text-primary rounded-[16px]"
+            "relative group flex  mx-3 h-12 w-12 rounded-3xl group-hover:rounded-2xl transition-all overflow-hidden",
+            params?.serverId !== "bg-primary/10 text-primary rounded-2xl"
           )}
         >
           <Image
             fill
-            src={imageUrl}
+            src={imageUrl ? `${imageUrl}` : defaultServerImage}
             sizes="(max-width: 768px) 50px, (max-width: 1200px) 70px"
             quality={30}
             alt={`Server: ${name}`}

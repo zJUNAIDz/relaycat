@@ -1,12 +1,13 @@
 "use client"
+import { Server, User } from "@/generated/prisma/client";
 import { RoleIcon } from "@/shared/components/icons";
 import { UserAvatar } from "@/shared/components/user-avatar";
+import { ServerWithMembersAndUser } from "@/shared/types";
 import { cn } from "@/shared/utils/cn";
-import { Member, Server, User } from "@/generated/prisma/client";
 import { useParams, useRouter } from "next/navigation";
 
 interface ServerMemberProps {
-  member: Member & { user: User };
+  member: ServerWithMembersAndUser["members"][number];
   serverId: Server["id"];
   profileId: User["id"];
 }
@@ -17,7 +18,6 @@ export const ServerMember: React.FC<ServerMemberProps> = ({ member, serverId, pr
   const onClick = () => {
     if (member.user.id !== profileId)
       router.push(`/servers/${serverId}/conversations/${member.id}`)
-
   }
   return (
     <button

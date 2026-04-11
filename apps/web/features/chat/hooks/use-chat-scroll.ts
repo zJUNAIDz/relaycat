@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 
 type ChatScrollProps = {
-  chatRef: React.RefObject<HTMLDivElement>;
-  bottomRef: React.RefObject<HTMLDivElement>;
+  chatRef: React.RefObject<HTMLDivElement | null>;
+  bottomRef: React.RefObject<HTMLDivElement | null>;
   shouldLoadMore: boolean;
   loadMore: () => void;
   count: number;
@@ -13,7 +13,7 @@ export const useChatScroll = ({
   bottomRef,
   shouldLoadMore,
   loadMore,
-  count
+  count,
 }: ChatScrollProps) => {
   const [hasInitialized, setHasInitialized] = useState(false);
 
@@ -21,10 +21,14 @@ export const useChatScroll = ({
     const topDiv = chatRef?.current;
 
     const handleScroll = () => {
-      console.log({ scrollHeight: topDiv?.scrollHeight, clientHeight: topDiv?.clientHeight, scrollTop: topDiv?.scrollTop })
+      console.log({
+        scrollHeight: topDiv?.scrollHeight,
+        clientHeight: topDiv?.clientHeight,
+        scrollTop: topDiv?.scrollTop,
+      });
 
       const scrollTop = topDiv?.scrollTop;
-      console.log({ scrollTop })
+      console.log({ scrollTop });
       if (scrollTop === 0 && shouldLoadMore) {
         loadMore();
       }
@@ -50,11 +54,11 @@ export const useChatScroll = ({
     };
 
     setTimeout(() => {
-      const shouldNow = shouldAutoScroll()
-      console.log({ shouldNow })
+      const shouldNow = shouldAutoScroll();
+      console.log({ shouldNow });
       if (shouldNow) {
         bottomRef.current?.scrollIntoView({
-          behavior: "smooth"
+          behavior: "smooth",
         });
       }
     }, 100);
