@@ -1,19 +1,21 @@
 import { Channel } from "@/generated/prisma/client";
 import axiosClient from "@/shared/lib/axios-client";
-import { CONFIG } from "@/shared/lib/config";
 import { AxiosError, AxiosResponse } from "axios";
 
 class ChannelService {
   async getChannelById(channelId: string) {
     try {
       const {
-        data: { channel },
+        data,
       }: AxiosResponse<{ channel: Channel | null }> = await axiosClient.get(
-        `${CONFIG.API_URL}/channels/${channelId}`
+        `/channels/${channelId}`,
       );
+      console.log("getChannelById data:", data);
+      const channel = data.channel;
       if (!channel) {
         return { channel: null, error: "Channel not found" };
       }
+    
       return { channel, error: null };
     } catch (error) {
       if (error instanceof AxiosError) {
