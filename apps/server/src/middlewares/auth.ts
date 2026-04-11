@@ -8,8 +8,8 @@ export const setAuthContext = async (
 ) => {
   const session = await auth.api.getSession({ headers: c.req.raw.headers });
   if (!session) {
-    c.set("user", null as any);
-    c.set("session", null as any);
+    c.set("user", null);
+    c.set("session", null);
     await next();
     return;
   }
