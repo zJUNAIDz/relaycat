@@ -1,30 +1,19 @@
-"use client"
-import { PAGE_ROUTES } from "@/shared/lib/routes";
-import { useAuth } from "@/shared/providers/auth-provider";
+import NavigationSidebar from "@/features/server/navigation/navigation-sidebar";
 import { ModalProvider } from "@/shared/providers/modal-provider";
 import { QueryProvider } from "@/shared/providers/query-provider";
 import SocketProvider from "@/shared/providers/socket-provider";
 import { Ubuntu } from "next/font/google";
-import { redirect } from "next/navigation";
 
 const ubuntuFont = Ubuntu({ subsets: ['latin'], weight: ["300"] })
 
 const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { user, isLoading } = useAuth();
 
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
-
-  if (!user) {
-    return redirect(PAGE_ROUTES.AUTH);
-  }
   return <div className={`h-full ${ubuntuFont.className}`}>
     <SocketProvider >
       <QueryProvider>
         <ModalProvider />
         <aside className="hidden md:flex h-full w-0 md:w-18 z-30 flex-col fixed inset-y-0">
-          {/* <NavigationSidebar /> */}
+          <NavigationSidebar />
         </aside>
         <main className="md:pl-18 h-full">
           {children}
