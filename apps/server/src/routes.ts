@@ -49,7 +49,7 @@ protectedApp.get("/", (c) => {
 });
 
 app.route("/public", publicRoute);
-app.route("/api", protectedApp);
+app.route("/", protectedApp);
 app.onError(errorhandler);
 export default {
   port: getEnv("HTTP_PORT") || 3001,
