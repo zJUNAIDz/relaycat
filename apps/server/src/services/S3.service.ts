@@ -3,28 +3,29 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import "dotenv/config";
 import { generateErrorMessage } from "../utils/error-handler";
 import { UploadPolicy } from "../config/uploads";
+import { file } from "bun";
 
-type getSignedUrlResponse = {
-  success: true;
-  data: {
-    signedUrl: string;
-    bucketName: string;
-    key: string
-  };
-  error: null;
-} | {
-  success: false;
-  data: null;
-  error: { message: string }
-};
+type getSignedUrlResponse =
+  | {
+      success: true;
+      data: {
+        signedUrl: string;
+        bucketName: string;
+        key: string;
+      };
+      error: null;
+    }
+  | {
+      success: false;
+      data: null;
+      error: { message: string };
+    };
 interface S3ServiceOptions {
   allowedFileTypes?: string[];
   signedUrlExpirationSeconds?: number;
 }
 
-
 export class S3Service {
-
   private ALLOWED_FILE_TYPES: string[];
   private SIGNED_URL_EXPIRATION_SECONDS: number;
   constructor(
@@ -39,9 +40,9 @@ export class S3Service {
       "image/jpg",
       "image/webp",
     ];
-    this.SIGNED_URL_EXPIRATION_SECONDS = this.options.signedUrlExpirationSeconds ?? 1 * 60 * 60; // 1 hour default
+    this.SIGNED_URL_EXPIRATION_SECONDS =
+      this.options.signedUrlExpirationSeconds ?? 1 * 60 * 60; // 1 hour default
   }
-
 
   /**
    * Returns a signed url for uploading a new image
@@ -53,20 +54,22 @@ export class S3Service {
   async generatePresignedUrl(
     fileName: string,
     fileType: string,
-    policy: UploadPolicy
+    policy: UploadPolicy,
   ): Promise<getSignedUrlResponse> {
     if (!policy.allowedFileTypes.includes(fileType)) {
       return {
         data: null,
         success: false,
         error: {
-          message:
-            `File type not supported. Must be one of these [${policy.allowedFileTypes.join(", ")}]`,
+          message: `File type not supported. Must be one of these [${policy.allowedFileTypes.join(", ")}]`,
         },
       };
     }
     try {
-      const key = `${policy.pathPrefix}${fileName}-${crypto.randomUUID()}.${fileType.split("/")[1]}`;
+      const fileExtension = fileType.includes("/")
+        ? fileType.split("/")[1]
+        : fileType;
+      const key = `${policy.pathPrefix}${fileName}-${crypto.randomUUID()}.${fileExtension}`;
       const command = new PutObjectCommand({
         Bucket: this.bucketName,
         Key: key,
@@ -75,13 +78,12 @@ export class S3Service {
 
       const signedUrl = await getSignedUrl(this.s3Client, command, {
         expiresIn: policy.signedUrlExpirationSeconds,
-
       });
       return {
         data: {
           signedUrl,
           bucketName: this.bucketName,
-          key
+          key,
         },
         success: true,
         error: null,
@@ -91,9 +93,13 @@ export class S3Service {
         data: null,
         success: false,
         error: {
-          message: generateErrorMessage(err, "An unknown error occurred while generating the signed URL.", "[s3Service/getUploadImageUrlError]"),
+          message: generateErrorMessage(
+            err,
+            "An unknown error occurred while generating the signed URL.",
+            "[s3Service/getUploadImageUrlError]",
+          ),
         },
       };
     }
   }
-}  
+}
