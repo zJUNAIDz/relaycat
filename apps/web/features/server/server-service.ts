@@ -11,23 +11,23 @@ import queryString from "query-string";
 
 class ServerService {
   API_URL: string;
-  constructor() {
-    this.API_URL = CONFIG.API_URL;
+  constructor(apiUrl: string) {
+    this.API_URL = apiUrl;
   }
 
   async getCurrentUserServers(): Promise<
     ServerWithMembersAndUser[] | Server[] | null
   > {
     try {
-      const { data: servers }: { data: Server[] } = await axiosClient.get(
-        `${this.API_URL}/servers`
-      );
+     
+      const { data: servers }: { data: Server[] } =
+        await axiosClient.get(`/servers`);
       if (!servers) return null;
       return servers;
     } catch (err) {
       console.error(
         "[SERVER_SERVICE:getServerWithMembersWithUserProfiles] ",
-        err
+        err,
       );
       return null;
     }
@@ -35,27 +35,27 @@ class ServerService {
 
   async getServer(
     serverId: string,
-    options?: ["members"]
+    options?: ["members"],
   ): Promise<ServerWithMembersOnly | null>;
   async getServer(
     serverId: string,
-    options?: ["user", "members"] | ["user"]
+    options?: ["user", "members"] | ["user"],
   ): Promise<ServerWithMembersAndUser | null>;
   async getServer(
     serverId: string,
-    options?: ["user", "members", "channels"] | ["user", "channels"]
+    options?: ["user", "members", "channels"] | ["user", "channels"],
   ): Promise<ServerWithMembersUserAndChannels>;
   async getServer(
     serverId: string,
-    options?: undefined | []
+    options?: undefined | [],
   ): Promise<Server | null>;
   async getServer(
     serverId: string,
-    options?: string[]
+    options?: string[],
   ): Promise<ServerWithMembersAndUser | ServerWithMembersOnly | Server | null> {
     try {
       const url = queryString.stringifyUrl({
-        url: `${this.API_URL}/servers/${serverId}`,
+        url: `/servers/${serverId}`,
         query: {
           user: options?.includes("users") ? true : false,
           member: options?.includes("members") ? true : false,
@@ -78,7 +78,7 @@ class ServerService {
     }
   }
   async joinServerByInviteCode(
-    inviteCode: string
+    inviteCode: string,
   ): Promise<{ serverId: Server["id"] | null; error: string | null }> {
     try {
       const endpoint = `${this.API_URL}/servers/join/invite`;
@@ -102,4 +102,4 @@ class ServerService {
   }
 }
 
-export const serverService = new ServerService();
+export const serverService = new ServerService(CONFIG.API_URL);
