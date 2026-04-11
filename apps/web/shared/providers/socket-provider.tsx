@@ -1,17 +1,19 @@
 "use client"
+import { CONFIG } from "@/shared/lib/config";
 import React from "react";
 import { io as ClientIO, Socket } from "socket.io-client";
-import { CONFIG } from "@/shared/lib/config";
 import { useAuth } from "./auth-provider";
 
 type SocketContextType = {
   socket: Socket | null;
   isConnected: boolean;
+  isLoading: boolean;
 }
 
 const SocketContext = React.createContext<SocketContextType>({
   socket: null,
   isConnected: false,
+  isLoading: true,
 });
 
 export const useSocket = () => React.useContext(SocketContext);
@@ -19,14 +21,14 @@ export const useSocket = () => React.useContext(SocketContext);
 export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
   const [socket, setSocket] = React.useState<Socket | null>(null);
   const [isConnected, setIsConnected] = React.useState(false);
-  const { session } = useAuth()
-
+  const [isConnecting, setIsConnecting] = React.useState(true);
+  const { session, isLoading: isAuthLoading } = useAuth()
+  const isLoading = isAuthLoading || isConnecting;
   React.useEffect(() => {
+    if (isAuthLoading || !session) return;
 
-    if (!session) {
-      throw new Error("no user found for socket")
-    }
     console.log("Initializing socket connection...");
+    setIsConnecting(true);
 
     const newSocket = ClientIO(CONFIG.SOCKET_URL, {
       path: "/",
@@ -39,6 +41,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     const connectionHandler = () => {
       console.log("WS Connected ID:", newSocket.id);
       setIsConnected(true);
+      setIsConnecting(false);
     };
 
     const disconnectHandler = () => {
@@ -60,10 +63,10 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
       newSocket.off("disconnect", disconnectHandler);
       newSocket.disconnect();
     };
-  }, [session]);
+  }, [session, isAuthLoading]);
 
   return (
-    <SocketContext.Provider value={{ socket, isConnected }}>
+    <SocketContext.Provider value={{ socket, isConnected, isLoading: isAuthLoading }}>
       {children}
     </SocketContext.Provider>
   );
