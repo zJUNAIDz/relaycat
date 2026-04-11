@@ -3,8 +3,8 @@ import z from "zod/v4";
 
 export type AppContext = {
   Variables: {
-    user: typeof auth.$Infer.Session.user;
-    session: typeof auth.$Infer.Session.session;
+    user: typeof auth.$Infer.Session.user | null;
+    session: typeof auth.$Infer.Session.session | null;
     logger: typeof import("../lib/logger").logger | null;
   };
 };

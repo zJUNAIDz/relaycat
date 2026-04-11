@@ -66,15 +66,14 @@ class MembersService {
 
       const grouped = membersList.reduce(
         (acc, curr) => {
-          const user = curr.user;
+          const user = curr.user!;
           const member = curr.members;
           if (!acc[member.id]) {
             acc[member.id] = {
               ...member,
-              user: [],
+              user,
             };
           }
-          if (user) acc[member.id].user.push(user);
           return acc;
         },
         {} as Record<string, MemberWithUser>,
@@ -89,13 +88,12 @@ class MembersService {
     }
   }
 
-
-/**
- * Deletes a member from a server based on the provided member ID.
- * @param memberId  Id of the member to be deleted
- * @param currentUserId  Id of the user making the deletion request
- * @returns  True if deletion is successful, false otherwise
- */
+  /**
+   * Deletes a member from a server based on the provided member ID.
+   * @param memberId  Id of the member to be deleted
+   * @param currentUserId  Id of the user making the deletion request
+   * @returns  True if deletion is successful, false otherwise
+   */
   async deleteMemberById(memberId: Member["id"], currentUserId: string) {
     try {
       const success = await db.transaction(async (tx) => {

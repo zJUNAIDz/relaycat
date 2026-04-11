@@ -21,7 +21,7 @@ export const members = pgTable("members", {
 });
 export type Member = typeof members.$inferSelect;
 export type MemberWithUser = Member & {
-  user: (typeof user.$inferSelect)[];
+  user: (typeof user.$inferSelect);
 };
 // get memberRole as const so I can use it in other files MemberRole.ADMIN
 export const MemberRole = possibleMemberRoles.reduce(
