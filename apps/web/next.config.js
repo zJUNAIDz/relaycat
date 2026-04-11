@@ -1,10 +1,12 @@
-/** @type {import('next').NextConfig} */
-const withbundleAnalyzer = require("@next/bundle-analyzer")({
-  enabled: process.env.ANALYZE === "true",
-});
+// /** @type {import('next').NextConfig} */
+// const withbundleAnalyzer = require("@next/bundle-analyzer")({
+//   enabled: process.env.ANALYZE === "true",
+// });
 const nextConfig = {
-  output: "standalone",
+  // output: "standalone",
+
   images: {
+    qualities: [30, 75],
     remotePatterns: [
       {
         protocol: "https",
@@ -32,9 +34,22 @@ const nextConfig = {
         hostname: "cdnb.artstation.com",
         pathname: "/**",
       },
+      // {
+      //   protocol: "http",
+      //   hostname: "localhost",
+      //   port: "4566",
+      //   pathname: "/**",
+      // },
+      {
+        protocol: "https",
+        hostname: "localhost.localstack.cloud",
+        port: "4566",
+        pathname: "/**",
+      },
       {
         protocol: "http",
-        hostname: "localhost",
+        hostname: "127.0.0.1",
+        port: "4566",
         pathname: "/**",
       },
     ],
