@@ -1,5 +1,5 @@
 "use client"
-import React from "react";
+import React, { useMemo } from "react";
 import { authClient, Session, User } from "../lib/auth-client";
 
 type AuthContextType = {
@@ -44,9 +44,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
     })();
   }, []);
-
+  const value = useMemo(() => ({ user, session, isLoading, error }), [user, session, isLoading, error])
   return (
-    <AuthContext.Provider value={{ user, session, isLoading, error }}>
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );

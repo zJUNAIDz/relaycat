@@ -4,25 +4,51 @@ export const authClient = createAuthClient({
   baseURL: process.env.NEXT_PUBLIC_API_URL!,
 });
 
-export async function signinWIthEmail(email: string, password: string) {
-  await authClient.signIn.email(
+export async function signinWithEmail(
+  email: string,
+  password: string,
+  rememberMe: boolean = false,
+) {
+  return await authClient.signIn.email(
     {
       email,
       password,
+      rememberMe,
       callbackURL: "/",
     },
     {
       onError: (ctx) => {
         // Handle the error
         if (ctx.error.status === 403) {
-          console.log("Please verify your email address");
+          throw new Error("Please verify your email address");
         }
         //you can also show the original error message
-        console.log(ctx.error.message);
+        throw new Error(ctx.error.message);
       },
-    }
+    },
   );
 }
+
+export async function signupWithEmail(
+  email: string,
+  password: string,
+  name: string,
+) {
+  return await authClient.signUp.email(
+    {
+      email,
+      password,
+      name,
+      callbackURL: "/",
+    },
+    {
+      onError: (ctx) => {
+        throw new Error(ctx.error.message);
+      },
+    },
+  );
+}
+
 export async function signIn(provider: string, callbackURL: string = "/") {
   await authClient.signIn.social({
     provider,
@@ -37,7 +63,7 @@ export type User = {
   email: string;
   emailVerified: boolean;
   name: string;
-  image?: string | null | undefined;
+  image?: string | null;
 };
 export type Session = {
   id: string;
