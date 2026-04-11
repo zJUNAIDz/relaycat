@@ -4,6 +4,7 @@ import { pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { Channel } from "./channel";
 import { Member } from "./member";
+import { user } from "./auth-schema";
 
 export const servers = pgTable("servers", {
   id: uuid("id").default(randomUUIDv7()).primaryKey(),
@@ -21,7 +22,9 @@ export const serverInsertSchema = createInsertSchema(servers);
 export type Server = typeof servers.$inferSelect;
 export type ServerInput = typeof servers.$inferInsert;
 
-export type ServerWithMembersAndChannels = Server & {
-  members: Member[];
+export type MemberWithUser = Member & { user: typeof user.$inferSelect };
+export type ServerWithMembersAndUsersAndChannels = {
+  server: Server;
+  members: MemberWithUser[];
   channels: Channel[];
 };

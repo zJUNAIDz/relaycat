@@ -1,10 +1,11 @@
 import { db } from "@/db";
+import { user } from "@/db/schema/auth-schema";
 import { channels, ChannelType } from "@/db/schema/channel";
-import { MemberRole, members } from "@/db/schema/member";
+import { MemberRole, members, MemberWithUser } from "@/db/schema/member";
 import {
   ServerInput,
   servers,
-  ServerWithMembersAndChannels,
+  ServerWithMembersAndUsersAndChannels,
   type Server,
 } from "@/db/schema/server";
 import { and, eq, not, notExists } from "drizzle-orm";
@@ -64,37 +65,75 @@ class ServersService {
 
   async getServer(serverId: Server["id"], userId: string) {
     try {
-      const rows = await db
+      const membersWithUser = await db
         .select()
-        .from(servers)
-        .leftJoin(members, eq(members.serverId, servers.id))
-        .leftJoin(channels, eq(channels.serverId, servers.id))
-        .where(and(eq(servers.id, serverId), eq(members.userId, userId)));
-      if (rows.length === 0) {
+        .from(members)
+        .leftJoin(user, eq(user.id, members.userId))
+        .where(eq(members.serverId, serverId));
+      if (!membersWithUser.some((row) => row.user?.id === userId)) {
         return null;
       }
 
-      const grouped: Record<string, ServerWithMembersAndChannels> = rows.reduce(
-        (acc, row) => {
-          const server = row.servers as Server;
-          const member = row.members ?? null;
-          const channel = row.channels ?? null;
+      const [server] = await db
+        .select()
+        .from(servers)
+        .where(and(eq(servers.id, serverId)));
+      if (!server) {
+        return null;
+      }
+      const channelsInServer = await db
+        .select()
+        .from(channels)
+        .where(eq(channels.serverId, serverId));
 
-          if (!acc[server.id]) {
-            acc[server.id] = {
-              ...server,
-              members: [],
-              channels: [],
-            };
-          }
+      return {
+        server,
+        members: membersWithUser.map((row) => ({
+          ...row.members,
+          user: row.user,
+        })),
+        channels: channelsInServer,
+      } as ServerWithMembersAndUsersAndChannels;
+      // const rows = await db
+      //   .select({
+      //     server: servers,
+      //     member: members,
+      //     user: user,
+      //     channel: channels,
+      //   })
+      //   .from(servers)
+      //   .leftJoin(members, eq(members.serverId, servers.id))
+      //   .leftJoin(user, eq(user.id, members.userId))
+      //   .leftJoin(channels, eq(channels.serverId, servers.id))
+      //   .where(and(eq(servers.id, serverId), eq(members.userId, userId)));
+      // if (rows.length === 0) {
+      //   return null;
+      // }
 
-          if (member) acc[server.id].members.push(member);
-          if (channel) acc[server.id].channels.push(channel);
-          return acc;
-        },
-        {} as Record<string, ServerWithMembersAndChannels>,
-      );
-      return Object.values(grouped)[0];
+      // const grouped: Record<string, ServerWithMembersAndUsersAndChannels> =
+      //   rows.reduce(
+      //     (acc, row) => {
+      //       const server = row.server as Server;
+      //       const member = row.member as MemberWithUser | null;
+      //       const userData = row.user as typeof user.$inferSelect | null;
+      //       const channel = row.channel ?? null;
+      //       if (!acc[server.id]) {
+      //         acc[server.id] = {
+      //           server,
+      //           members: [],
+      //           channels: [],
+      //         };
+      //       }
+
+      //       if (member) {
+      //         acc[server.id].members.push({ ...member, user: userData });
+      //       }
+      //       if (channel) acc[server.id].channels.push(channel);
+      //       return acc;
+      //     },
+      //     {} as Record<string, ServerWithMembersAndUsersAndChannels>,
+      //   );
+      // return Object.values(grouped)[0];
     } catch (err) {
       return null;
     }
