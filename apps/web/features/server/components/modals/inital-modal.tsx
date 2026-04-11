@@ -142,7 +142,7 @@ const InitialModal = () => {
                         <FileUpload
                           type="image"
                           defaultValue={CONFIG.DEFAULT_SERVER_IMAGE_URL}
-                          value={field.value}
+                          value={field.value as string}
                           onChange={(previewUrl, file) => {
                             field.onChange(previewUrl);
                             setImageFile(file);

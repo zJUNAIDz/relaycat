@@ -31,7 +31,7 @@ const formSchema = z.object({
   name: z.string().min(1, {
     message: "Server name is required.",
   }),
-  imageUrl: z.string().optional().default(CONFIG.DEFAULT_SERVER_IMAGE_URL),
+  image: z.string().optional().default(CONFIG.DEFAULT_SERVER_IMAGE_URL),
 });
 
 
@@ -49,7 +49,7 @@ const CreateServerModal = () => {
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
-      imageUrl:
+      image:
         CONFIG.DEFAULT_SERVER_IMAGE_URL,
     },
   });
@@ -58,7 +58,7 @@ const CreateServerModal = () => {
   const resetForm = () => {
     form.reset({
       name: "",
-      imageUrl: CONFIG.DEFAULT_SERVER_IMAGE_URL,
+      image: CONFIG.DEFAULT_SERVER_IMAGE_URL,
     });
     setImageFile(null);
   }
@@ -66,14 +66,14 @@ const CreateServerModal = () => {
     try {
       setIsLoading(true);
       if (!imageFile) {
-        if (!values.imageUrl.length) {
+        if (!values.image.length) {
           setErrorMessage("Please upload an image");
           return;
         }
-        if (values.imageUrl === CONFIG.DEFAULT_SERVER_IMAGE_URL) {
+        if (values.image === CONFIG.DEFAULT_SERVER_IMAGE_URL) {
           await axiosClient.post(`${CONFIG.API_URL}/servers`, {
             name: values.name,
-            imageUrl: values.imageUrl,
+            imageUrl: values.image,
           });
           resetForm();
           router.refresh();
@@ -82,7 +82,7 @@ const CreateServerModal = () => {
         }
 
         //* impossible edge case
-        if (values.imageUrl !== CONFIG.DEFAULT_SERVER_IMAGE_URL) {
+        if (values.image !== CONFIG.DEFAULT_SERVER_IMAGE_URL) {
           setErrorMessage("Image Url is not valid. please refresh the page");
           return;
         }
@@ -96,14 +96,12 @@ const CreateServerModal = () => {
         return;
       }
       const s3BaseUrl = process.env.NEXT_PUBLIC_S3_URL!;
-      const imageUrl = `${s3BaseUrl}/${bucketName}/${key}`;
+      const image = `${s3BaseUrl}/${bucketName}/${key}`;
 
-      await axios.put(signedUrl, imageFile, {
-        headers: { "Content-Type": imageFile.type },
-      });
-      await axiosClient.post(`${CONFIG.API_URL}/servers`, {
+      await axios.put(signedUrl, imageFile);
+      await axiosClient.post(`/servers`, {
         name: values.name,
-        imageUrl,
+        image: image,
       });
 
       resetForm();

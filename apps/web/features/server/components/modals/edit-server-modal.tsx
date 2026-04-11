@@ -69,18 +69,15 @@ const EditServerModal = () => {
       //* Get signed url from api
       const { data: { signedUrl, key, bucketName } } = await axiosClient.get(`${CONFIG.API_URL}/s3/uploads/server-icon?serverName=${form.getValues("name")}&fileType=${imageFile.type}`);
       //* Upload file to S3
-      // await fetch(signedUrl, {
-      //   method: "PUT",
-      //   headers: { "Content-Type": file.type },
-      //   body: file,
-      // });
-      await axios.put(signedUrl, imageFile, {
-        headers: { "Content-Type": imageFile.type },
-      });
-      await axiosClient.patch(`${CONFIG.API_URL}/servers/${server?.id}`, {
-        name: values.name,
-        imageUrl: `https://s3.ap-south-1.amazonaws.com/${bucketName}/${key}`,
-      });
+      await Promise.all([
+        () => axios.put(signedUrl, imageFile, {
+          headers: { "Content-Type": imageFile.type },
+        }),
+        () => axiosClient.patch(`${CONFIG.API_URL}/servers/${server?.id}`, {
+          name: values.name,
+          imageUrl: `https://s3.ap-south-1.amazonaws.com/${bucketName}/${key}`,
+        })
+      ])
       form.reset();
       router.refresh();
       window.location.reload();
@@ -123,7 +120,7 @@ const EditServerModal = () => {
                       <FormControl>
                         <FileUpload
                           type="image"
-                          value={field.value}
+                          value={field.value as string}
                           onChange={
                             (previewUrl, file) => {
                               field.onChange(previewUrl);
