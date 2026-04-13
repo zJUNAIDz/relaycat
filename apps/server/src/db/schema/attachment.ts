@@ -1,9 +1,9 @@
-import { randomUUIDv7 } from "bun";
+import {v7 as uuidv7 } from "uuid";
 import { pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 import { messages } from "./message";
 
 export const attachments = pgTable("attachments", {
-  id: uuid("id").default(randomUUIDv7()).primaryKey(),
+  id: uuid("id").$defaultFn(() => uuidv7()).primaryKey(),
   messageId: uuid("message_id")
     .references(() => messages.id, { onDelete: "cascade" })
     .notNull(),

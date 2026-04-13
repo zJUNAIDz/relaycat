@@ -1,19 +1,18 @@
-import { randomUUIDv7 } from "bun";
-import { sql } from "drizzle-orm";
 import { pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
+import { v7 as uuidv7 } from "uuid";
+import { user } from "./auth-schema";
 import { Channel } from "./channel";
 import { Member } from "./member";
-import { user } from "./auth-schema";
 
 export const servers = pgTable("servers", {
-  id: uuid("id").default(randomUUIDv7()).primaryKey(),
+  id: uuid("id").$defaultFn(() => uuidv7()).primaryKey(),
   name: text("name").notNull(),
   image: text("image"),
   inviteCode: text("invite_code")
     .notNull()
     .unique()
-    .default(sql`encode(gen_random_bytes(16), 'hex')`),
+    .$defaultFn(() => uuidv7().replace(/-/g, "").slice(0, 8)),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at"),
 });

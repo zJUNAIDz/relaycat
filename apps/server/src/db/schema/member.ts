@@ -1,4 +1,4 @@
-import { randomUUIDv7 } from "bun";
+import {v7 as uuidv7 } from "uuid";
 import { pgEnum, text, timestamp, uuid } from "drizzle-orm/pg-core";
 import { pgTable } from "drizzle-orm/pg-core/table";
 import { user } from "./auth-schema";
@@ -7,7 +7,7 @@ import { servers } from "./server";
 export const possibleMemberRoles = ["ADMIN", "MODERATOR", "MEMBER"] as const;
 export const memberRole = pgEnum("member_role", possibleMemberRoles);
 export const members = pgTable("members", {
-  id: uuid("id").default(randomUUIDv7()).primaryKey(),
+  id: uuid("id").$defaultFn(() => uuidv7()).primaryKey(),
 
   userId: text("user_id")
     .references(() => user.id)

@@ -1,11 +1,11 @@
-import { randomUUIDv7 } from "bun";
+import {v7 as uuidv7 } from "uuid";
 import { pgEnum, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 import { createSelectSchema } from "drizzle-zod";
 import { servers } from "./server";
 const channelTypes = ["TEXT", "VOICE"] as const;
 export const channelTypeEnum = pgEnum("channel_type", channelTypes);
 export const channels = pgTable("channels", {
-  id: uuid("id").default(randomUUIDv7()).primaryKey(),
+  id: uuid("id").$defaultFn(() => uuidv7()).primaryKey(),
   name: text("name").notNull(),
   type: channelTypeEnum("type").notNull().default("TEXT"),
   serverId: uuid("server_id")
