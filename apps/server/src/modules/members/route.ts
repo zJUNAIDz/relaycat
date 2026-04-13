@@ -2,11 +2,11 @@ import {
   possibleMemberRoles
 } from "@/db/schema/member";
 import { membersService } from "@/modules/members/service";
-import { AppContext } from "@/types";
+import { ProtectedAppContext } from "@/types";
 import { Hono } from "hono";
 import z from "zod";
 
-const membersRoutes = new Hono<AppContext>();
+const membersRoutes = new Hono<ProtectedAppContext>();
 
 membersRoutes.get("/:memberId", async (c) => {
   const memberId = c.req.param("memberId");

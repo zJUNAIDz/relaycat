@@ -8,7 +8,7 @@ import membersRoutes from "@/modules/members/route";
 import profilesRoute from "@/routes/profiles.route";
 import { publicRoute } from "@/routes/public.route";
 import s3Routes from "@/routes/s3.route";
-import { AppContext } from "@/types";
+import { AppContext, ProtectedAppContext } from "@/types";
 import { getEnv } from "@/utils/env";
 import { errorhandler } from "@/utils/error-handler";
 import "dotenv/config";
@@ -32,7 +32,7 @@ app.use("*", setAuthContext);
 app.use("/static/*", serveStatic({ root: "./" }));
 
 //* PROTECTED ROUTES
-const protectedApp = new Hono<AppContext>();
+const protectedApp = new Hono<ProtectedAppContext>();
 protectedApp.use("*", setAuthContext);
 protectedApp.use("*", requireAuth);
 protectedApp.use("*", loggerMiddleware);

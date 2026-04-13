@@ -1,10 +1,9 @@
 import { Server, serverInsertSchema } from "@/db/schema/server";
-import { logger } from "@/lib/logger";
 import { serversService } from "@/modules/guilds/service";
-import { AppContext } from "@/types";
+import { ProtectedAppContext } from "@/types";
 import { randomUUIDv7 } from "bun";
 import { Hono } from "hono";
-const serverRoutes = new Hono<AppContext>();
+const serverRoutes = new Hono<ProtectedAppContext>();
 
 // Get all servers for the current user
 serverRoutes.get("/", async (c) => {
@@ -19,7 +18,7 @@ serverRoutes.get("/", async (c) => {
 // Create a new server
 serverRoutes.post("/", async (c) => {
   const body = await c.req.json();
-  const log = c.get("logger") ?? logger;
+  const log = c.get("logger");
   const serverData = serverInsertSchema.safeParse(body);
   if (serverData.error) {
     log.warn({ body, error: serverData.error }, "[NEW SERVER INVALID DATA]");
@@ -32,15 +31,7 @@ serverRoutes.post("/", async (c) => {
     log.error({ user, serverData }, "[NEW SERVER CREATION FAILED]");
     return c.json({ error: "Failed to create server" }, 500);
   }
-  log.info(
-    {
-      server: {
-        id: server.id,
-        name: server.name,
-      },
-    },
-    "[NEW SERVER CREATED]",
-  );
+  log.info({ server }, "[NEW SERVER CREATED]");
   return c.json(server);
 });
 
@@ -59,7 +50,7 @@ serverRoutes.get("/:serverId", async (c) => {
 serverRoutes.patch("/:serverId", async (c) => {
   const serverId = c.req.param("serverId") as Server["id"];
   const body = await c.req.json();
-  const log = c.get("logger") ?? logger;
+  const log = c.get("logger");
   const serverData = serverInsertSchema.safeParse(body);
   if (serverData.error) {
     return c.json({ error: serverData.error.message }, 400);
@@ -77,7 +68,7 @@ serverRoutes.patch("/:serverId", async (c) => {
 serverRoutes.delete("/:serverId", async (c) => {
   const serverId = c.req.param("serverId") as Server["id"];
   const user = c.get("user");
-  const log = c.get("logger") ?? logger;
+  const log = c.get("logger");
   const success = await serversService.deleteServer(serverId, user.id);
   if (!success) {
     log.warn({ user, serverId }, "[SERVER DELETE FAILED]");
@@ -91,7 +82,7 @@ serverRoutes.delete("/:serverId", async (c) => {
 serverRoutes.patch("/join/:inviteCode", async (c) => {
   const inviteCode = c.req.param("inviteCode");
   const user = c.get("user");
-  const log = c.get("logger") ?? logger;
+  const log = c.get("logger");
   const success = await serversService.joinServerFromInviteCode(
     user.id,
     inviteCode,
@@ -107,7 +98,7 @@ serverRoutes.patch("/join/:inviteCode", async (c) => {
 serverRoutes.delete("/:serverId/members/me", async (c) => {
   const serverId = c.req.param("serverId") as Server["id"];
   const user = c.get("user");
-  const log = c.get("logger") ?? logger;
+  const log = c.get("logger");
   const server = await serversService.leaveServer(serverId, user.id);
   if (!server) {
     log.warn({ user, serverId }, "[SERVER LEAVE NOT FOUND]");
@@ -121,7 +112,7 @@ serverRoutes.delete("/:serverId/members/me", async (c) => {
 serverRoutes.patch("/:serverId/invite-code", async (c) => {
   const serverId = c.req.param("serverId") as Server["id"];
   const user = c.get("user");
-  const log = c.get("logger") ?? logger;
+  const log = c.get("logger");
   if (!serverId) {
     log.warn({ user, serverId }, "[SERVER_UPDATE_INVITE_CODE_MISSING_ID]");
     return c.json({ error: "Server ID is required" }, 400);

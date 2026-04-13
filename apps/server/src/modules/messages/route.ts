@@ -1,11 +1,11 @@
 import { MessageCreateSchema } from "@/db/schema/message";
 import { socketManager } from "@/lib/socket-manager";
 import { messageService } from "@/modules/messages/service";
-import { AppContext, cursorSchema } from "@/types";
+import { ProtectedAppContext, cursorSchema } from "@/types";
 import { Hono } from "hono";
 import z from "zod/v4";
 
-const messageRoute = new Hono<AppContext>();
+const messageRoute = new Hono<ProtectedAppContext>();
 
 messageRoute.get("/", async (c) => {
   const channelId = z

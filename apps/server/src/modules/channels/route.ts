@@ -1,11 +1,10 @@
 import { ChannelInsertSchema } from "@/db/schema/channel";
-import { logger } from "@/lib/logger";
-import { AppContext } from "@/types";
+import { ProtectedAppContext } from "@/types";
 import { Hono } from "hono";
 import { channelService } from "./service";
 import messageRoute from "@/modules/messages/route";
 
-const channelsRoute = new Hono<AppContext>();
+const channelsRoute = new Hono<ProtectedAppContext>();
 channelsRoute.route("/:channelId/messages", messageRoute);
 
 channelsRoute.get("/", async (c) => {
@@ -23,7 +22,7 @@ channelsRoute.get("/", async (c) => {
 
 channelsRoute.post("/", async (c) => {
   const body = await c.req.json();
-  const log = c.get("logger") ?? logger;
+  const log = c.get("logger");
   const channelData = ChannelInsertSchema.safeParse(body);
   if (channelData.error) {
     return c.json({ error: channelData.error.message }, 400);
@@ -69,7 +68,7 @@ channelsRoute.patch("/:channelId", async (c) => {
   }
   const { channelId } = c.req.param();
   const user = c.get("user");
-  const log = c.get("logger") ?? logger;
+  const log = c.get("logger");
   // console.table({ name, type, channelId, userId });
   const channel = await channelService.editChannel(
     channelData.data,

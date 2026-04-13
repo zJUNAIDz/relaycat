@@ -1,11 +1,23 @@
 import { auth } from "@/lib/auth";
 import z from "zod/v4";
 
+type SessionUser = typeof auth.$Infer.Session.user;
+type SessionData = typeof auth.$Infer.Session.session;
+type RequestLogger = typeof import("../lib/logger").logger;
+
 export type AppContext = {
   Variables: {
-    user: typeof auth.$Infer.Session.user | null;
-    session: typeof auth.$Infer.Session.session | null;
-    logger: typeof import("../lib/logger").logger | null;
+    user: SessionUser | null;
+    session: SessionData | null;
+    logger: RequestLogger | null;
+  };
+};
+
+export type ProtectedAppContext = {
+  Variables: {
+    user: SessionUser;
+    session: SessionData;
+    logger: RequestLogger;
   };
 };
 
