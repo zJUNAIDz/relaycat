@@ -8,6 +8,13 @@
       "when": 1769514041771,
       "tag": "0000_absent_zzzax",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1776070350948,
+      "tag": "0001_strong_wolf_cub",
+      "breakpoints": true
     }
   ]
 }
