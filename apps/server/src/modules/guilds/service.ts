@@ -35,11 +35,13 @@ class ServersService {
           return newServer;
         })
         .catch((err) => {
+          console.error("Error creating server:", err);
           return null;
         });
 
       return server ?? null;
     } catch (err) {
+      console.error("Error creating server:", err);
       return null;
     }
   }

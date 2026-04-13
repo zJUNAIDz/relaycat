@@ -78,6 +78,7 @@ export class S3Service {
 
       const signedUrl = await getSignedUrl(this.s3Client, command, {
         expiresIn: policy.signedUrlExpirationSeconds,
+        signableHeaders:new Set(["Content-Type"]),
       });
       return {
         data: {
