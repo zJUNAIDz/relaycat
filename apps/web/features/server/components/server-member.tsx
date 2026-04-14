@@ -29,7 +29,7 @@ export const ServerMember: React.FC<ServerMemberProps> = ({ member, serverId, pr
       )}
     >
       <UserAvatar
-        src={member.user.image}
+        src={member.user.image ?? undefined}
         className="h-4 w-4 md:h-8 md:w-8"
       />
       <p

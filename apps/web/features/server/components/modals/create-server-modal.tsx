@@ -66,30 +66,16 @@ const CreateServerModal = () => {
     try {
       setIsLoading(true);
       if (!imageFile) {
-        if (!values.image.length) {
-          setErrorMessage("Please upload an image");
-          return;
-        }
-        if (values.image === CONFIG.DEFAULT_SERVER_IMAGE_URL) {
-          await axiosClient.post(`${CONFIG.API_URL}/servers`, {
-            name: values.name,
-            imageUrl: values.image,
-          });
-          resetForm();
-          router.refresh();
-          onClose();
-          return;
-        }
-
-        //* impossible edge case
-        if (values.image !== CONFIG.DEFAULT_SERVER_IMAGE_URL) {
-          setErrorMessage("Image Url is not valid. please refresh the page");
-          return;
-        }
-        setErrorMessage("No image found")
+        await axiosClient.post(`/servers`, {
+          name: values.name,
+          image: values.image,
+        });
+        resetForm();
+        router.refresh();
+        onClose();
         return;
       }
-      const { data: { signedUrl, key, bucketName } } = await axiosClient.get(`${CONFIG.API_URL}/s3/uploads/server-icon?serverName=${form.getValues("name")}&fileType=${imageFile.type}`);
+      const { data: { signedUrl, key, bucketName } } = await axiosClient.get(`/s3/uploads/server-icon?serverName=${form.getValues("name")}&fileType=${imageFile.type}`);
 
       if (!signedUrl || !key || !bucketName) {
         setErrorMessage("Error uploading image");
@@ -98,7 +84,9 @@ const CreateServerModal = () => {
       const s3BaseUrl = process.env.NEXT_PUBLIC_S3_URL!;
       const image = `${s3BaseUrl}/${bucketName}/${key}`;
 
-      await axios.put(signedUrl, imageFile);
+      await axios.put(signedUrl, imageFile, {
+        headers: { "Content-Type": imageFile.type },
+      });
       await axiosClient.post(`/servers`, {
         name: values.name,
         image: image,
@@ -142,7 +130,7 @@ const CreateServerModal = () => {
               <div className="flex justify-center items-center text-center">
                 <FormField
                   control={form.control}
-                  name="imageUrl"
+                  name="image"
                   render={({ field }) => (
                     <FormItem>
                       <FormControl>
