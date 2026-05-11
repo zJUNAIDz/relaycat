@@ -8,7 +8,7 @@ import {
   ServerWithMembersAndUsersAndChannels,
   type Server,
 } from "@/db/schema/server";
-import { and, eq, not, notExists } from "drizzle-orm";
+import { and, eq, inArray, not, notExists } from "drizzle-orm";
 
 class ServersService {
   async createServer(
@@ -65,14 +65,17 @@ class ServersService {
     }
   }
 
-  async getServer(serverId: Server["id"], userId: string) {
+  async getServer(
+    serverId: Server["id"],
+    userId: string,
+  ): Promise<ServerWithMembersAndUsersAndChannels | null> {
     try {
       const membersWithUser = await db
         .select()
         .from(members)
-        .leftJoin(user, eq(user.id, members.userId))
+        .innerJoin(user, eq(user.id, members.userId))
         .where(eq(members.serverId, serverId));
-      if (!membersWithUser.some((row) => row.user?.id === userId)) {
+      if (!membersWithUser.some((row) => row.user.id === userId)) {
         return null;
       }
 
@@ -89,53 +92,13 @@ class ServersService {
         .where(eq(channels.serverId, serverId));
 
       return {
-        server,
+        ...server,
         members: membersWithUser.map((row) => ({
           ...row.members,
           user: row.user,
         })),
         channels: channelsInServer,
-      } as ServerWithMembersAndUsersAndChannels;
-      // const rows = await db
-      //   .select({
-      //     server: servers,
-      //     member: members,
-      //     user: user,
-      //     channel: channels,
-      //   })
-      //   .from(servers)
-      //   .leftJoin(members, eq(members.serverId, servers.id))
-      //   .leftJoin(user, eq(user.id, members.userId))
-      //   .leftJoin(channels, eq(channels.serverId, servers.id))
-      //   .where(and(eq(servers.id, serverId), eq(members.userId, userId)));
-      // if (rows.length === 0) {
-      //   return null;
-      // }
-
-      // const grouped: Record<string, ServerWithMembersAndUsersAndChannels> =
-      //   rows.reduce(
-      //     (acc, row) => {
-      //       const server = row.server as Server;
-      //       const member = row.member as MemberWithUser | null;
-      //       const userData = row.user as typeof user.$inferSelect | null;
-      //       const channel = row.channel ?? null;
-      //       if (!acc[server.id]) {
-      //         acc[server.id] = {
-      //           server,
-      //           members: [],
-      //           channels: [],
-      //         };
-      //       }
-
-      //       if (member) {
-      //         acc[server.id].members.push({ ...member, user: userData });
-      //       }
-      //       if (channel) acc[server.id].channels.push(channel);
-      //       return acc;
-      //     },
-      //     {} as Record<string, ServerWithMembersAndUsersAndChannels>,
-      //   );
-      // return Object.values(grouped)[0];
+      };
     } catch (err) {
       return null;
     }
@@ -143,14 +106,47 @@ class ServersService {
 
   async getServersByUserId(userId: string) {
     try {
-      const rows = await db
-        .select({
-          server: servers,
-        })
-        .from(servers)
-        .innerJoin(members, eq(servers.id, members.serverId))
+      const userMemberships = await db
+        .select({ serverId: members.serverId })
+        .from(members)
         .where(eq(members.userId, userId));
-      return rows.map((row) => row.server);
+
+      if (userMemberships.length === 0) {
+        return [];
+      }
+
+      const serverIds = userMemberships.map(
+        (membership) => membership.serverId,
+      );
+
+      const serversInScope = await db
+        .select()
+        .from(servers)
+        .where(inArray(servers.id, serverIds));
+
+      const membersWithUser = await db
+        .select()
+        .from(members)
+        .innerJoin(user, eq(user.id, members.userId))
+        .where(inArray(members.serverId, serverIds));
+
+      const channelsInScope = await db
+        .select()
+        .from(channels)
+        .where(inArray(channels.serverId, serverIds));
+
+      return serversInScope.map((server) => ({
+        ...server,
+        channels: channelsInScope.filter(
+          (channel) => channel.serverId === server.id,
+        ),
+        members: membersWithUser
+          .filter((row) => row.members.serverId === server.id)
+          .map((row) => ({
+            ...row.members,
+            user: row.user,
+          })),
+      }));
     } catch (err) {
       return null;
     }

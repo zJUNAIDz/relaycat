@@ -3,6 +3,7 @@ import axiosClient from "@/shared/lib/axios-client";
 import { CONFIG } from "@/shared/lib/config";
 import { PAGE_ROUTES } from "@/shared/lib/routes";
 import { getCurrentUser } from "@/shared/utils/server";
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import queryString from "query-string";
 interface ServerIdPageProps {
@@ -14,7 +15,7 @@ interface ServerIdPageProps {
 
 const ServerIdPage = async ({ params }: ServerIdPageProps) => {
   const { serverId } = await params
-  const user = await getCurrentUser()
+  const user = await getCurrentUser(headers(()))
   if (!user) {
     redirect(`${PAGE_ROUTES.AUTH}?login=`)
   }

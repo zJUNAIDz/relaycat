@@ -1,3 +1,4 @@
+"use client";
 import { SocketIndicator } from "@/features/socket/components/socket-indicator";
 import { MobileToggle } from "@/shared/components/mobile-toggle";
 import { UserAvatar } from "@/shared/components/user-avatar";

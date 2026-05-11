@@ -1,12 +1,13 @@
 import InitialModal from "@/features/server/components/modals/inital-modal";
 import { serverService } from "@/features/server/server-service";
 import { getCurrentUser } from "@/shared/utils/server";
+import { headers } from "next/headers";
 import { redirect, RedirectType } from "next/navigation";
 
 export const dynamic = "force-dynamic";
 
 const SetupPage = async () => {
-  const user = await getCurrentUser();
+  const user = await getCurrentUser(headers());
   if (!user) return redirect("/auth", RedirectType.replace);
   //TODO: optimize it to query first server only
   const servers = await serverService.getCurrentUserServers()

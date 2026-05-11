@@ -1,10 +1,9 @@
-import "server-only"
 import { ModeToggle } from "@/shared/components/mode-toggle";
 import { ScrollArea } from "@/shared/components/ui/scroll-area";
 import { Separator } from "@/shared/components/ui/separator";
 import { serverService } from "../server-service";
-import { NavigationAction } from "./navigation-action";
 import NavigationItem from "./navigation-item";
+import { CreateServerButton } from "./create-server-button";
 
 const NavigationSidebar = async () => {
   const servers = await serverService.getCurrentUserServers();
@@ -26,7 +25,7 @@ const NavigationSidebar = async () => {
       </ScrollArea>
       <div className="pb-3 mt-auto flex items-center flex-col gap-y-4">
         <Separator className="h-0.5 bg-zinc-300 dark:bg-zinc-700 rounded-md w-10 mx-auto" />
-        <NavigationAction />
+        <CreateServerButton />
         <ModeToggle />
       </div>
     </div>

@@ -57,7 +57,7 @@ channelsRoute.get("/:channelId", async (c) => {
   const channel = await channelService.getChannelById(channelId, user.id);
   if (!channel)
     return c.json({ error: "Channel not found or access denied" }, 400);
-  return c.json(channel);
+  return c.json({channel});
 });
 
 channelsRoute.patch("/:channelId", async (c) => {

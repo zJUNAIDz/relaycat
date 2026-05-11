@@ -3,7 +3,7 @@ import { serverService } from "@/features/server/server-service";
 import { PAGE_ROUTES } from "@/shared/lib/routes";
 import { getCurrentUser } from "@/shared/utils/server";
 import { redirect } from "next/navigation";
-
+import { headers } from "next/headers";
 interface ServerIdLayoutProps {
   children: React.ReactNode;
   params: Promise<{
@@ -14,7 +14,7 @@ const ServerIdLayout: React.FC<ServerIdLayoutProps> = async ({
   children,
   params,
 }) => {
-  const user = await getCurrentUser();
+  const user = await getCurrentUser(headers());
   if (!user) return redirect("/auth");
 
   const { serverId } = await params;
