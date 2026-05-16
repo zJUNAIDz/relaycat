@@ -104,7 +104,7 @@ const MembersModal = () => {
             {server?.members && (
               server?.members.map(member => (
                 <div key={member.id} className="flex items-center gap-x-2 mb-6">
-                  <UserAvatar src={member.user.image} />
+                  <UserAvatar src={member.user.image ?? undefined} />
                   <div className="flex flex-col gap-y-1">
                     <div className="text-xs font-semibold flex items-center">
                       <span>{member.user.name}</span>

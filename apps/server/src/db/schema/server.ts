@@ -22,8 +22,7 @@ export type Server = typeof servers.$inferSelect;
 export type ServerInput = typeof servers.$inferInsert;
 
 export type MemberWithUser = Member & { user: typeof user.$inferSelect };
-export type ServerWithMembersAndUsersAndChannels = {
-  server: Server;
+export type ServerWithMembersAndUsersAndChannels = Server & {
   members: MemberWithUser[];
   channels: Channel[];
 };

@@ -1,0 +1,54 @@
+services:
+  postgres:
+    image: postgres:18
+    container_name: relaycat-postgres18
+    environment:
+      POSTGRES_USER: relaycat
+      POSTGRES_PASSWORD: relaycat
+      POSTGRES_DB: relaycat
+    ports:
+      - "5432:5432"
+    # restart: unless-stopped
+    volumes:
+      - postgres_data:/var/lib/postgresql/18/docker
+  minio:
+    image: minio/minio:latest
+    container_name: relaycat-minio
+    environment:
+      MINIO_ROOT_USER: relaycat
+      MINIO_ROOT_PASSWORD: relaycat
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    # restart: unless-stopped
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio_data:/data
+  loki:
+    image: grafana/loki:latest
+    container_name: relaycat-loki
+    ports:
+      - "3100:3100"
+    # restart: unless-stopped
+    command: -config.file=/etc/loki/local-config.yaml
+    volumes:
+      - loki_data:/loki
+      # - ./loki-config.yaml:/etc/loki/local-config.yaml
+  grafana:
+    image: grafana/grafana:latest
+    container_name: relaycat-grafana
+    ports:
+      - "3200:3000"
+    # restart: unless-stopped
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+    volumes:
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      - loki
+volumes:
+  postgres_data:
+  minio_data:
+  loki_data:
+  grafana_data:

@@ -1,7 +1,7 @@
+"use client";
 import ServerSidebar from "@/features/server/components/server-sidebar"
 import NavigationSidebar from "@/features/server/navigation/navigation-sidebar"
 import { Menu } from "lucide-react"
-import { useAppContextStore } from "../stores/use-app-store"
 import { Button } from "./ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "./ui/sheet"
 

@@ -1,6 +1,7 @@
 import InitialModal from "@/features/server/components/modals/inital-modal";
 import { serverService } from "@/features/server/server-service";
 import { getCurrentUser } from "@/shared/utils/server";
+import { headers } from "next/headers";
 import { redirect, RedirectType } from "next/navigation";
 
 export const dynamic = "force-dynamic";

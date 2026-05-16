@@ -35,7 +35,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         const { data, error } = await authClient.getSession() // better auth client
         console.log({ data, error });
         if (error) setError(error.message ?? "Error while fetching session")
-        setUser(data?.user ?? null);
+        setUser(data?.user as User ?? null);
         setSession(data?.session ?? null)
       } catch (err) {
         setError("Network error - failed to fetch token");

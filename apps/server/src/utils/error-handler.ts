@@ -7,18 +7,18 @@ export const errorhandler = (err: Error, c: Context) => {
   log.error({ err }, "[ROUTE_ERROR_HANDLER]");
   return c.json(
     {
-      error: err.message
-      // process.env.NODE_ENV === "prod"
-      //   ? "Server Error. run it in dev mode to see error message"
-      //   : err.message,
+      error:
+        process.env.NODE_ENV === "prod"
+          ? "Server Error. check logs for details."
+          : err.message,
     },
-    err.name === "ValidationError" ? 400 : 500
+    err.name === "ValidationError" ? 400 : 500,
   );
 };
 export const generateErrorMessage = (
   err: unknown,
   defaultMessage: string,
-  prefix?: string
+  prefix?: string,
 ) => {
   let errMessage = defaultMessage;
   if (err instanceof Error) {
@@ -30,4 +30,4 @@ export const generateErrorMessage = (
   }
   console.error(`${prefix} ${errMessage}`);
   return `${prefix} ${errMessage}`;
-}
+};

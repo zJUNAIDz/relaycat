@@ -21,7 +21,8 @@ class MemberService {
   }
   async getMemberByUserId(userId: Member["userId"]): Promise<{ member: Member, error: null } | { member: null, error: string }> {
     try {
-      const { data: { member, error } } = await axios.get(`${this.API_URL}/members/user/${userId}`)
+      const { data: { member, error } } = await axiosClient.get(`${this.API_URL}/members/user/${userId}`)
+      console.log({ member, error })
       if (error) {
         return { member: null, error }
       }
