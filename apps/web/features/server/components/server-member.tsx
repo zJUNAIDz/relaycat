@@ -9,23 +9,23 @@ import { useParams, useRouter } from "next/navigation";
 interface ServerMemberProps {
   member: ServerWithMembersAndUser["members"][number];
   serverId: Server["id"];
-  profileId: User["id"];
+  // profileId: User["id"];
 }
 
-export const ServerMember: React.FC<ServerMemberProps> = ({ member, serverId, profileId }) => {
+export const ServerMember: React.FC<ServerMemberProps> = ({ member, serverId }) => {
   const params = useParams();
   const router = useRouter();
-  const onClick = () => {
-    if (member.user.id !== profileId)
-      router.push(`/servers/${serverId}/conversations/${member.id}`)
-  }
+  // const onClick = () => {
+  //   if (member.user.id !== profileId)
+  //     router.push(`/servers/${serverId}/conversations/${member.id}`)
+  // }
   return (
     <button
-      onClick={onClick}
+      // onClick={onClick}
       className={cn(
         "group px-2 py-2 rounded-md flex items-center gap-x-2 w-full  haver:bg-zinc-700/10 dark:hover:bg-zinc-700/50 transition mb-1",
         params.memberId === member.id && "bg-zinc-70020 dark:bg-zinc-700",
-        member.user.id === profileId && "cursor-default"
+        // member.user.id === profileId && "cursor-default"
       )}
     >
       <UserAvatar
