@@ -65,7 +65,8 @@ const ChannelIdPage = async ({ params }: ChannelIdPageProps) => {
           </>
         )
       }
-      {
+      {/* // TODO: FIX LIVEKIT MEDIA ROOMS */}
+      {/* {
         channel.type === ChannelType.AUDIO && (
           <MediaRoom
             chatId={channel.id}
@@ -82,7 +83,7 @@ const ChannelIdPage = async ({ params }: ChannelIdPageProps) => {
             video={true}
           />
         )
-      }
+      } */}
     </div>
   )
 }

@@ -81,12 +81,12 @@ const CreateServerModal = () => {
         setErrorMessage("Error uploading image");
         return;
       }
-      const s3BaseUrl = process.env.NEXT_PUBLIC_S3_URL!;
-      const image = `${s3BaseUrl}/${bucketName}/${key}`;
 
       await axios.put(signedUrl, imageFile, {
         headers: { "Content-Type": imageFile.type },
       });
+      const s3BaseUrl = process.env.NEXT_PUBLIC_S3_URL!;
+      const image = `${s3BaseUrl}/${bucketName}/${key}`;
       await axiosClient.post(`/servers`, {
         name: values.name,
         image: image,

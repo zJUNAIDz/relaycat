@@ -1,8 +1,8 @@
 import { ChannelInsertSchema } from "@/db/schema/channel";
+import messageRoute from "@/modules/messages/route";
 import { ProtectedAppContext } from "@/types";
 import { Hono } from "hono";
 import { channelService } from "./service";
-import messageRoute from "@/modules/messages/route";
 
 const channelsRoute = new Hono<ProtectedAppContext>();
 channelsRoute.route("/:channelId/messages", messageRoute);
@@ -50,9 +50,6 @@ channelsRoute.post("/", async (c) => {
 
 channelsRoute.get("/:channelId", async (c) => {
   const channelId = c.req.param("channelId");
-  if (!channelId) {
-    return c.json({ error: "channelId is required" }, 400);
-  }
   const user = c.get("user");
   const channel = await channelService.getChannelById(channelId, user.id);
   if (!channel)
