@@ -7,7 +7,6 @@ import '@livekit/components-styles';
 import { Loader2 } from "lucide-react";
 import React from "react";
 import { useAuth } from "../providers/auth-provider";
-import { useTheme } from 'next-themes';
 interface MediaRoomProps {
   chatId: string;
   video: boolean;
@@ -21,8 +20,6 @@ export const MediaRoom = ({
 }: MediaRoomProps) => {
   const { user } = useAuth();
   const [token, setToken] = React.useState("")
-  const { resolvedTheme } = useTheme();
-  const theme = resolvedTheme === "system" ? "default" : resolvedTheme;
 
   React.useEffect(() => {
     try {
