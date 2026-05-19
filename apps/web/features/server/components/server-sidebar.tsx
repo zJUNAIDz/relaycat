@@ -8,7 +8,6 @@ import { Separator } from "@/shared/components/ui/separator";
 import { Skeleton } from "@/shared/components/ui/skeleton";
 import { PAGE_ROUTES } from "@/shared/lib/routes";
 import { useAuth } from "@/shared/providers/auth-provider";
-import { useAppContextStore } from "@/shared/stores/use-app-store";
 import { useQuery } from "@tanstack/react-query";
 import { Hash, Mic, Video } from "lucide-react";
 import { redirect } from "next/navigation";
@@ -30,29 +29,28 @@ const roleIconMap = {
   [MemberRole.GUEST]: <RoleIcon role={MemberRole.GUEST} />,
 }
 
-const ServerSidebar = () => {
-  const ctx = useAppContextStore();
+const ServerSidebar = ({ serverId, channelId }: { serverId: string; channelId: string }) => {
   const { user, isLoading: isUserLoading, error: userError } = useAuth();
 
   const { data: server, isLoading: isServerDataLoading, isError: isServerDataError } = useQuery({
-    queryKey: ["server", ctx.currentServerId],
-    queryFn: () => serverService.getServer(ctx.currentServerId!),
-    enabled: !!ctx.currentServerId
+    queryKey: ["server", serverId],
+    queryFn: () => serverService.getServer(serverId),
+    enabled: !!serverId
   });
-  if (isServerDataError || userError) {
-    redirect(PAGE_ROUTES.HOME);
-  }
-  if (!server || !user) {
-    redirect(PAGE_ROUTES.HOME);
-  }
-  if (isServerDataLoading || isUserLoading) {
-    console.log({ isServerDataLoading, isUserLoading })
+  // Handle loading and error states for user
+  if (isUserLoading || isServerDataLoading) {
     return <ServerSidebarLoading />;
   }
-  if (!ctx.currentServerId) {
+  if (userError || !user) {
+    redirect(PAGE_ROUTES.AUTH);
+  }
+  // Handle loading and error states for server data
+  if (isServerDataError) {
+    redirect(PAGE_ROUTES.HOME);
+  }
+  if (!server) {
     return <NoServerSelected name={user.name ?? "Na"} image={user.image ?? ""} />;
   }
-  console.log(server);
   const textChannels = server?.channels.filter(
     (channel) => channel.type === ChannelType.TEXT
   );
