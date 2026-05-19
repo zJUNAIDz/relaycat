@@ -1,10 +1,10 @@
 
 import { AuthProvider } from "@/shared/providers/auth-provider";
-import { ThemeProvider } from "@/shared/providers/theme-provider";
 import { cn } from "@/shared/utils/cn";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import { ThemeProvider } from "@wrksz/themes";
 
 
 const inter = Inter({ subsets: ["latin"] });
@@ -25,6 +25,7 @@ export default async function RootLayout({
         <ThemeProvider
           attribute="class"
           defaultTheme="dark"
+          storage="hybrid"
           enableSystem={false}
           storageKey="relaycat"
         >
