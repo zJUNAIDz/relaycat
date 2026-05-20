@@ -2,10 +2,7 @@ import ServerSidebar from "@/features/server/components/server-sidebar";
 
 interface ServerIdLayoutProps {
   children: React.ReactNode;
-  params: Promise<{
-    serverId: string;
-    channelId: string;
-  }>
+  params: Promise<any>
 }
 const ServerIdLayout: React.FC<ServerIdLayoutProps> = async ({
   children,

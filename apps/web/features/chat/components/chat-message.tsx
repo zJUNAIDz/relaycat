@@ -110,7 +110,7 @@ export const ChatMessage = ({
   const isPDF = fileUrl && fileType === "pdf";
   const isImage = !isPDF && fileUrl;
   if (isLoadingAuth) return <div>Loading...</div>;
-  if (error) return <div>Error: {error}</div>;
+  if (error) return <div>Error: {error.message}</div>;
   return (
     <div className="relative group flex items-center hover:bg-black/5 p-4 transition w-full">
       <div className="group flex gap-x-2 items-start w-full">
