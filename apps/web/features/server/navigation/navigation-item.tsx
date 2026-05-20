@@ -14,11 +14,8 @@ const NavigationItem: React.FC<NavigationItemProps> = ({ server }) => {
   console.log("NavigationItem server: ", server)
   const params = useParams();
   const router = useRouter();
-  const ctx = useAppContextStore();
   const onClickServerIcon = () => {
-    ctx.setServer(server.id);
-    ctx.setChannel(server.channels?.[0]?.id ?? null);
-    router.push(`/channels/${server.channels?.[0]?.id}`);
+    router.push(`/channels/${server.id}/${server.channels?.[0]?.id}`);
   };
   // console.log("imageUrl", imageUrl)
   return (
