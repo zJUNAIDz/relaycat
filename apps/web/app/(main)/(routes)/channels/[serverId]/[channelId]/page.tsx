@@ -5,9 +5,8 @@ import { ChatMessages } from "@/features/chat/components/chat-messages";
 import { memberService } from "@/features/member/member-service";
 import { ChannelType } from "@/generated/prisma/client";
 import { CONFIG } from "@/shared/lib/config";
-import { PAGE_ROUTES } from "@/shared/lib/routes";
 import { getCurrentUser } from "@/shared/utils/server";
-import { redirect } from "next/navigation";
+import { notFound, unauthorized } from "next/navigation";
 interface ChannelIdPageProps {
   params: Promise<{
     serverId: string;
@@ -19,16 +18,15 @@ const ChannelIdPage = async ({ params }: ChannelIdPageProps) => {
   const { channelId } = await params;
   const channel = await channelService.getChannelById(channelId)
   if (!channel) {
-    redirect(PAGE_ROUTES.HOME)
+    notFound()
   }
   const user = await getCurrentUser();
   if (!user) {
-    redirect(PAGE_ROUTES.AUTH)
+    unauthorized();
   }
-  const { member, error } = await memberService.getMemberByUserId(user.id)
-  if (error || !member) {
-    console.log("[ChannelIdPage] ", error)
-    redirect(PAGE_ROUTES.HOME)
+  const member = await memberService.getMemberByUserId(user.id)
+  if (!member) {
+    notFound()
   }
   return (
     <div className="h-screen flex flex-col bg-white dark:bg-[#313338] ">

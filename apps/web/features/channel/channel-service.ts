@@ -5,7 +5,7 @@ class ChannelService {
   async getChannelById(channelId: string) {
     const { data }: AxiosResponse<{ channel: any | null }> =
       await axiosClient.get(`/channels/${channelId}`);
-    return data.channel;
+    return data.channel ?? null;
   }
 }
 
