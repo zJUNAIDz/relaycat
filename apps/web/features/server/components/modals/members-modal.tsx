@@ -1,6 +1,5 @@
 "use client";
 
-import { MemberRole } from "@/generated/prisma/client";
 import { RoleIcon } from "@/shared/components/icons";
 import { Button } from "@/shared/components/ui/button";
 import {
@@ -25,7 +24,7 @@ import { UserAvatar } from "@/shared/components/user-avatar";
 import { useModal } from "@/shared/hooks/use-modal-store";
 import axiosClient from "@/shared/lib/axios-client";
 import { CONFIG } from "@/shared/lib/config";
-import { ServerWithMembersAndUser } from "@/shared/types";
+import { MemberRole, ServerWithMembersAndUser } from "@/shared/types";
 import { capitalizeFirstLetter } from "@/shared/utils/misc";
 import { Check, Gavel, Loader2, MoreVertical, Shield } from "lucide-react";
 import { useRouter } from "next/navigation";

@@ -1,8 +1,7 @@
 "use client"
-import { Server, User } from "@/generated/prisma/client";
 import { RoleIcon } from "@/shared/components/icons";
 import { UserAvatar } from "@/shared/components/user-avatar";
-import { ServerWithMembersAndUser } from "@/shared/types";
+import { Server, ServerWithMembersAndUser } from "@/shared/types";
 import { cn } from "@/shared/utils/cn";
 import { useParams, useRouter } from "next/navigation";
 

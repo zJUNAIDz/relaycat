@@ -1,4 +1,3 @@
-import { Member, MemberRole, Message } from "@/generated/prisma/client";
 import { ActionTooltip } from "@/shared/components/action-tooltip";
 import { RoleIcon } from "@/shared/components/icons";
 import { Form, FormControl, FormField, FormItem } from "@/shared/components/ui/form";
@@ -8,7 +7,7 @@ import { useModal } from "@/shared/hooks/use-modal-store";
 import axiosClient from "@/shared/lib/axios-client";
 import { CONFIG } from "@/shared/lib/config";
 import { useAuth } from "@/shared/providers/auth-provider";
-import { MemberWithUser } from "@/shared/types";
+import { Member, MemberRole, MemberWithUser, Message } from "@/shared/types";
 import { cn } from "@/shared/utils/cn";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Edit, Trash } from "lucide-react";

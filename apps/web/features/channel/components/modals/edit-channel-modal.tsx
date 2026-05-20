@@ -1,6 +1,5 @@
 "use client";
 
-import { ChannelType } from "@/generated/prisma/client";
 import { Button } from "@/shared/components/ui/button";
 import {
   Dialog,
@@ -19,6 +18,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useModal } from "@/shared/hooks/use-modal-store";
 import axiosClient from "@/shared/lib/axios-client";
 import { CONFIG } from "@/shared/lib/config";
+import { ChannelType } from "@/shared/types";
 import { capitalizeFirstLetter } from "@/shared/utils/misc";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DialogTitle } from "@radix-ui/react-dialog";

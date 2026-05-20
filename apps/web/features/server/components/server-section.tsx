@@ -1,7 +1,7 @@
 "use client";
 import { ActionTooltip } from "@/shared/components/action-tooltip";
 import { useModal } from "@/shared/hooks/use-modal-store";
-import { ChannelType, MemberRole, Server } from "@/generated/prisma/client";
+import { ChannelType, MemberRole, Server } from "@/shared/types";
 import { Plus, Settings } from "lucide-react";
 
 interface ServerSectionProps {

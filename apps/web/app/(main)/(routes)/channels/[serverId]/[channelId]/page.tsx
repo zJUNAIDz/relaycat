@@ -3,8 +3,8 @@ import ChatHeader from "@/features/chat/components/chat-header";
 import { ChatInput } from "@/features/chat/components/chat-input";
 import { ChatMessages } from "@/features/chat/components/chat-messages";
 import { memberService } from "@/features/member/member-service";
-import { ChannelType } from "@/generated/prisma/client";
 import { CONFIG } from "@/shared/lib/config";
+import { ChannelType } from "@/shared/types";
 import { getCurrentUser } from "@/shared/utils/server";
 import { notFound, unauthorized } from "next/navigation";
 interface ChannelIdPageProps {

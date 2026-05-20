@@ -1,13 +1,13 @@
 "use client";
 import { ChannelList } from "@/features/channel/components/channels-list";
 import { ServerSearch } from "@/features/server/navigation/server-search";
-import { ChannelType, MemberRole } from "@/generated/prisma/client";
 import { RoleIcon } from "@/shared/components/icons";
 import { ScrollArea } from "@/shared/components/ui/scroll-area";
 import { Separator } from "@/shared/components/ui/separator";
 import { Skeleton } from "@/shared/components/ui/skeleton";
 import { PAGE_ROUTES } from "@/shared/lib/routes";
 import { useAuth } from "@/shared/providers/auth-provider";
+import { ChannelType, MemberRole } from "@/shared/types";
 import { useQuery } from "@tanstack/react-query";
 import { Hash, Mic, Video } from "lucide-react";
 import { redirect } from "next/navigation";
@@ -103,7 +103,7 @@ const ServerSidebar = ({ serverId, channelId }: { serverId: string; channelId: s
               type: "member",
               data: members?.map(member => ({
                 icon: roleIconMap[member.role],
-                name: member.user.name || "",
+                name: member.user?.name || "",
                 id: member.userId
               }))
             },

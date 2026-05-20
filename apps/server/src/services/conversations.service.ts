@@ -1,12 +1,10 @@
-import { DirectMessage, Member } from "@/generated/prisma/client";
 import { db } from "../lib/db";
-import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 
 class ConversationService {
   private MESSAGE_BATCH = 10;
   async getMessagesByConversationId(
-    conversationId: DirectMessage["conversationId"],
-    cursor: DirectMessage["id"],
+    conversationId: string,
+    cursor: string | null,
   ) {
     try {
       const messages = await db.directMessage.findMany({
@@ -28,20 +26,25 @@ class ConversationService {
         },
       });
       if (!messages) {
-        return { messages: null, nextCursor: null, error: "Conversation Messages not found" }
+        return {
+          messages: null,
+          nextCursor: null,
+          error: "Conversation Messages not found",
+        };
       }
       let nextCursor = null;
       if (messages.length === this.MESSAGE_BATCH) {
-        nextCursor = messages[this.MESSAGE_BATCH - 1].id
-
+        nextCursor = messages[this.MESSAGE_BATCH - 1].id;
       }
-      console.log({ messages, nextCursor })
-      return { messages, nextCursor, error: null }
+      console.log({ messages, nextCursor });
+      return { messages, nextCursor, error: null };
     } catch (error) {
-      console.error("[getConversationMessages] ", error)
-      if (error instanceof PrismaClientKnownRequestError)
-        return { messages: null, nextCursor: null, error: error.message }
-      return { messages: null, nextCursor: null, error: "Failed to get conversation messages" }
+      console.error("[getConversationMessages] ", error);
+      return {
+        messages: null,
+        nextCursor: null,
+        error: "Failed to get conversation messages",
+      };
     }
   }
 
@@ -52,75 +55,81 @@ class ConversationService {
           OR: [
             {
               memberOneId,
-              memberTwoId
+              memberTwoId,
             },
             {
               memberOneId: memberTwoId,
-              memberTwoId: memberOneId
-            }
-          ]
+              memberTwoId: memberOneId,
+            },
+          ],
         },
         include: {
           memberOne: {
             include: {
-              user: true
-            }
+              user: true,
+            },
           },
           memberTwo: {
             include: {
-              user: true
-            }
-          }
-        }
-      })
+              user: true,
+            },
+          },
+        },
+      });
       if (!conversation) {
-        return { conversation: null, error: "conversation not found" }
+        return { conversation: null, error: "conversation not found" };
       }
-      return { conversation, error: null }
-    }
-    catch (err) {
-      console.error("[findConversation] ", err)
-      return { conversation: null, error: "Failed to find conversation" }
+      return { conversation, error: null };
+    } catch (err) {
+      console.error("[findConversation] ", err);
+      return { conversation: null, error: "Failed to find conversation" };
     }
   }
-  async createConversation(memberOneId: Member["id"], memberTwoId: Member["id"]) {
+  async createConversation(
+    memberOneId: Member["id"],
+    memberTwoId: Member["id"],
+  ) {
     try {
       const conversation = await db.conversation.create({
         data: {
           memberOneId,
-          memberTwoId
+          memberTwoId,
         },
         include: {
           memberOne: {
             include: {
-              user: true
-            }
+              user: true,
+            },
           },
           memberTwo: {
             include: {
-              user: true
-            }
-          }
-        }
-      })
-      return { conversation, error: null }
-    }
-    catch (err) {
-      console.error("[createConversation] ", err)
-      return { conversation: null, error: "Failed to create conversation" }
+              user: true,
+            },
+          },
+        },
+      });
+      return { conversation, error: null };
+    } catch (err) {
+      console.error("[createConversation] ", err);
+      return { conversation: null, error: "Failed to create conversation" };
     }
   }
-  async getOrCreateConversation(memberOneId: Member["id"], memberTwoId: Member["id"]) {
+  async getOrCreateConversation(
+    memberOneId: Member["id"],
+    memberTwoId: Member["id"],
+  ) {
     try {
       let conversation = await this.findConversation(memberOneId, memberTwoId);
       if (conversation.error) {
         conversation = await this.createConversation(memberOneId, memberTwoId);
       }
-      return { conversation, error: null }
-    }
-    catch (err) {
-      console.error("[getOrCreateConversation] ", err)
-      return { conversation: null, error: "Failed to get or create conversation" }
+      return { conversation, error: null };
+    } catch (err) {
+      console.error("[getOrCreateConversation] ", err);
+      return {
+        conversation: null,
+        error: "Failed to get or create conversation",
+      };
     }
   }
 }
