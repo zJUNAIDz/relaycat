@@ -12,7 +12,6 @@ const ServerIdLayout: React.FC<ServerIdLayoutProps> = async ({
   params,
 }) => {
   const { serverId, channelId } = await params;
-  console.log("ServerIdLayout params: ", { serverId, channelId });
   return (
     <div className="h-full">
       <div className="hidden md:flex h-full w-60 z-20 fixed inset-y-0">

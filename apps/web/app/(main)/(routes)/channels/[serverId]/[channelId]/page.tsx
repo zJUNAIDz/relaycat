@@ -9,14 +9,16 @@ import { PAGE_ROUTES } from "@/shared/lib/routes";
 import { getCurrentUser } from "@/shared/utils/server";
 import { redirect } from "next/navigation";
 interface ChannelIdPageProps {
-  params: any
+  params: Promise<{
+    serverId: string;
+    channelId: string;
+  }>
 }
 
 const ChannelIdPage = async ({ params }: ChannelIdPageProps) => {
   const { channelId } = await params;
-  const { channel, error: err } = await channelService.getChannelById(channelId)
+  const channel = await channelService.getChannelById(channelId)
   if (!channel) {
-    console.log("[ChannelIdPage] ", err)
     redirect(PAGE_ROUTES.HOME)
   }
   const user = await getCurrentUser();
@@ -54,7 +56,7 @@ const ChannelIdPage = async ({ params }: ChannelIdPageProps) => {
               apiUrl={`${CONFIG.API_URL}/messages`}
               query={{
                 channelId,
-                memberId:member.id,
+                memberId: member.id,
               }}
             />
           </>
