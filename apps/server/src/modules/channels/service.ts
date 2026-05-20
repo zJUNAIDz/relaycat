@@ -53,34 +53,21 @@ class ChannelService {
   }
 
   async getChannelById(channelId: Channel["id"], userId: string) {
-    try {
-      const channel = await db.transaction(async (tx) => {
-        const [channel] = await tx
-          .select()
-          .from(channels)
-          .where(eq(channels.id, channelId))
-          .limit(1);
-        const [server] = await tx
-          .select()
-          .from(servers)
-          .where(eq(servers.id, channel.serverId));
-        const [member] = await tx
-          .select()
-          .from(members)
-          .where(
-            and(eq(members.serverId, server.id), eq(members.userId, userId)),
-          )
-          .limit(1);
-        if (!member) {
-          return null;
-        }
-        return channel;
-      });
-      return channel;
-    } catch (err) {
-      console.error("[getChannelById]", err);
-      return null;
-    }
+    const [result] = await db
+      .select({
+        channel: channels,
+      })
+      .from(channels)
+      .innerJoin(
+        members,
+        and(
+          eq(members.serverId, channels.serverId),
+          eq(members.userId, userId),
+        ),
+      )
+      .where(eq(channels.id, channelId))
+      .limit(1);
+    return result ?? null;
   }
 
   async getChannelsByServerId(

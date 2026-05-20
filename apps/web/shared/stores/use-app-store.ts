@@ -20,8 +20,12 @@ export const useAppContextStore = create<AppContextState>((set) => ({
   permissions: null,
   socketConnected: false,
 
-  setServer: (id) => set({ currentServerId: id }),
-  setChannel: (id) => set({ currentChannelId: id }),
+  setServer: (id) => {
+    set({ currentServerId: id });
+  },
+  setChannel: (id) => {
+    set({ currentChannelId: id });
+  },
   setPermissions: (perm) => set({ permissions: perm }),
   setSocketConnected: (state) => set({ socketConnected: state }),
 }));

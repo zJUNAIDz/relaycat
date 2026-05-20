@@ -4,35 +4,30 @@ import { ChatInput } from "@/features/chat/components/chat-input";
 import { ChatMessages } from "@/features/chat/components/chat-messages";
 import { memberService } from "@/features/member/member-service";
 import { ChannelType } from "@/generated/prisma/client";
-import { MediaRoom } from "@/shared/components/media-room";
 import { CONFIG } from "@/shared/lib/config";
-import { PAGE_ROUTES } from "@/shared/lib/routes";
 import { getCurrentUser } from "@/shared/utils/server";
-import { redirect } from "next/navigation";
+import { notFound, unauthorized } from "next/navigation";
 interface ChannelIdPageProps {
-  params: any
+  params: Promise<{
+    serverId: string;
+    channelId: string;
+  }>
 }
 
 const ChannelIdPage = async ({ params }: ChannelIdPageProps) => {
   const { channelId } = await params;
-  // const user = await getCurrentUser();
-  // if (!user) {
-  //   return redirect(PAGE_ROUTES.AUTH)
-  // }
-  const { channel } = await channelService.getChannelById(channelId)
-  console.log("ChannelIdPage channel:", channel)
+  const channel = await channelService.getChannelById(channelId)
   if (!channel) {
-    redirect("/channels/me")
+    notFound()
   }
   const user = await getCurrentUser();
   if (!user) {
-    redirect(PAGE_ROUTES.AUTH)
+    unauthorized();
   }
-  const { member, error } = await memberService.getMemberByUserId(user.id)
-  if (error || !member) {
-    redirect(PAGE_ROUTES.HOME)
+  const member = await memberService.getMemberByUserId(user.id)
+  if (!member) {
+    notFound()
   }
-  const memberId = member?.id;
   return (
     <div className="h-screen flex flex-col bg-white dark:bg-[#313338] ">
       <ChatHeader type="channel" label={channel.name} />
@@ -59,13 +54,14 @@ const ChannelIdPage = async ({ params }: ChannelIdPageProps) => {
               apiUrl={`${CONFIG.API_URL}/messages`}
               query={{
                 channelId,
-                memberId,
+                memberId: member.id,
               }}
             />
           </>
         )
       }
-      {
+      {/* // TODO: FIX LIVEKIT MEDIA ROOMS */}
+      {/* {
         channel.type === ChannelType.AUDIO && (
           <MediaRoom
             chatId={channel.id}
@@ -82,7 +78,7 @@ const ChannelIdPage = async ({ params }: ChannelIdPageProps) => {
             video={true}
           />
         )
-      }
+      } */}
     </div>
   )
 }

@@ -1,7 +1,7 @@
 import { Popover, PopoverContent, PopoverTrigger } from "@/shared/components/ui/popover";
 import { Smile } from "lucide-react";
 import Picker, { EmojiClickData, EmojiStyle, Theme } from "emoji-picker-react";
-import { useTheme } from "next-themes"
+import { useTheme } from "@wrksz/themes/client"
 interface EmojiPickerProps {
   onChange: (value: string) => void;
 }

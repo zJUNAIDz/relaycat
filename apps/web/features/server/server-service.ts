@@ -19,7 +19,6 @@ class ServerService {
     ServerWithMembersAndUser[] | Server[] | null
   > {
     try {
-     
       const { data: servers }: { data: Server[] } =
         await axiosClient.get(`/servers`);
       if (!servers) return null;
@@ -35,42 +34,14 @@ class ServerService {
 
   async getServer(
     serverId: string,
-    options?: ["members"],
-  ): Promise<ServerWithMembersOnly | null>;
-  async getServer(
-    serverId: string,
-    options?: ["user", "members"] | ["user"],
-  ): Promise<ServerWithMembersAndUser | null>;
-  async getServer(
-    serverId: string,
-    options?: ["user", "members", "channels"] | ["user", "channels"],
-  ): Promise<ServerWithMembersUserAndChannels>;
-  async getServer(
-    serverId: string,
-    options?: undefined | [],
-  ): Promise<Server | null>;
-  async getServer(
-    serverId: string,
-    options?: string[],
-  ): Promise<ServerWithMembersAndUser | ServerWithMembersOnly | Server | null> {
+  ): Promise<ServerWithMembersUserAndChannels | null> {
     try {
       const url = queryString.stringifyUrl({
         url: `/servers/${serverId}`,
-        query: {
-          user: options?.includes("users") ? true : false,
-          member: options?.includes("members") ? true : false,
-          options: options?.toString(),
-        },
       });
 
-      const {
-        data: server,
-      }: AxiosResponse<
-        | Server
-        | ServerWithMembersOnly
-        | ServerWithMembersAndUser
-        | ServerWithMembersUserAndChannels
-      > = await axiosClient.get(url);
+      const { data: server }: AxiosResponse<ServerWithMembersUserAndChannels> =
+        await axiosClient.get(url);
       return server;
     } catch (err) {
       console.error("[SERVER_SERVICE:getServer] ", err);

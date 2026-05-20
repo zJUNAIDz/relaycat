@@ -1,7 +1,8 @@
 
 import { AuthProvider } from "@/shared/providers/auth-provider";
-import { ThemeProvider } from "@/shared/providers/theme-provider";
+import { QueryProvider } from "@/shared/providers/query-provider";
 import { cn } from "@/shared/utils/cn";
+import { ThemeProvider } from "@wrksz/themes";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
@@ -25,12 +26,15 @@ export default async function RootLayout({
         <ThemeProvider
           attribute="class"
           defaultTheme="dark"
+          storage="hybrid"
           enableSystem={false}
           storageKey="relaycat"
         >
-          <AuthProvider>
-            {children}
-          </AuthProvider>
+          <QueryProvider>
+            <AuthProvider>
+              {children}
+            </AuthProvider>
+          </QueryProvider>
         </ThemeProvider>
       </body>
     </html>

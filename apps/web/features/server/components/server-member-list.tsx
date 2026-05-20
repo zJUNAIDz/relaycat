@@ -1,14 +1,11 @@
-// "use client"
-import { Server } from "@/generated/prisma/client";
 import { ServerWithMembersAndUser } from "@/shared/types";
 import { ServerMember } from "./server-member";
 import { ServerSection } from "./server-section";
-
 interface ServerMembersListProps {
   members: ServerWithMembersAndUser["members"]
-  serverId: Server["id"]
+  serverId: ServerWithMembersAndUser["id"]
 }
-export const ServerMembersList: React.FC<ServerMembersListProps> = async ({ members, serverId }) => {
+export const ServerMembersList: React.FC<ServerMembersListProps> = ({ members, serverId }) => {
   //TODO: fix this
   //* Impossible edge case
   if (!members?.length) return <div>No members</div>

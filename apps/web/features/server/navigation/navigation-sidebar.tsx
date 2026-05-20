@@ -1,12 +1,24 @@
+"use client";
 import { ModeToggle } from "@/shared/components/mode-toggle";
 import { ScrollArea } from "@/shared/components/ui/scroll-area";
 import { Separator } from "@/shared/components/ui/separator";
 import { serverService } from "../server-service";
 import NavigationItem from "./navigation-item";
 import { CreateServerButton } from "./create-server-button";
+import { useQuery } from "@tanstack/react-query";
 
-const NavigationSidebar = async () => {
-  const servers = await serverService.getCurrentUserServers();
+const NavigationSidebar = () => {
+  const query = useQuery({
+    queryKey: ["currentUserServers"],
+    queryFn: async () => {
+      const servers = await serverService.getCurrentUserServers();
+      return servers;
+    }
+  })
+  if (query.isLoading) {
+    return <LoadingNavigationSidebar />;
+  }
+  const servers = query.data || [];
   // console.log("servers: ", servers)
   return (
     <div
@@ -14,12 +26,12 @@ const NavigationSidebar = async () => {
     dark:bg-[#1e1f22] bg-[#e3e5e8] py-3"
     >
       <ScrollArea className="flex flex-1 w-full justify-center items-center ">
-        {servers && servers.map(({ id, name, image }) => (
+        {servers && servers.map((server) => (
           <div
-            key={id}
+            key={server.id}
             className="mb-4 flex w-full justify-center items-center"
           >
-            <NavigationItem id={id} name={name} imageUrl={image} />
+            <NavigationItem server={server} />
           </div>
         ))}
       </ScrollArea>
@@ -31,4 +43,21 @@ const NavigationSidebar = async () => {
     </div>
   );
 };
+const LoadingNavigationSidebar = () => {
+  return (
+    <div className="space-y-4 flex flex-col h-full items-center text-primary w-full
+    dark:bg-[#1e1f22] bg-[#e3e5e8] py-3 animate-pulse">
+      <div className="flex flex-col gap-y-2 w-full px-2">
+        {[...Array(5)].map((_, i) => (
+          <div key={i} className="h-10 bg-zinc-300 dark:bg-zinc-700 rounded-md w-full" />
+        ))}
+      </div>
+      <div className="pb-3 mt-auto flex items-center flex-col gap-y-4">
+        <Separator className="h-0.5 bg-zinc-300 dark:bg-zinc-700 rounded-md w-10 mx-auto" />
+        <div className="h-10 bg-zinc-300 dark:bg-zinc-700 rounded-md w-full" />
+        <ModeToggle />
+      </div>
+    </div>
+  )
+}
 export default NavigationSidebar;

@@ -1,25 +1,71 @@
 "use client";
+
+import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/shared/components/ui/card";
 import { authClient, User } from "@/shared/lib/auth-client";
 import { PAGE_ROUTES } from "@/shared/lib/routes";
 import { useAuth } from "@/shared/providers/auth-provider";
 import { motion } from "framer-motion";
+import { Github, MessageSquare, MoveRight, Server, Zap } from "lucide-react"; // Assuming you have lucide-react, standard with shadcn
 import { Inter, Space_Grotesk } from "next/font/google";
-import Image from "next/image";
 import Link from "next/link";
-import { useRef } from "react";
 
 const spaceGrotesk = Space_Grotesk({ subsets: ["latin"], weight: ["700"] });
-const inter = Inter({ subsets: ["latin"], weight: ["400", "600", "700"] });
+const inter = Inter({ subsets: ["latin"], weight: ["400", "500", "600", "700"] });
+
+const features = [
+  {
+    title: "Real-time WebSockets",
+    description: "Powered by Socket.io and Hono to ensure messages and presence updates are delivered instantly without polling.",
+    icon: <Zap className="h-5 w-5 text-primary" />,
+  },
+  {
+    title: "Server & Channel Architecture",
+    description: "A familiar mental model. Organize communities into servers and categorize discussions into dedicated text channels.",
+    icon: <Server className="h-5 w-5 text-primary" />,
+  },
+  {
+    title: "Direct Messaging",
+    description: "Seamless one-to-one conversations that exist outside of the server environment for private chats.",
+    icon: <MessageSquare className="h-5 w-5 text-primary" />,
+  },
+  {
+    title: "Modern Tech Stack",
+    description: "Built from the ground up using Next.js, Bun, and Hono to explore full-stack architecture and real-time state management.",
+    icon: <Github className="h-5 w-5 text-primary" />,
+  },
+];
+
+const techStack = [
+  "Next.js App Router",
+  "Bun",
+  "Hono",
+  "Socket.io",
+  "Tailwind CSS",
+  "Framer Motion",
+];
 
 const Landing = () => {
-  const containerRef = useRef(null);
   const { user, isLoading } = useAuth();
+
   return (
-    <div className={`${inter.className} min-h-screen bg-neutral-50 dark:bg-neutral-900`} ref={containerRef}>
+    <div className={`${inter.className} relative min-h-screen overflow-hidden bg-background text-foreground selection:bg-primary/30`}>
+      {/* Sleeker, modern background */}
+      <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,var(--tw-gradient-stops))] from-slate-200/40 via-background to-background dark:from-slate-800/40" />
+      <div className="absolute inset-0 -z-10 bg-[linear-gradient(rgba(148,163,184,0.08)_1px,transparent_1px),linear-gradient(90deg,rgba(148,163,184,0.08)_1px,transparent_1px)] bg-size-[32px_32px]" />
+
       <Navbar isLoading={isLoading} user={user} />
-      <main className="pt-32 pb-20 px-6 md:px-1 max-w-7xl mx-auto">
+
+      <main className="mx-auto flex w-full max-w-6xl flex-col gap-24 px-6 pb-24 pt-32 md:px-10 lg:pt-40">
         <HeroSection />
+        <FeatureSection />
       </main>
     </div>
   );
@@ -27,114 +73,167 @@ const Landing = () => {
 
 const Navbar = ({ isLoading, user }: { isLoading: boolean; user: User | null }) => {
   return (
-    <motion.nav
-      className="fixed w-full opacity-1 top-0 backdrop-blur-md z-50 py-4 px-6 md:px-12 flex justify-between items-center bg-white/80 dark:bg-neutral-900/80 border-b border-neutral-200 dark:border-neutral-800"
+    <motion.header
+      className="fixed inset-x-0 top-0 z-50 border-b border-border/40 bg-background/60 backdrop-blur-xl"
+      initial={{ y: -20, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ duration: 0.4, ease: "easeOut" }}
     >
-      <motion.div
-        className={`text-xl ${spaceGrotesk.className} tracking-tight text-neutral-800 dark:text-neutral-200`}
-        initial={{ x: -20 }}
-        animate={{ x: 0 }}
-      >
-        Relay<span className="text-sky-500">cat</span>
-      </motion.div>
-
-      <div className="hidden md:flex gap-6 items-center">
-        <AuthPanel isLoading={isLoading} user={user} />
-      </div>
-    </motion.nav>
-  )
-}
-
-const HeroSection = () => {
-  return (
-    <section className="text-center mb-32">
-      <motion.div
-        className="inline-block relative"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-      >
-        <h1 className={`${spaceGrotesk.className} text-5xl md:text-7xl mb-6 text-neutral-900 dark:text-neutral-100`}>
-          Modern Communication
-          <span className="block mt-4 pb-1 bg-linear-to-r from-sky-500 via-purple-500 to-blue-600 bg-clip-text text-transparent">
-            Reimagined
-          </span>
-        </h1>
-        <div className="absolute inset-x-0 -bottom-6 h-1 bg-linear-to-r from-sky-500/30 via-purple-500/30 to-blue-600/30 rounded-full" />
-      </motion.div>
-
-      <motion.p
-        className="text-lg md:text-xl text-neutral-600 dark:text-neutral-400 mb-12 max-w-3xl mx-auto leading-relaxed"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1, transition: { delay: 0.2 } }}
-      >
-        Secure enterprise messaging platform with real-time translation, end-to-end encryption, and global infrastructure.
-      </motion.p>
-
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1, transition: { delay: 0.4 } }}
-        className="inline-flex flex-col sm:flex-row gap-4"
-      >
-        <Link
-          href={PAGE_ROUTES.AUTH}
-          className="group inline-flex items-center gap-3 px-8 py-4 bg-linear-to-br from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 rounded-xl text-white shadow-lg hover:shadow-xl transition-all"
-        >
-          <span>Get Started</span>
-          <span className="group-hover:translate-x-1 transition-transform">→</span>
+      <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between px-6 md:px-10">
+        <Link href={PAGE_ROUTES.LANDING} className={`text-xl font-bold tracking-tight ${spaceGrotesk.className}`}>
+          Relay<span className="text-primary">cat</span>
         </Link>
-      </motion.div>
-    </section>
-  )
-}
-const AuthPanel = ({ isLoading, user }: { isLoading: boolean; user: User | null }) => {
-  if (isLoading) {
-    return (
-      <div className="flex items-center gap-4 ml-4" aria-hidden>
-        {/* avatar skeleton */}
-        <div className="w-10 h-10 rounded-full bg-neutral-200 dark:bg-neutral-700 animate-pulse" />
-        {/* button/placeholders skeleton */}
-        <div className="flex gap-3">
-          <div className="w-20 h-9 rounded-lg bg-neutral-200 dark:bg-neutral-700 animate-pulse" />
+
+        <div className="flex items-center gap-4">
+          <NavbarAuth isLoading={isLoading} user={user} />
         </div>
       </div>
-    );
+    </motion.header>
+  );
+};
+
+const NavbarAuth = ({ isLoading, user }: { isLoading: boolean; user: User | null }) => {
+  if (isLoading) {
+    return <div className="h-9 w-20 animate-pulse rounded-md bg-muted" aria-hidden />;
   }
 
   if (user) {
     return (
-      <div className="flex items-center gap-4 ml-4">
-        <Image
-          src={user.image ?? ""}
-          alt="Profile"
-          width={40}
-          height={40}
-          className="rounded-full border-2 border-sky-500 hover:border-sky-600 transition-colors"
-        />
-        <Button
-          onClick={() => authClient.signOut()}
-          className="px-4 py-2.5 bg-linear-to-br from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 text-sm rounded-lg shadow-sm"
-        >
-          Sign out
-        </Button>
-      </div>
+      <Button variant="ghost" size="sm" onClick={() => authClient.signOut()}>
+        Sign out
+      </Button>
     );
   }
 
   return (
-    <div className="flex gap-3 ml-4">
-      <Link
-        href={PAGE_ROUTES.AUTH}
-        className="px-4 py-2.5 text-sm rounded-lg border border-neutral-300 hover:border-sky-500 bg-white/50 dark:bg-neutral-800/50 backdrop-blur-sm transition-colors"
-      >
-        Login
-      </Link>
-      <Link
-        href={PAGE_ROUTES.AUTH}
-        className="px-4 py-2.5 bg-linear-to-br from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 text-sm rounded-lg text-white shadow-sm"
-      >
-        Get Started
-      </Link>
-    </div>
+    <Button asChild size="sm" className="rounded-full px-5">
+      <Link href={PAGE_ROUTES.AUTH}>Sign in</Link>
+    </Button>
   );
 };
-export default Landing; 
+
+const HeroSection = () => {
+  return (
+    <section className="grid gap-12 lg:grid-cols-[1.2fr_0.8fr] lg:items-center">
+      <motion.div
+        className="space-y-8"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        <Badge variant="secondary" className="w-fit rounded-full px-3 py-1.5 text-xs font-medium">
+          <span className="flex items-center gap-2">
+            <span className="relative flex h-2 w-2">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75"></span>
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-primary"></span>
+            </span>
+            Open Source Portfolio Project
+          </span>
+        </Badge>
+
+        <div className="space-y-6">
+          <h1 className={`${spaceGrotesk.className} max-w-3xl text-4xl font-bold tracking-tight text-foreground sm:text-5xl lg:text-6xl lg:leading-[1.1]`}>
+            A Discord-inspired chat app built for the modern web.
+          </h1>
+          <p className="max-w-xl text-lg leading-relaxed text-muted-foreground">
+            Relaycat isn&apos;t an enterprise SaaS. It&apos;s a hands-on technical exploration of real-time web technologies, authentication flows, and complex UI state management.
+          </p>
+        </div>
+
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+          <Button asChild size="lg" className="group rounded-full px-8">
+            <Link href={PAGE_ROUTES.AUTH}>
+              Enter the App
+              <MoveRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+            </Link>
+          </Button>
+          <Button asChild variant="outline" size="lg" className="rounded-full px-8">
+            <Link href={PAGE_ROUTES.HOME}>View Demo Shell</Link>
+          </Button>
+        </div>
+
+        <div className="pt-4">
+          <p className="mb-3 text-sm font-medium text-muted-foreground">Built with</p>
+          <div className="flex flex-wrap gap-2">
+            {techStack.map((tech) => (
+              <Badge key={tech} variant="outline" className="bg-background/50 text-xs text-muted-foreground">
+                {tech}
+              </Badge>
+            ))}
+          </div>
+        </div>
+      </motion.div>
+
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.5, delay: 0.1 }}
+      >
+        <Card className="overflow-hidden border-border/50 bg-background/50 shadow-2xl backdrop-blur-sm">
+          <div className="border-b border-border/50 bg-muted/30 px-4 py-3">
+            <div className="flex items-center gap-2">
+              <div className="h-3 w-3 rounded-full bg-red-500/80" />
+              <div className="h-3 w-3 rounded-full bg-yellow-500/80" />
+              <div className="h-3 w-3 rounded-full bg-green-500/80" />
+            </div>
+          </div>
+          <CardHeader className="space-y-1 pb-4">
+            <CardTitle className="text-lg">Project Scope</CardTitle>
+            <CardDescription>
+              What to expect when testing this application.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3 text-sm">
+            <div className="rounded-md border border-border/50 bg-background/50 p-3">
+              <span className="font-semibold text-foreground">Functional:</span> Auth, real-time messaging, server creation, channel navigation.
+            </div>
+            <div className="rounded-md border border-border/50 bg-background/50 p-3">
+              <span className="font-semibold text-foreground">In Progress:</span> Voice channels, deep notification systems, mobile responsiveness.
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
+    </section>
+  );
+};
+
+const FeatureSection = () => {
+  return (
+    <section className="space-y-10">
+      <div className="max-w-2xl space-y-3">
+        <h2 className={`text-3xl font-bold tracking-tight ${spaceGrotesk.className}`}>
+          Core Features
+        </h2>
+        <p className="text-muted-foreground text-lg">
+          Tackling the engineering challenges behind a real-time communication platform.
+        </p>
+      </div>
+
+      <div className="grid gap-6 md:grid-cols-2">
+        {features.map((feature, i) => (
+          <motion.div
+            key={feature.title}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: i * 0.1 }}
+          >
+            <Card className="group h-full border-border/50 bg-background/50 transition-colors hover:border-primary/50 hover:bg-muted/20">
+              <CardHeader>
+                <div className="mb-3 w-fit rounded-lg bg-primary/10 p-2.5">
+                  {feature.icon}
+                </div>
+                <CardTitle className="text-xl">{feature.title}</CardTitle>
+                <CardDescription className="text-base leading-relaxed">
+                  {feature.description}
+                </CardDescription>
+              </CardHeader>
+            </Card>
+          </motion.div>
+        ))}
+      </div>
+    </section>
+  );
+};
+
+export default Landing;
