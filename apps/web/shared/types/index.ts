@@ -38,8 +38,8 @@ export type Member = {
   serverId: string;
   createdAt: Date;
   updatedAt: Date;
-  user?: User;
-  server?: Server;
+  user: User;
+  server: Server;
 };
 
 export type Channel = {
@@ -50,9 +50,9 @@ export type Channel = {
   serverId: string;
   createdAt: Date;
   updatedAt: Date;
-  user?: User;
-  server?: Server;
-  Message?: Message[];
+  user: User;
+  server: Server;
+  Message: Message[];
 };
 
 export type Message = {
@@ -64,8 +64,8 @@ export type Message = {
   channelId: string;
   createdAt: Date;
   updatedAt: Date;
-  member?: Member;
-  channel?: Channel;
+  member: Member;
+  channel: Channel;
 };
 
 export type ServerWithMembersAndUser = Server & {
