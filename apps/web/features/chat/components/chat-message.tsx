@@ -68,7 +68,7 @@ export const ChatMessage = ({
   const onMessageEdit = async (values: z.infer<typeof formSchema>) => {
     try {
       const url = queryString.stringifyUrl({
-        url: `${CONFIG.API_URL}/messages/${id}`,
+        url: `/messages/${id}`,
         query: socketQuery,
       });
       await axiosClient.patch(url, values)

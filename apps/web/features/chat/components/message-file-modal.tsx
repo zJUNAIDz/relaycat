@@ -87,7 +87,7 @@ const MessageFileModal = () => {
         return;
       }
 
-      const { data: { signedUrl, key, bucketName } } = await axiosClient.get(`${CONFIG.API_URL}/s3/uploads/server-icon?fileType=${file.type}`);
+      const { data: { signedUrl, key, bucketName } } = await axiosClient.get(`/s3/uploads/server-icon?fileType=${file.type}`);
 
       if (!signedUrl || !key || !bucketName) {
         setErrorMessage("Error uploading image");

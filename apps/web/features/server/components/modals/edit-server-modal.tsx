@@ -57,7 +57,7 @@ const EditServerModal = () => {
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       if (!imageFile) {
-        await axiosClient.patch(`${CONFIG.API_URL}/servers/${server?.id}`, {
+        await axiosClient.patch(`/servers/${server?.id}`, {
           name: values.name,
           imageUrl: values?.imageUrl,
         });
@@ -67,13 +67,13 @@ const EditServerModal = () => {
         return;
       }
       //* Get signed url from api
-      const { data: { signedUrl, key, bucketName } } = await axiosClient.get(`${CONFIG.API_URL}/s3/uploads/server-icon?serverName=${form.getValues("name")}&fileType=${imageFile.type}`);
+      const { data: { signedUrl, key, bucketName } } = await axiosClient.get(`/s3/uploads/server-icon?serverName=${form.getValues("name")}&fileType=${imageFile.type}`);
       //* Upload file to S3
       await Promise.all([
         () => axios.put(signedUrl, imageFile, {
           headers: { "Content-Type": imageFile.type },
         }),
-        () => axiosClient.patch(`${CONFIG.API_URL}/servers/${server?.id}`, {
+        () => axiosClient.patch(`/servers/${server?.id}`, {
           name: values.name,
           imageUrl: `https://s3.ap-south-1.amazonaws.com/${bucketName}/${key}`,
         })

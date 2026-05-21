@@ -71,7 +71,7 @@ Follow these instructions to set up the project locally.
 
     **`apps/web/.env`**:
     ```env
-    NEXT_PUBLIC_SITE_URL=http://localhost:3000
+    NEXT_PUBLIC_APP_URL=http://localhost:3000
     NEXT_PUBLIC_API_URL=http://localhost:8000
     
     # LiveKit (for Voice/Video)

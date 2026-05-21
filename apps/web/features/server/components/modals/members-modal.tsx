@@ -50,7 +50,7 @@ const MembersModal = () => {
     try {
       setLoadingId(memberId)
       const url = qs.stringifyUrl({
-        url: `${CONFIG.API_URL}/members/kick`,
+        url: `/members/kick`,
         query: {
           serverId: server?.id,
           memberId
@@ -70,7 +70,7 @@ const MembersModal = () => {
     try {
       setLoadingId(memberId)
       const url = qs.stringifyUrl({
-        url: `${CONFIG.API_URL}/members/changeRole`,
+        url: `/members/changeRole`,
         query: {
           serverId: server?.id,
           memberId

@@ -69,7 +69,7 @@ const InitialModal = () => {
           return;
         }
         if (values.imageUrl === CONFIG.DEFAULT_SERVER_IMAGE_URL) {
-          await axiosClient.post(`${CONFIG.API_URL}/servers`, {
+          await axiosClient.post(`/servers`, {
             name: values.name,
             imageUrl: values.imageUrl,
           });
@@ -86,7 +86,7 @@ const InitialModal = () => {
         setErrorMessage("No image found")
         return;
       }
-      const { data: { signedUrl, key, bucketName } } = await axiosClient.get(`${CONFIG.API_URL}/s3/uploads/server-icon?serverName=${form.getValues("name")}&fileType=${imageFile.type}`);
+      const { data: { signedUrl, key, bucketName } } = await axiosClient.get(`/s3/uploads/server-icon?serverName=${form.getValues("name")}&fileType=${imageFile.type}`);
 
       if (!signedUrl || !key || !bucketName) {
         setErrorMessage("Error uploading image");
@@ -98,7 +98,7 @@ const InitialModal = () => {
       await axios.put(signedUrl, imageFile, {
         headers: { "Content-Type": imageFile.type },
       });
-      await axiosClient.post(`${CONFIG.API_URL}/servers`, {
+      await axiosClient.post(`/servers`, {
         name: values.name,
         imageUrl,
       });
