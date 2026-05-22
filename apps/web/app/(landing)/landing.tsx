@@ -100,7 +100,7 @@ const NavbarAuth = ({ isLoading, user }: { isLoading: boolean; user: User | null
 
   if (user) {
     return (
-      <div>
+      <div className="flex items-center gap-2">
         <Button variant="ghost" size="sm" onClick={() => authClient.signOut()}>
           Sign out
         </Button>
@@ -110,7 +110,7 @@ const NavbarAuth = ({ isLoading, user }: { isLoading: boolean; user: User | null
   }
 
   return (
-    <div>
+    <div className="flex items-center gap-2">
       <Button asChild size="sm" className="rounded-full px-5">
         <Link href={PAGE_ROUTES.AUTH}>Sign in</Link>
       </Button>

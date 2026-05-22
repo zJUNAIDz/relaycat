@@ -86,7 +86,7 @@ const InitialModal = () => {
         setErrorMessage("No image found")
         return;
       }
-      const { data: { signedUrl, key, bucketName } } = await axiosClient.get(`/s3/uploads/server-icon?serverName=${form.getValues("name")}&fileType=${imageFile.type}`);
+      const { data: { signedUrl, key, bucketName } } = await axiosClient.get(`/s3/uploads/server-icon?serverName=${encodeURIComponent(form.getValues("name"))}&fileType=${encodeURIComponent(imageFile.type)}`);
 
       if (!signedUrl || !key || !bucketName) {
         setErrorMessage("Error uploading image");
