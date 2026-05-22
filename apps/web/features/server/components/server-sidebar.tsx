@@ -66,7 +66,7 @@ const ServerSidebar = ({ serverId, channelId }: { serverId: string; channelId: s
   )?.role;
   if (!role) return redirect(PAGE_ROUTES.AUTH);
   return (
-    <div className="flex flex-col h-full text-primary w-full dark:bg-[#2B2D31] bg-[#F2F3F5]">
+    <WrapperDiv>
       <ServerHeader server={server} role={role} />
       <ScrollArea className="flex-1 px-3">
         <ServerSearch
@@ -122,12 +122,12 @@ const ServerSidebar = ({ serverId, channelId }: { serverId: string; channelId: s
         <ServerMembersList members={server.members} serverId={server.id} />
       </ScrollArea>
       <UserFooter name={user.name ?? "Na"} username="NA" imageUrl={user.image ?? ""} />
-    </div>
+    </WrapperDiv>
   );
 };
 const NoServerSelected = ({ name, image }: { name: string, image: string }) => {
   return (
-    <div className="flex flex-col h-full text-primary w-full dark:bg-[#2B2D31] bg-[#F2F3F5]">
+    <WrapperDiv>
       {/* Empty header area */}
       <div className="h-12 px-3 flex items-center border-b-2 border-neutral-200 dark:border-neutral-800">
         <div className="text-xs uppercase font-semibold text-zinc-400 dark:text-zinc-500">
@@ -149,13 +149,13 @@ const NoServerSelected = ({ name, image }: { name: string, image: string }) => {
 
       {/* Empty footer area */}
       <UserFooter name={name} username="NA" imageUrl={image} />
-    </div>
+    </WrapperDiv>
   )
 };
 
 const ServerSidebarLoading = () => {
   return (
-    <div className="flex flex-col h-full min-w-full dark:bg-[#2B2D31] bg-[#F2F3F5]">
+    <WrapperDiv>
       {/* Header - h-12 to match ServerHeader */}
       <div className="h-12 px-3 flex items-center border-b-2 border-neutral-200 dark:border-neutral-800">
         <Skeleton className="h-6 w-2/3 rounded-md bg-zinc-300 dark:bg-zinc-700" />
@@ -228,8 +228,14 @@ const ServerSidebarLoading = () => {
           </div>
         </div>
       </div>
-    </div>
+    </WrapperDiv>
   )
 };
-
+const WrapperDiv = ({ children }: { children: React.ReactNode }) => {
+  return (
+    <div className="flex flex-col h-full text-primary w-full bg-background border-r border-neutral-200 dark:border-neutral-800">
+      {children}
+    </div>
+  )
+}
 export default ServerSidebar;

@@ -108,13 +108,13 @@ const EditChannelModal = () => {
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="uppercase text-xs font-bold text-zinc-700 dark:text-[#97A6BC]">
+                    <FormLabel className="uppercase text-xs font-bold">
                       Channel Name
                     </FormLabel>
                     <FormControl>
                       <Input
                         disabled={isLoading}
-                        className="border-2 border-black border-solid focus-visible:ring-1 text-black dark:text-[#edf1f8] focus-visible:ring-offset-1 "
+                        className="border-2 border-black border-solid focus-visible:ring-1 focus-visible:ring-offset-1 "
                         placeholder="Enter Channel Name"
                         {...field}
                       />
@@ -128,7 +128,7 @@ const EditChannelModal = () => {
                 name="type"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="uppercase text-xs font-bold text-zinc-700 dark:text-[#97A6BC]">
+                    <FormLabel className="uppercase text-xs font-bold">
                       Channel Type
                     </FormLabel>
                     <Select
@@ -162,7 +162,7 @@ const EditChannelModal = () => {
                   {errorMessage}
                 </div>
               )}
-              <Button className="bg-blue-500 text-white dark:bg-blue-700 hover:bg-blue-600 dark:hover:bg-blue-800" variant="primary" type="submit" disabled={isLoading}>
+              <Button className="bg-blue-500 text-white dark:bg-blue-700 hover:bg-blue-600 dark:hover:bg-blue-800" variant="default" type="submit" disabled={isLoading}>
                 Save Changes
               </Button>
             </DialogFooter>

@@ -22,7 +22,7 @@ export default async function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={cn(inter.className, "dark:bg-[#313338] bg-white ")}>
+      <body className={cn(inter.className)}>
         <ThemeProvider
           attribute="class"
           defaultTheme="dark"

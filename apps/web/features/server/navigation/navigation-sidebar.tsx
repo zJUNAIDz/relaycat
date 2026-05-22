@@ -22,8 +22,7 @@ const NavigationSidebar = () => {
   // console.log("servers: ", servers)
   return (
     <div
-      className="space-y-4 flex flex-col h-full items-center text-primary w-full
-    dark:bg-[#1e1f22] bg-[#e3e5e8] py-3"
+      className="space-y-4 flex flex-col h-full items-center text-primary w-full py-3 bg-background/50 border-r border-muted"
     >
       <ScrollArea className="flex flex-1 w-full justify-center items-center ">
         {servers && servers.map((server) => (

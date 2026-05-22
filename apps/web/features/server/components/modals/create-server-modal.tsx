@@ -5,7 +5,9 @@ import { Button } from "@/shared/components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
+  DialogTitle,
 } from "@/shared/components/ui/dialog";
 import {
   FormControl,
@@ -19,7 +21,6 @@ import { useModal } from "@/shared/hooks/use-modal-store";
 import axiosClient from "@/shared/lib/axios-client";
 import { CONFIG } from "@/shared/lib/config";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { DialogDescription, DialogTitle } from "@radix-ui/react-dialog";
 import axios, { AxiosError } from "axios";
 import { useRouter } from "next/navigation";
 import React from "react";
@@ -116,7 +117,7 @@ const CreateServerModal = () => {
       onOpenChange={handleCloseModal}
       aria-label="Add New Server"
     >
-      <DialogContent className="overflow-hidden">
+      <DialogContent className="overflow-hidden bg-background rounded-lg shadow-lg w-full max-w-md">
         <DialogTitle className="text-center text-2xl font-bold">
           Customize your Server
         </DialogTitle>
@@ -156,13 +157,13 @@ const CreateServerModal = () => {
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="uppercase text-xs font-bold text-zinc-700 dark:text-[#97A6BC]">
+                    <FormLabel className="uppercase text-xs font-bold">
                       Server Name
                     </FormLabel>
                     <FormControl>
                       <Input
                         disabled={isLoading}
-                        className="border-2 border-black border-solid focus-visible:ring-1 text-black dark:text-[#edf1f8] focus-visible:ring-offset-1 "
+                        className="border border-gray-300 focus-visible:ring-1  focus-visible:ring-offset-1"
                         placeholder="Enter Server Name"
                         {...field}
                       />
@@ -172,13 +173,13 @@ const CreateServerModal = () => {
                 )}
               />
             </div>
-            <DialogFooter className="px-6 py-4 w-full">
+            <DialogFooter className="px-6 py-4 bg-accent">
               {errorMessage && (
                 <div className="text-red-500  text-center mb-4">
                   {errorMessage}
                 </div>
               )}
-              <Button className="bg-blue-500 text-white dark:bg-blue-700 hover:bg-blue-600 dark:hover:bg-blue-800" variant="primary" type="submit" disabled={isLoading}>
+              <Button className="bg-blue-500 text-white dark:bg-blue-700 hover:bg-blue-600 dark:hover:bg-blue-800" variant="default" type="submit" disabled={isLoading}>
                 Create
               </Button>
             </DialogFooter>

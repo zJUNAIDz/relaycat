@@ -29,7 +29,7 @@ const ChannelIdPage = async ({ params }: ChannelIdPageProps) => {
     notFound()
   }
   return (
-    <div className="h-screen flex flex-col bg-white dark:bg-[#313338] ">
+    <div className="h-screen flex flex-col">
       <ChatHeader type="channel" label={channel.name} />
       {
         channel.type === ChannelType.TEXT && (
