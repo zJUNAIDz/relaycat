@@ -176,7 +176,7 @@ const InitialModal = () => {
               />
             </div>
             <DialogFooter className="px-6 py-4 w-full">
-              <Button variant="primary" type="submit" disabled={isLoading}>
+              <Button variant="default" type="submit" disabled={isLoading}>
                 Create
               </Button>
             </DialogFooter>

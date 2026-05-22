@@ -165,7 +165,7 @@ const MessageFileModal = () => {
                   {errorMessage}
                 </div>
               )}
-              <Button className="bg-blue-500 text-white dark:bg-blue-700 hover:bg-blue-600 dark:hover:bg-blue-800" variant="primary" type="submit" disabled={isLoading}>
+              <Button className="bg-blue-500 text-white dark:bg-blue-700 hover:bg-blue-600 dark:hover:bg-blue-800" variant="default" type="submit" disabled={isLoading}>
                 send
               </Button>
             </DialogFooter>
