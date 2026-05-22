@@ -1,5 +1,6 @@
 "use client";
 
+import { ModeToggle } from "@/shared/components/mode-toggle";
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
 import {
@@ -99,16 +100,22 @@ const NavbarAuth = ({ isLoading, user }: { isLoading: boolean; user: User | null
 
   if (user) {
     return (
-      <Button variant="ghost" size="sm" onClick={() => authClient.signOut()}>
-        Sign out
-      </Button>
+      <div>
+        <Button variant="ghost" size="sm" onClick={() => authClient.signOut()}>
+          Sign out
+        </Button>
+        <ModeToggle />
+      </div>
     );
   }
 
   return (
-    <Button asChild size="sm" className="rounded-full px-5">
-      <Link href={PAGE_ROUTES.AUTH}>Sign in</Link>
-    </Button>
+    <div>
+      <Button asChild size="sm" className="rounded-full px-5">
+        <Link href={PAGE_ROUTES.AUTH}>Sign in</Link>
+      </Button>
+      <ModeToggle />
+    </div>
   );
 };
 

@@ -1,7 +1,7 @@
-import { Server } from "@/generated/prisma/client";
 import axiosClient from "@/shared/lib/axios-client";
 import { CONFIG } from "@/shared/lib/config";
 import {
+  Server,
   ServerWithMembersAndUser,
   ServerWithMembersOnly,
   ServerWithMembersUserAndChannels,

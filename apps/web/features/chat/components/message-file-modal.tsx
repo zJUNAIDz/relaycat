@@ -87,7 +87,7 @@ const MessageFileModal = () => {
         return;
       }
 
-      const { data: { signedUrl, key, bucketName } } = await axiosClient.get(`${CONFIG.API_URL}/s3/uploads/server-icon?fileType=${file.type}`);
+      const { data: { signedUrl, key, bucketName } } = await axiosClient.get(`/s3/uploads/server-icon?fileType=${file.type}`);
 
       if (!signedUrl || !key || !bucketName) {
         setErrorMessage("Error uploading image");
@@ -165,7 +165,7 @@ const MessageFileModal = () => {
                   {errorMessage}
                 </div>
               )}
-              <Button className="bg-blue-500 text-white dark:bg-blue-700 hover:bg-blue-600 dark:hover:bg-blue-800" variant="primary" type="submit" disabled={isLoading}>
+              <Button className="bg-blue-500 text-white dark:bg-blue-700 hover:bg-blue-600 dark:hover:bg-blue-800" variant="default" type="submit" disabled={isLoading}>
                 send
               </Button>
             </DialogFooter>

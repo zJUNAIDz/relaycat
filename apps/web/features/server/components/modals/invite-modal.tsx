@@ -39,7 +39,7 @@ const InviteModal = () => {
   const onGenerate = async () => {
     try {
       setIsLoading(true);
-      const response = await axiosClient.patch(`${CONFIG.API_URL}/servers/${server?.id}/invite-code`);
+      const response = await axiosClient.patch(`/servers/${server?.id}/invite-code`);
       // router.refresh()
       onOpen("invite", { server: response.data.server });
     } catch (err) {

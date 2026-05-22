@@ -1,7 +1,6 @@
 "use client"
 
-import { Member } from "@/generated/prisma/client";
-import { MessageWithMemberWithUser } from "@/shared/types";
+import { Member, MessageWithMemberWithUser } from "@/shared/types";
 import { format } from "date-fns";
 import { Loader2 } from "lucide-react";
 import React from "react";

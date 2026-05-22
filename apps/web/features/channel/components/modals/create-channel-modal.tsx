@@ -1,6 +1,5 @@
 "use client";
 
-import { ChannelType } from "@/generated/prisma/client";
 import { Button } from "@/shared/components/ui/button";
 import {
   Dialog,
@@ -18,7 +17,7 @@ import { Input } from "@/shared/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/components/ui/select";
 import { useModal } from "@/shared/hooks/use-modal-store";
 import axiosClient from "@/shared/lib/axios-client";
-import { CONFIG } from "@/shared/lib/config";
+import { ChannelType } from "@/shared/types";
 import { capitalizeFirstLetter } from "@/shared/utils/misc";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DialogTitle } from "@radix-ui/react-dialog";
@@ -61,7 +60,7 @@ const CreateChannelModal = () => {
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       const url = qs.stringifyUrl({
-        url: `${CONFIG.API_URL}/channels/create`,
+        url: `/channels/create`,
 
       })
 
@@ -96,7 +95,7 @@ const CreateChannelModal = () => {
       onOpenChange={handleCloseModal}
       aria-label="Create New Channel"
     >
-      <DialogContent className="overflow-hidden">
+      <DialogContent className="overflow-hidden bg-background rounded-lg shadow-lg w-full max-w-md">
         <DialogTitle className="text-center text-2xl font-bold">
           Create New Channel
         </DialogTitle>
@@ -108,13 +107,13 @@ const CreateChannelModal = () => {
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="uppercase text-xs font-bold text-zinc-700 dark:text-[#97A6BC]">
+                    <FormLabel className="uppercase text-xs font-bold">
                       Channel Name
                     </FormLabel>
                     <FormControl>
                       <Input
                         disabled={isLoading}
-                        className="border-2 border-black border-solid focus-visible:ring-1 text-black dark:text-[#edf1f8] focus-visible:ring-offset-1 "
+                        className="border-2 focus-visible:ring-1  focus-visible:ring-offset-1"
                         placeholder="Enter Channel Name"
                         {...field}
                       />
@@ -128,7 +127,7 @@ const CreateChannelModal = () => {
                 name="type"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="uppercase text-xs font-bold text-zinc-700 dark:text-[#97A6BC]">
+                    <FormLabel className="uppercase text-xs font-bold">
                       Channel Type
                     </FormLabel>
                     <Select
@@ -156,13 +155,13 @@ const CreateChannelModal = () => {
                 )}
               />
             </div>
-            <DialogFooter className="px-6 py-2 w-full">
+            <DialogFooter className="px-6 py-2">
               {errorMessage && (
                 <div className="text-red-500  text-center mb-4">
                   {errorMessage}
                 </div>
               )}
-              <Button className="bg-blue-500 text-white dark:bg-blue-700 hover:bg-blue-600 dark:hover:bg-blue-800" variant="primary" type="submit" disabled={isLoading}>
+              <Button className=" bg-blue-500 text-white dark:bg-blue-700 hover:bg-blue-600 dark:hover:bg-blue-800" variant="default" type="submit" disabled={isLoading}>
                 Create
               </Button>
             </DialogFooter>

@@ -31,7 +31,7 @@ const DeleteServerModal = () => {
     try {
       setIsLoading(true)
       const url = qs.stringifyUrl({
-        url: `${CONFIG.API_URL}/servers/delete`,
+        url: `/servers/delete`,
         query: {
           serverId: server?.id
         }

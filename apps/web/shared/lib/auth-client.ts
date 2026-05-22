@@ -1,4 +1,5 @@
 import { createAuthClient } from "better-auth/react";
+import { CONFIG } from "./config";
 export const authClient = createAuthClient({
   /** The base URL of the server (optional if you're using the same domain) */
   baseURL: process.env.NEXT_PUBLIC_API_URL!,
@@ -14,7 +15,7 @@ export async function signinWithEmail(
       email,
       password,
       rememberMe,
-      callbackURL: "/",
+      callbackURL: CONFIG.APP_URL, // Redirect to the app after successful sign-in
     },
     {
       onError: (ctx) => {
@@ -39,7 +40,7 @@ export async function signupWithEmail(
       email,
       password,
       name,
-      callbackURL: "/",
+      callbackURL: CONFIG.APP_URL, // Redirect to the app after successful sign-up
     },
     {
       onError: (ctx) => {
@@ -49,7 +50,7 @@ export async function signupWithEmail(
   );
 }
 
-export async function signIn(provider: string, callbackURL: string = "/") {
+export async function signIn(provider: string, callbackURL: string = CONFIG.APP_URL) {
   await authClient.signIn.social({
     provider,
     callbackURL,

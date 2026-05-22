@@ -29,7 +29,7 @@ const LeaveServerModal = () => {
     try {
       setIsLoading(true)
       const url = qs.stringifyUrl({
-        url: `${CONFIG.API_URL}/servers/leave`,
+        url: `/servers/leave`,
         query: {
           serverId: server?.id
         }

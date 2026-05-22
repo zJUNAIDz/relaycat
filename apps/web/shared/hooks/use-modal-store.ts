@@ -1,5 +1,4 @@
-import { ServerWithMembersAndUser } from "@/shared/types";
-import { Channel, ChannelType, Server, User } from "@/generated/prisma/client";
+import { Channel, ChannelType, Server, ServerWithMembersAndUser, User } from "@/shared/types";
 import { create } from "zustand";
 export type ModalType =
   | "createServer"
