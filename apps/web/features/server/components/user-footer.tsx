@@ -14,7 +14,7 @@ export const UserFooter = ({ user }: UserFooterProps) => {
     <div className="w-full flex p-1 h-14  bg-background/50 dark:bg-background/10 border-t border-neutral-200 dark:border-neutral-800">
       <Popover>
         <PopoverTrigger asChild>
-          <div className="flex justify-center items-center gap-2 hover:dark:bg-[#3A3B41] p-2 py-3 rounded-md cursor-pointer">
+          <div className="flex justify-center items-center gap-2 hover:bg-accent p-2 py-3 rounded-md cursor-pointer">
             <UserAvatar src={user?.image || undefined } />
             <div className="flex flex-col">
               <span className="text-sm font-semibold">{user.name}</span>
