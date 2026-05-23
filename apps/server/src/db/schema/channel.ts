@@ -1,6 +1,6 @@
 import {v7 as uuidv7 } from "uuid";
 import { pgEnum, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
-import { createSelectSchema } from "drizzle-zod";
+import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { servers } from "./server";
 const channelTypes = ["TEXT", "VOICE"] as const;
 export const channelTypeEnum = pgEnum("channel_type", channelTypes);
@@ -25,4 +25,4 @@ export const ChannelType = channelTypes.reduce(
 export type Channel = typeof channels.$inferSelect;
 export type ChannelInput = typeof channels.$inferInsert;
 export const ChannelSelectSchema = createSelectSchema(channels);
-export const ChannelInsertSchema = createSelectSchema(channels);
+export const ChannelInsertSchema = createInsertSchema(channels);
