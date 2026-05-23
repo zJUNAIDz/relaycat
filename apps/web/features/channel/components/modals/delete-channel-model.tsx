@@ -29,10 +29,7 @@ const DeleteChannelModal = () => {
   const deleteChannel = async () => {
     try {
       setIsLoading(true)
-      const url = qs.stringifyUrl({
-        url: `/channels/${channel?.id}`,
-      })
-      await axiosClient.delete(url);
+      await axiosClient.delete(`/channels/${channel?.id}`);
       onClose()
       router.refresh()
       // router.push("/")
@@ -46,7 +43,7 @@ const DeleteChannelModal = () => {
 
   return (
     <Dialog open={isModalOpen} onOpenChange={onClose}>
-      <DialogContent aria-description="Invite Link" className="overflow-hidden w-full gap-5">
+      <DialogContent aria-description="Invite Link" className="overflow-hidden w-full gap-5 bg-background">
         <DialogHeader>
           <DialogTitle className="text-center text-2xl font-bold">
             Delete Channel

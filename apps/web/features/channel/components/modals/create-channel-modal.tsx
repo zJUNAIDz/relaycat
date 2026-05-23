@@ -22,8 +22,7 @@ import { capitalizeFirstLetter } from "@/shared/utils/misc";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DialogTitle } from "@radix-ui/react-dialog";
 import { useParams, useRouter } from "next/navigation";
-import qs from "query-string";
-import React from "react";
+import { useEffect, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import * as z from "zod";
 
@@ -39,8 +38,8 @@ const CreateChannelModal = () => {
   //* component beginning
   const { isOpen, onClose, type, data: { channelType } } = useModal();
   const isModalOpen = isOpen && type == "createChannel";
-  const [isLoading, setIsLoading] = React.useState(false);
-  const [errorMessage, setErrorMessage] = React.useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   const { serverId } = useParams<{ serverId: string }>()
   const router = useRouter();
   const form = useForm({
@@ -59,12 +58,7 @@ const CreateChannelModal = () => {
   }
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      const url = qs.stringifyUrl({
-        url: `/channels/create`,
-
-      })
-
-      await axiosClient.post(url, { ...values, serverId })
+      await axiosClient.post("/channels", { ...values, serverId })
       form.reset()
       router.refresh()
       onClose()
@@ -81,7 +75,7 @@ const CreateChannelModal = () => {
     resetForm();
     onClose();
   };
-  React.useEffect(() => {
+  useEffect(() => {
     if (channelType) {
       form.setValue("type", channelType)
     } else {
@@ -95,7 +89,7 @@ const CreateChannelModal = () => {
       onOpenChange={handleCloseModal}
       aria-label="Create New Channel"
     >
-      <DialogContent className="overflow-hidden bg-background rounded-lg shadow-lg w-full max-w-md">
+      <DialogContent className="overflow-hidden bg-background rounded-lg shadow-lg">
         <DialogTitle className="text-center text-2xl font-bold">
           Create New Channel
         </DialogTitle>
@@ -161,7 +155,7 @@ const CreateChannelModal = () => {
                   {errorMessage}
                 </div>
               )}
-              <Button className=" bg-blue-500 text-white dark:bg-blue-700 hover:bg-blue-600 dark:hover:bg-blue-800" variant="default" type="submit" disabled={isLoading}>
+              <Button className="" variant="default" type="submit" disabled={isLoading}>
                 Create
               </Button>
             </DialogFooter>
