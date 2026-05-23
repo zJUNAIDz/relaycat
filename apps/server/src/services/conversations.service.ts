@@ -36,7 +36,6 @@ class ConversationService {
       if (messages.length === this.MESSAGE_BATCH) {
         nextCursor = messages[this.MESSAGE_BATCH - 1].id;
       }
-      console.log({ messages, nextCursor });
       return { messages, nextCursor, error: null };
     } catch (error) {
       console.error("[getConversationMessages] ", error);
@@ -119,11 +118,11 @@ class ConversationService {
     memberTwoId: Member["id"],
   ) {
     try {
-      let conversation = await this.findConversation(memberOneId, memberTwoId);
-      if (conversation.error) {
-        conversation = await this.createConversation(memberOneId, memberTwoId);
+      let result = await this.findConversation(memberOneId, memberTwoId);
+      if (result.error) {
+        result = await this.createConversation(memberOneId, memberTwoId);
       }
-      return { conversation, error: null };
+      return { conversation: result.conversation, error: result.error };
     } catch (err) {
       console.error("[getOrCreateConversation] ", err);
       return {

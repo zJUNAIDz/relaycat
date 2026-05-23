@@ -121,7 +121,7 @@ const ServerSidebar = ({ serverId, channelId }: { serverId: string; channelId: s
         />
         <ServerMembersList members={server.members} serverId={server.id} />
       </ScrollArea>
-      <UserFooter name={user.name ?? "Na"} username="NA" imageUrl={user.image ?? ""} />
+      <UserFooter user={user} />
     </WrapperDiv>
   );
 };
@@ -148,7 +148,7 @@ const NoServerSelected = ({ name, image }: { name: string, image: string }) => {
       </div>
 
       {/* Empty footer area */}
-      <UserFooter name={name} username="NA" imageUrl={image} />
+      <UserFooter user={{ name, username: "NA", image }} />
     </WrapperDiv>
   )
 };

@@ -33,7 +33,7 @@ export const ServerChannel: React.FC<ServerChannelProps> = ({ channel, server, r
   }
   const onChannelClick = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     e.stopPropagation();
-    router.push(`/servers/${server.id}/channels/${channel.id}`);
+    router.push(`/channels/${server.id}/${channel.id}`);
   }
 
   return (

@@ -22,21 +22,40 @@ export default function ClientVerifyEmail({ searchParams }: { searchParams: Prom
           return;
         }
 
-        // The verification happens automatically via the backend
-        // We just need to show the status
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/verify-email?token=${encodeURIComponent(token)}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({ message: 'Verification failed' }));
+          setStatus("error");
+          setMessage(errorData.message || "Failed to verify email. The link may be invalid or expired.");
+          return;
+        }
+
         setStatus("success");
         setMessage("Email verified successfully! Redirecting...");
 
-        setTimeout(() => {
+        const timeoutId = setTimeout(() => {
           router.push(PAGE_ROUTES.HOME);
         }, 2000);
+
+        return () => clearTimeout(timeoutId);
       } catch (error) {
         setStatus("error");
         setMessage("Failed to verify email. Please try again.");
       }
     };
 
-    verifyEmail();
+    const cleanup = verifyEmail();
+    return () => {
+      if (cleanup instanceof Promise) {
+        cleanup.then((cleanupFn) => cleanupFn && cleanupFn());
+      }
+    };
   }, [searchParams, router, params]);
 
   return (

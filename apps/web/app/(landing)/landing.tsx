@@ -45,12 +45,21 @@ const features = [
 ];
 
 const techStack = [
-  "Next.js App Router",
+  "Typescript",
+  "Next.js 16 App Router",
   "Bun",
   "Hono",
   "Socket.io",
   "Tailwind CSS",
   "Framer Motion",
+  "Shadcn UI",
+  "Postgres with Drizzle ORM",
+  "Docker",
+  "Better-Auth",
+  "AWS S3",
+  "Tanstack Query",
+  "Zod",
+  "Zustand",
 ];
 
 const Landing = () => {
@@ -100,7 +109,7 @@ const NavbarAuth = ({ isLoading, user }: { isLoading: boolean; user: User | null
 
   if (user) {
     return (
-      <div>
+      <div className="flex items-center gap-2">
         <Button variant="ghost" size="sm" onClick={() => authClient.signOut()}>
           Sign out
         </Button>
@@ -110,7 +119,7 @@ const NavbarAuth = ({ isLoading, user }: { isLoading: boolean; user: User | null
   }
 
   return (
-    <div>
+    <div className="flex items-center gap-2">
       <Button asChild size="sm" className="rounded-full px-5">
         <Link href={PAGE_ROUTES.AUTH}>Sign in</Link>
       </Button>
@@ -128,15 +137,6 @@ const HeroSection = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <Badge variant="secondary" className="w-fit rounded-full px-3 py-1.5 text-xs font-medium">
-          <span className="flex items-center gap-2">
-            <span className="relative flex h-2 w-2">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75"></span>
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-primary"></span>
-            </span>
-            Open Source Portfolio Project
-          </span>
-        </Badge>
 
         <div className="space-y-6">
           <h1 className={`${spaceGrotesk.className} max-w-3xl text-4xl font-bold tracking-tight text-foreground sm:text-5xl lg:text-6xl lg:leading-[1.1]`}>
@@ -148,15 +148,13 @@ const HeroSection = () => {
         </div>
 
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-          <Button asChild size="lg" className="group rounded-full px-8">
+          <Button asChild variant="outline" size="lg" className="group rounded-full px-8">
             <Link href={PAGE_ROUTES.AUTH}>
               Enter the App
               <MoveRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
             </Link>
           </Button>
-          <Button asChild variant="outline" size="lg" className="rounded-full px-8">
-            <Link href={PAGE_ROUTES.HOME}>View Demo Shell</Link>
-          </Button>
+
         </div>
 
         <div className="pt-4">
