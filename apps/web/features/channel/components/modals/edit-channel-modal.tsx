@@ -162,7 +162,7 @@ const EditChannelModal = () => {
                   {errorMessage}
                 </div>
               )}
-              <Button className="bg-blue-500 text-white dark:bg-blue-700 hover:bg-blue-600 dark:hover:bg-blue-800" variant="default" type="submit" disabled={isLoading}>
+              <Button className="" variant="default" type="submit" disabled={isLoading}>
                 Save Changes
               </Button>
             </DialogFooter>

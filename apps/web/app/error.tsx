@@ -21,7 +21,7 @@ const ErrorPage = () => {
 
         {/* Discord-like Button to Go Home */}
         <Link href="/">
-          <button className="mt-6 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:bg-purple-600 dark:hover:bg-purple-700">
+          <button className="mt-6 px-6 py-3 font-semibold rounded-lg transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:bg-purple-600 dark:hover:bg-purple-700">
             Return to Home
           </button>
         </Link>

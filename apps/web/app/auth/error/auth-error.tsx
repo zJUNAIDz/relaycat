@@ -43,7 +43,7 @@ const AuthErrorComponent = ({ getErrorMessage }: { getErrorMessage: () => string
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-medium flex items-center justify-center gap-2 transition-colors"
+              className="w-full text-white py-3 rounded-lg font-medium flex items-center justify-center gap-2 transition-colors"
             >
               <HiArrowLeft className="w-5 h-5" />
               Return to Login
