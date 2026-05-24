@@ -21,6 +21,7 @@ import { ChannelType } from "@/shared/types";
 import { capitalizeFirstLetter } from "@/shared/utils/misc";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DialogTitle } from "@radix-ui/react-dialog";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
@@ -36,6 +37,7 @@ const formSchema = z.object({
 
 const CreateChannelModal = () => {
   //* component beginning
+  const createChannelMutation = useCreateChannelMutation();
   const { isOpen, onClose, type, data: { channelType } } = useModal();
   const isModalOpen = isOpen && type == "createChannel";
   const [isLoading, setIsLoading] = useState(false);
@@ -58,7 +60,7 @@ const CreateChannelModal = () => {
   }
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      await axiosClient.post("/channels", { ...values, serverId })
+      await createChannelMutation.mutateAsync({ ...values, serverId })
       form.reset()
       router.refresh()
       onClose()
@@ -166,4 +168,15 @@ const CreateChannelModal = () => {
   );
 };
 
+function useCreateChannelMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: z.infer<typeof formSchema> & { serverId: string }) => {
+      return axiosClient.post("/channels", data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["server"] });
+    }
+  })
+}
 export default CreateChannelModal;
