@@ -105,7 +105,7 @@ class ChannelService {
   }
 
   async editChannel(
-    newData: ChannelInput,
+    newData: { name: string },
     channelId: Channel["id"],
     userId: string,
   ): Promise<Channel | null> {
