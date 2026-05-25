@@ -1,7 +1,7 @@
 import { db } from "@/db";
 import { user } from "@/db/schema/auth-schema";
 import { channels, ChannelType } from "@/db/schema/channel";
-import { MemberRole, members, MemberWithUser } from "@/db/schema/member";
+import { MemberRole, members } from "@/db/schema/member";
 import {
   ServerInput,
   servers,
@@ -158,13 +158,17 @@ class ServersService {
     inviteCode: string,
   ) {
     try {
-      await db
+      const [server] = await db
         .update(servers)
         .set({ inviteCode })
-        .where(eq(servers.id, serverId));
-      return true;
+        .where(eq(servers.id, serverId))
+        .returning();
+      if (!server) {
+        return null;
+      }
+      return server;
     } catch (err) {
-      return false;
+      return null;
     }
   }
 
