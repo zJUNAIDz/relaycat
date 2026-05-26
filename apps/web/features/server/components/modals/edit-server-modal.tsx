@@ -19,14 +19,14 @@ import {
 } from "@/shared/components/ui/form";
 import { Input } from "@/shared/components/ui/input";
 import { useModal } from "@/shared/hooks/use-modal-store";
-import axiosClient from "@/shared/lib/axios-client";
 import { CONFIG } from "@/shared/lib/config";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import React, { useEffect } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import * as z from "zod";
+import { useS3Uploads } from "../../hooks/use-s3-uploads";
+import { useServerMutation } from "../../hooks/use-server-mutation";
 
 
 const formSchema = z.object({
@@ -40,10 +40,10 @@ const formSchema = z.object({
 
 const EditServerModal = () => {
   const { isOpen, onClose, type, data: { server } } = useModal();
-  const mutate = useEditServerMutation(server?.id as string);
+  const { editServerMutation } = useServerMutation(server?.id as string);
   const isModalOpen = isOpen && type == "editServer";
   const [imageFile, setImageFile] = React.useState<File | null>(null);
-
+  const { isUploading, uploadServerIcon } = useS3Uploads();
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -51,6 +51,16 @@ const EditServerModal = () => {
       image: server?.image || CONFIG.DEFAULT_SERVER_IMAGE_URL,
     },
   });
+  const isSubmitting = form.formState.isSubmitting || isUploading || editServerMutation.isPending;
+
+  useEffect(() => {
+    if (isModalOpen && server) {
+      form.reset({
+        name: server.name,
+        image: server.image || CONFIG.DEFAULT_SERVER_IMAGE_URL,
+      });
+    }
+  }, [server, isModalOpen, form]);
 
   const handleCloseModal = () => {
     form.reset();
@@ -60,21 +70,10 @@ const EditServerModal = () => {
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      let finalImageUrl = values.image;
-      if (imageFile) {
-        const { data: { signedUrl, key, bucketName } } = await axiosClient.get(`/s3/uploads/server-icon?serverName=${form.getValues("name")}&fileType=${imageFile.type}`);
-
-        const uploadResponse = await axiosClient.put(signedUrl, imageFile, {
-          headers: { "Content-Type": imageFile.type },
-        });
-        if (uploadResponse.status !== 200) {
-          throw new Error("Failed to upload image to S3.");
-        }
-        finalImageUrl = `${CONFIG.S3_URL}/${bucketName}/${key}`
-      }
-      const mutateResponse = await mutate.mutateAsync({
+      let imageUrl = imageFile ? await uploadServerIcon(imageFile, values.name) : values.image;
+      const mutateResponse = await editServerMutation.mutateAsync({
         name: values.name,
-        image: finalImageUrl,
+        image: imageUrl,
       })
       if (mutateResponse.status !== 200) {
         throw new Error("Failed to update server with new image.");
@@ -85,15 +84,6 @@ const EditServerModal = () => {
       toast.error(err instanceof Error ? err.message : "Failed to edit server. Please try again.");
     }
   };
-
-  useEffect(() => {
-    if (isModalOpen && server) {
-      form.reset({
-        name: server.name,
-        image: server.image || CONFIG.DEFAULT_SERVER_IMAGE_URL,
-      });
-    }
-  }, [server, isModalOpen, form]);
 
   return (
     <Dialog open={isModalOpen} onOpenChange={handleCloseModal}>
@@ -114,6 +104,7 @@ const EditServerModal = () => {
                 <FormField
                   control={form.control}
                   name="image"
+                  disabled={isSubmitting}
                   render={({ field }) => (
                     <FormItem>
                       <FormControl>
@@ -143,7 +134,7 @@ const EditServerModal = () => {
                     </FormLabel>
                     <FormControl>
                       <Input
-                        disabled={form.formState.isSubmitting}
+                        disabled={isSubmitting}
                         className="border focus-visible:ring-0  focus-visible:ring-offset-0 bg-transparent"
                         placeholder="Enter Server Name"
                         {...field}
@@ -155,8 +146,8 @@ const EditServerModal = () => {
               />
             </div>
             <DialogFooter className="px-6 py-4">
-              <Button variant="default" type="submit" disabled={form.formState.isSubmitting}>
-                Edit
+              <Button variant="default" type="submit" disabled={isSubmitting}>
+                {isSubmitting ? "Saving..." : "Save Changes"}
               </Button>
             </DialogFooter>
           </form>
@@ -166,21 +157,5 @@ const EditServerModal = () => {
   );
 };
 
-function useEditServerMutation(serverId: string) {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationKey: ["server", serverId],
-    mutationFn: async ({ name, image }: { name: string, image: string }) => {
-      const response = await axiosClient.patch(`/servers/${serverId}`, {
-        name,
-        image,
-      });
-      return response;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["server", serverId] });
-      queryClient.invalidateQueries({ queryKey: ["currentUserServers"] });
-    }
-  });;
-}
+
 export default EditServerModal;
