@@ -219,7 +219,7 @@ const ServerSidebarLoading = () => {
       </div>
 
       {/* Footer - h-14 to match UserFooter */}
-      <div className="h-14 p-1 bg-slate-200 dark:bg-[#222327] border-t border-neutral-200 dark:border-neutral-800">
+      <div className="h-14 p-1 border-t border-neutral-200 dark:border-neutral-800">
         <div className="flex items-center gap-2 px-2 py-3">
           <Skeleton className="h-10 w-10 rounded-full shrink-0 bg-zinc-300 dark:bg-zinc-700/50" />
           <div className="flex-1 flex flex-col gap-y-1">

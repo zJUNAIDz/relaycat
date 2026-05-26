@@ -2,7 +2,6 @@
 
 import defaultServerImage from "@/public/placeholder.webp";
 import { ActionTooltip } from "@/shared/components/action-tooltip";
-import { useAppContextStore } from "@/shared/stores/use-app-store";
 import { cn } from "@/shared/utils/cn";
 import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";

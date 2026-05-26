@@ -3,4 +3,5 @@ export const CONFIG = {
   SOCKET_URL: process.env.NEXT_PUBLIC_SOCKET_URL!,
   DEFAULT_SERVER_IMAGE_URL: process.env.NEXT_PUBLIC_DEFAULT_SERVER_IMAGE_URL!,
   APP_URL: process.env.NEXT_PUBLIC_APP_URL!,
+  S3_URL: process.env.NEXT_PUBLIC_S3_URL!,
 };
