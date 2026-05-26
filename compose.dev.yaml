@@ -12,7 +12,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/18/docker
   minio:
-    image: minio/minio:latest
+    image: firstfinger/minio:latest
     container_name: relaycat-minio
     environment:
       MINIO_ROOT_USER: relaycat
@@ -20,10 +20,14 @@ services:
     ports:
       - "9000:9000"
       - "9001:9001"
+      - "9002:9002"
     # restart: unless-stopped
-    command: server /data --console-address ":9001"
+    # command: server /data --console-address ":9001"
     volumes:
-      - minio_data:/data
+      # This saves your actual files/buckets permanently
+      - minio_data:/data 
+      # This saves your mc config, access keys, and system settings permanently!
+      - ./minio_config:/root/.minio
   loki:
     image: grafana/loki:latest
     container_name: relaycat-loki
