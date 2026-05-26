@@ -5,7 +5,10 @@ import { Button } from "@/shared/components/ui/button";
 import {
   Dialog,
   DialogContent,
-  DialogFooter
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle
 } from "@/shared/components/ui/dialog";
 import {
   FormControl,
@@ -19,11 +22,10 @@ import { useModal } from "@/shared/hooks/use-modal-store";
 import axiosClient from "@/shared/lib/axios-client";
 import { CONFIG } from "@/shared/lib/config";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { DialogDescription, DialogTitle } from "@radix-ui/react-dialog";
-import axios from "axios";
-import { useRouter } from "next/navigation";
-import React from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import React, { useEffect } from "react";
 import { FormProvider, useForm } from "react-hook-form";
+import { toast } from "sonner";
 import * as z from "zod";
 
 
@@ -31,90 +33,87 @@ const formSchema = z.object({
   name: z.string().min(1, {
     message: "Server name is required.",
   }),
-  //TODO: remove this requirement and use fallback image if not specified
-  imageUrl: z.string().min(1, {
+  image: z.string().min(1, {
     message: "Server image is required.",
   }).default(CONFIG.DEFAULT_SERVER_IMAGE_URL),
 });
 
 const EditServerModal = () => {
-  //* component beginning
-
   const { isOpen, onClose, type, data: { server } } = useModal();
+  const mutate = useEditServerMutation(server?.id as string);
   const isModalOpen = isOpen && type == "editServer";
   const [imageFile, setImageFile] = React.useState<File | null>(null);
 
-  const router = useRouter();
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: "",
-      imageUrl: CONFIG.DEFAULT_SERVER_IMAGE_URL,
+      name: server?.name || "",
+      image: server?.image || CONFIG.DEFAULT_SERVER_IMAGE_URL,
     },
   });
 
-  const isLoading = form.formState.isLoading;
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    try {
-      if (!imageFile) {
-        await axiosClient.patch(`/servers/${server?.id}`, {
-          name: values.name,
-          imageUrl: values?.imageUrl,
-        });
-        form.reset();
-        router.refresh();
-        window.location.reload();
-        return;
-      }
-      //* Get signed url from api
-      const { data: { signedUrl, key, bucketName } } = await axiosClient.get(`/s3/uploads/server-icon?serverName=${form.getValues("name")}&fileType=${imageFile.type}`);
-      //* Upload file to S3
-      await Promise.all([
-        () => axios.put(signedUrl, imageFile, {
-          headers: { "Content-Type": imageFile.type },
-        }),
-        () => axiosClient.patch(`/servers/${server?.id}`, {
-          name: values.name,
-          imageUrl: `https://s3.ap-south-1.amazonaws.com/${bucketName}/${key}`,
-        })
-      ])
-      form.reset();
-      router.refresh();
-      window.location.reload();
-    } catch (err) {
-      console.error("Error: \n", err);
-    }
-  };
-
-  React.useEffect(() => {
-    if (server) {
-      form.setValue("imageUrl", server?.image)
-      form.setValue("name", server?.name)
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
   const handleCloseModal = () => {
     form.reset();
+    setImageFile(null);
     onClose();
   };
 
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    try {
+      let finalImageUrl = values.image;
+      if (imageFile) {
+        const { data: { signedUrl, key, bucketName } } = await axiosClient.get(`/s3/uploads/server-icon?serverName=${form.getValues("name")}&fileType=${imageFile.type}`);
+
+        const uploadResponse = await axiosClient.put(signedUrl, imageFile, {
+          headers: { "Content-Type": imageFile.type },
+        });
+        if (uploadResponse.status !== 200) {
+          throw new Error("Failed to upload image to S3.");
+        }
+        finalImageUrl = `${CONFIG.S3_URL}/${bucketName}/${key}`
+      }
+      const mutateResponse = await mutate.mutateAsync({
+        name: values.name,
+        image: finalImageUrl,
+      })
+      if (mutateResponse.status !== 200) {
+        throw new Error("Failed to update server with new image.");
+      }
+      toast.success("Server updated successfully!");
+      handleCloseModal();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to edit server. Please try again.");
+    }
+  };
+
+  useEffect(() => {
+    if (isModalOpen && server) {
+      form.reset({
+        name: server.name,
+        image: server.image || CONFIG.DEFAULT_SERVER_IMAGE_URL,
+      });
+    }
+  }, [server, isModalOpen, form]);
+
   return (
     <Dialog open={isModalOpen} onOpenChange={handleCloseModal}>
-      <DialogContent className="overflow-hidden">
-        <DialogTitle className="text-center text-2xl font-bold">
-          Modify your Server
-        </DialogTitle>
-        <DialogDescription className="text-center">
-          Give your Server a personality with a Name and an Image. You can
-          always change it later.
-        </DialogDescription>
+      <DialogContent className="overflow-hidden bg-background">
+        <DialogHeader>
+          <DialogTitle className="text-center text-2xl font-bold">
+            Modify your Server
+          </DialogTitle>
+          <DialogDescription className="text-center">
+            Give your Server a personality with a Name and and Image. You can
+            always change it later.
+          </DialogDescription>
+        </DialogHeader>
         <FormProvider {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
             <div className="space-y-8 px-6">
               <div className="flex justify-center items-center text-center">
                 <FormField
                   control={form.control}
-                  name="imageUrl"
+                  name="image"
                   render={({ field }) => (
                     <FormItem>
                       <FormControl>
@@ -139,13 +138,13 @@ const EditServerModal = () => {
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="uppercase text-xs font-bold text-zinc-700 dark:text-[#97A6BC]">
+                    <FormLabel className="uppercase text-xs font-bold">
                       Server Name
                     </FormLabel>
                     <FormControl>
                       <Input
-                        disabled={isLoading}
-                        className="border-0 focus-visible:ring-0  focus-visble:ring-offset-0"
+                        disabled={form.formState.isSubmitting}
+                        className="border focus-visible:ring-0  focus-visible:ring-offset-0 bg-transparent"
                         placeholder="Enter Server Name"
                         {...field}
                       />
@@ -155,8 +154,8 @@ const EditServerModal = () => {
                 )}
               />
             </div>
-            <DialogFooter className="px-6 py-4 w-full">
-              <Button variant="default" type="submit" disabled={isLoading}>
+            <DialogFooter className="px-6 py-4">
+              <Button variant="default" type="submit" disabled={form.formState.isSubmitting}>
                 Edit
               </Button>
             </DialogFooter>
@@ -167,4 +166,21 @@ const EditServerModal = () => {
   );
 };
 
+function useEditServerMutation(serverId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationKey: ["server", serverId],
+    mutationFn: async ({ name, image }: { name: string, image: string }) => {
+      const response = await axiosClient.patch(`/servers/${serverId}`, {
+        name,
+        image,
+      });
+      return response;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["server", serverId] });
+      queryClient.invalidateQueries({ queryKey: ["currentUserServers"] });
+    }
+  });;
+}
 export default EditServerModal;
