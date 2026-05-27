@@ -1,9 +1,9 @@
 import axiosClient from "@/shared/lib/axios-client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-export function useServerMutation(serverId: string) {
+export function useEditServerMutation(serverId: string) {
   const queryClient = useQueryClient();
-  const editServerMutation = useMutation({
+  return useMutation({
     mutationKey: ["server", serverId],
     mutationFn: async ({ name, image }: { name: string; image: string }) => {
       const response = await axiosClient.patch(`/servers/${serverId}`, {
@@ -17,5 +17,20 @@ export function useServerMutation(serverId: string) {
       queryClient.invalidateQueries({ queryKey: ["currentUserServers"] });
     },
   });
-  return { editServerMutation };
+}
+export function useCreateServerMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationKey: ["createServer"],
+    mutationFn: async ({ name, image }: { name: string; image: string }) => {
+      const response = await axiosClient.post(`/servers`, {
+        name,
+        image,
+      });
+      return response;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["currentUserServers"] });
+    },
+  });
 }
