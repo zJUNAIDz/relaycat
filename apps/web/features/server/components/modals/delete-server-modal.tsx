@@ -8,15 +8,12 @@ import {
   DialogTitle
 } from "@/shared/components/ui/dialog";
 import { useModal } from "@/shared/hooks/use-modal-store";
-import axiosClient from "@/shared/lib/axios-client";
-import { CONFIG } from "@/shared/lib/config";
 import { PAGE_ROUTES } from "@/shared/lib/routes";
 import { useRouter } from "next/navigation";
-import qs from "query-string";
-import React from "react";
+import { toast } from "sonner";
+import { useDeleteServerMutation } from "../../hooks/server-mutations";
 
 const DeleteServerModal = () => {
-
   const {
     isOpen,
     onClose,
@@ -25,28 +22,18 @@ const DeleteServerModal = () => {
   } = useModal();
   const router = useRouter()
   const isModalOpen = isOpen && type == "deleteServer";
-  const [isLoading, setIsLoading] = React.useState(false);
+  const deleteServerMutation = useDeleteServerMutation(server?.id as string);
 
-  const leaveServer = async () => {
+  const onDeleteServer = async () => {
     try {
-      setIsLoading(true)
-      const url = qs.stringifyUrl({
-        url: `/servers/delete`,
-        query: {
-          serverId: server?.id
-        }
-      })
-      await axiosClient.delete(url)
+      await deleteServerMutation.mutateAsync();
       onClose()
-      router.refresh()
       router.push(PAGE_ROUTES.HOME)
+      toast.success(`Server ${server?.name} deleted successfully`)
     } catch (err) {
-      console.error("[DELETE_SERVER_MODAL] ", err)
-    } finally {
-      setIsLoading(false)
+      toast.error("Failed to delete server")
     }
   }
-
 
   return (
     <Dialog open={isModalOpen} onOpenChange={onClose}>
@@ -58,8 +45,12 @@ const DeleteServerModal = () => {
           Are you sure want to Delete this Server <span className="text-blue-500">{server?.name}</span>?
         </DialogDescription>
         <div className="flex items-center justify-around w-full">
-          <Button onClick={onClose} variant="ghost" className="border border-white">Cancel</Button>
-          <Button disabled={isLoading} onClick={leaveServer} className="bg-red-800 text-white hover:bg-red-600/85">Confirm</Button>
+          <Button onClick={onClose} variant="ghost" className="border border-white">
+            Cancel
+          </Button>
+          <Button disabled={deleteServerMutation.isPending} onClick={onDeleteServer} className="bg-red-800 text-white hover:bg-red-600/85">
+            Confirm
+          </Button>
         </div>
       </DialogContent>
     </Dialog>

@@ -34,3 +34,16 @@ export function useCreateServerMutation() {
     },
   });
 }
+export function useDeleteServerMutation(serverId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationKey: ["deleteServer", serverId],
+    mutationFn: async () => {
+      const response = await axiosClient.delete(`/servers/${serverId}`);
+      return response;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["currentUserServers"] });
+    },
+  });
+}
