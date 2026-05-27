@@ -18,7 +18,6 @@ import {
 } from "@/shared/components/ui/form";
 import { Input } from "@/shared/components/ui/input";
 import { useModal } from "@/shared/hooks/use-modal-store";
-import axiosClient from "@/shared/lib/axios-client";
 import { CONFIG } from "@/shared/lib/config";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios, { AxiosError } from "axios";
@@ -26,6 +25,9 @@ import { useRouter } from "next/navigation";
 import React from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import * as z from "zod";
+import { useS3Uploads } from "../../hooks/use-s3-uploads";
+import { useCreateServerMutation } from "../../hooks/server-mutations";
+import { toast } from "sonner";
 
 
 const formSchema = z.object({
@@ -35,16 +37,15 @@ const formSchema = z.object({
   image: z.string().optional().default(CONFIG.DEFAULT_SERVER_IMAGE_URL),
 });
 
-
-
 const CreateServerModal = () => {
   //* component beginning
   const { isOpen, onClose, type } = useModal();
   const isModalOpen = isOpen && type == "createServer";
   const [imageFile, setImageFile] = React.useState<File | null>(null);
+  const { uploadServerIcon } = useS3Uploads();
   const [isLoading, setIsLoading] = React.useState(false);
   const [errorMessage, setErrorMessage] = React.useState("");
-
+  const createServerMutation = useCreateServerMutation();
   const router = useRouter();
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -55,7 +56,6 @@ const CreateServerModal = () => {
     },
   });
 
-
   const resetForm = () => {
     form.reset({
       name: "",
@@ -63,52 +63,39 @@ const CreateServerModal = () => {
     });
     setImageFile(null);
   }
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    try {
-      setIsLoading(true);
-      if (!imageFile) {
-        await axiosClient.post(`/servers`, {
-          name: values.name,
-          image: values.image,
-        });
-        resetForm();
-        router.refresh();
-        onClose();
-        return;
-      }
-      const { data: { signedUrl, key, bucketName } } = await axiosClient.get(`/s3/uploads/server-icon?serverName=${form.getValues("name")}&fileType=${imageFile.type}`);
-
-      if (!signedUrl || !key || !bucketName) {
-        setErrorMessage("Error uploading image");
-        return;
-      }
-
-      await axios.put(signedUrl, imageFile, {
-        headers: { "Content-Type": imageFile.type },
-      });
-      const s3BaseUrl = process.env.NEXT_PUBLIC_S3_URL!;
-      const image = `${s3BaseUrl}/${bucketName}/${key}`;
-      await axiosClient.post(`/servers`, {
-        name: values.name,
-        image: image,
-      });
-
-      resetForm();
-      router.refresh();
-      onClose();
-    } catch (err) {
-      if (err instanceof AxiosError) {
-        console.error("[Error][Create Server: fn::onSubmit] ", err.response?.data);
-      }
-      console.error("[Error][Create Server: fn::onSubmit] ", err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const handleCloseModal = () => {
     resetForm();
+    router.refresh();
     onClose();
+  };
+
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    try {
+      setIsLoading(true);
+      const image = imageFile ? await uploadServerIcon(imageFile, values.name) : values.image;
+      const response = await createServerMutation.mutateAsync({
+        name: values.name,
+        image: image,
+      });
+      resetForm();
+      handleCloseModal();
+      router.push(`/channels/${response.data.id}/${response.data.channels[0].id}`);
+      toast.success("Server created successfully!");
+    } catch (err) {
+      console.error("Error creating server:", err);
+      if (axios.isAxiosError(err)) {
+        const axiosError = err as AxiosError<{ message?: string }>;
+        setErrorMessage(
+          axiosError.response?.data?.message ||
+          "An error occurred while creating the server."
+        );
+      } else {
+        setErrorMessage("An unexpected error occurred.");
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -180,7 +167,7 @@ const CreateServerModal = () => {
                 </div>
               )}
               <Button variant="default" type="submit" disabled={isLoading}>
-                Create
+                {isLoading ? "Creating..." : "Create Server"}
               </Button>
             </DialogFooter>
           </form>
