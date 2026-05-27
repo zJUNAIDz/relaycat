@@ -3,6 +3,7 @@ import messageRoute from "@/modules/messages/route";
 import { ProtectedAppContext } from "@/types";
 import { Hono } from "hono";
 import { channelService } from "./service";
+import z from "zod";
 
 const channelsRoute = new Hono<ProtectedAppContext>();
 channelsRoute.route("/:channelId/messages", messageRoute);
@@ -54,12 +55,12 @@ channelsRoute.get("/:channelId", async (c) => {
   const channel = await channelService.getChannelById(channelId, user.id);
   if (!channel)
     return c.json({ error: "Channel not found or access denied" }, 400);
-  return c.json({channel});
+  return c.json({ channel });
 });
 
 channelsRoute.patch("/:channelId", async (c) => {
   const body = await c.req.json();
-  const channelData = ChannelInsertSchema.safeParse(body);
+  const channelData = z.object({ name: z.string().min(1) }).safeParse(body);
   if (channelData.error) {
     return c.json({ error: channelData.error.message }, 400);
   }

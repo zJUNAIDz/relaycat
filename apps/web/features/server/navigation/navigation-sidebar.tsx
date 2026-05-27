@@ -13,13 +13,14 @@ const NavigationSidebar = () => {
     queryFn: async () => {
       const servers = await serverService.getCurrentUserServers();
       return servers;
-    }
+    },
+    staleTime: 1000 * 60 * 5, // 1 minute
   })
   if (query.isLoading) {
     return <LoadingNavigationSidebar />;
   }
   const servers = query.data || [];
-  // console.log("servers: ", servers)
+  
   return (
     <div
       className="space-y-4 flex flex-col h-full items-center text-primary w-full py-3 bg-background/70 border-r border-neutral-200 dark:border-neutral-800"
@@ -44,8 +45,7 @@ const NavigationSidebar = () => {
 };
 const LoadingNavigationSidebar = () => {
   return (
-    <div className="space-y-4 flex flex-col h-full items-center text-primary w-full
-    dark:bg-[#1e1f22] bg-[#e3e5e8] py-3 animate-pulse">
+    <div className="space-y-4 flex flex-col h-full items-center text-primary w-full py-3 animate-pulse">
       <div className="flex flex-col gap-y-2 w-full px-2">
         {[...Array(5)].map((_, i) => (
           <div key={i} className="h-10 bg-zinc-300 dark:bg-zinc-700 rounded-md w-full" />

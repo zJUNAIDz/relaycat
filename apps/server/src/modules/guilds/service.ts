@@ -1,7 +1,7 @@
 import { db } from "@/db";
 import { user } from "@/db/schema/auth-schema";
 import { channels, ChannelType } from "@/db/schema/channel";
-import { MemberRole, members, MemberWithUser } from "@/db/schema/member";
+import { MemberRole, members } from "@/db/schema/member";
 import {
   ServerInput,
   servers,
@@ -16,29 +16,48 @@ class ServersService {
     serverData: ServerInput,
   ): Promise<Server | null> {
     try {
-      const server: Server | null = await db
+      const server: ServerWithMembersAndUsersAndChannels | null = await db
         .transaction(async (tx) => {
+          let server: ServerWithMembersAndUsersAndChannels | null = null;
           const [newServer] = await tx
             .insert(servers)
             .values(serverData)
             .returning();
-          await tx.insert(channels).values({
-            name: "#general",
-            serverId: newServer.id,
-            type: ChannelType.TEXT,
-          });
-          await tx.insert(members).values({
-            userId,
-            role: MemberRole.ADMIN,
-            serverId: newServer.id,
-          });
-          return newServer;
+          const [channel] = await tx
+            .insert(channels)
+            .values({
+              name: "general",
+              serverId: newServer.id,
+              type: ChannelType.TEXT,
+            })
+            .returning();
+          const [member] = await tx
+            .insert(members)
+            .values({
+              userId,
+              role: MemberRole.ADMIN,
+              serverId: newServer.id,
+            })
+            .returning();
+          const [currUser] = await tx
+            .select()
+            .from(user)
+            .where(eq(user.id, userId))
+            .limit(1);
+          if (!currUser) {
+            throw new Error("User not found");
+          }
+          server = {
+            ...newServer,
+            channels: [channel],
+            members: [{ ...member, user: currUser }],
+          };
+          return server;
         })
         .catch((err) => {
           console.error("Error creating server:", err);
           return null;
         });
-
       return server ?? null;
     } catch (err) {
       console.error("Error creating server:", err);
@@ -158,13 +177,17 @@ class ServersService {
     inviteCode: string,
   ) {
     try {
-      await db
+      const [server] = await db
         .update(servers)
         .set({ inviteCode })
-        .where(eq(servers.id, serverId));
-      return true;
+        .where(eq(servers.id, serverId))
+        .returning();
+      if (!server) {
+        return null;
+      }
+      return server;
     } catch (err) {
-      return false;
+      return null;
     }
   }
 

@@ -48,7 +48,7 @@ const ServerHeader: React.FC<ServerHeaderProps> = ({ server, role }) => {
             Invite People <UserPlus className="h-4 w-4 ml-auto" />
           </DropdownMenuItem>
           {
-            isAdmin && (
+            (isAdmin || isModerator) && (
               <DropdownMenuItem
                 onClick={() => onOpen("editServer", { server })}
                 className="px-3 py-2 text-sm cursor-pointer"

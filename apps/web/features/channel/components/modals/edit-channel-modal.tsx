@@ -17,13 +17,12 @@ import { Input } from "@/shared/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/components/ui/select";
 import { useModal } from "@/shared/hooks/use-modal-store";
 import axiosClient from "@/shared/lib/axios-client";
-import { CONFIG } from "@/shared/lib/config";
 import { ChannelType } from "@/shared/types";
 import { capitalizeFirstLetter } from "@/shared/utils/misc";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DialogTitle } from "@radix-ui/react-dialog";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useParams, useRouter } from "next/navigation";
-import qs from "query-string";
 import React from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import * as z from "zod";
@@ -38,6 +37,7 @@ const formSchema = z.object({
 
 const EditChannelModal = () => {
   //* component beginning
+  const editChannelMutation = useEditChannelMutation();
   const { isOpen, onClose, type, data: { channel } } = useModal();
   const isModalOpen = isOpen && type == "editChannel";
   const [isLoading, setIsLoading] = React.useState(false);
@@ -61,14 +61,11 @@ const EditChannelModal = () => {
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      const url = qs.stringifyUrl({
-        url: `/channels/${channel?.id}`,
 
+      await editChannelMutation.mutateAsync({
+        channelId: channel!.id,
+        data: values
       })
-
-      await axiosClient.patch(url, { ...values, serverId })
-      form.reset()
-      router.refresh()
       onClose()
     } catch (err) {
       if (err instanceof z.ZodError)
@@ -173,4 +170,15 @@ const EditChannelModal = () => {
   );
 };
 
+function useEditChannelMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ channelId, data }: { channelId: string, data: z.infer<typeof formSchema> }) => {
+      return axiosClient.patch(`/channels/${channelId}`, data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["server"] });
+    }
+  })
+}
 export default EditChannelModal;

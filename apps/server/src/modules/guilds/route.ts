@@ -119,17 +119,17 @@ serverRoutes.patch("/:serverId/invite-code", async (c) => {
   }
 
   const inviteCode = randomUUIDv7("hex");
-  const success = await serversService.updateServerInviteCode(
+  const server = await serversService.updateServerInviteCode(
     serverId,
     user.id,
     inviteCode,
   );
-  if (!success) {
+  if (!server) {
     log.warn({ user, serverId }, "[SERVER_UPDATE_INVITE_CODE_FAILED]");
     return c.json({ error: "Server not found" }, 404);
   }
   log.info({ userId: user.id, serverId }, "[SERVER_UPDATE_INVITE_CODE]");
-  return c.json({ success });
+  return c.json({ server });
 });
 
 export default serverRoutes;
