@@ -26,7 +26,7 @@ import { FormProvider, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import * as z from "zod";
 import { useS3Uploads } from "../../hooks/use-s3-uploads";
-import { useServerMutation } from "../../hooks/use-server-mutation";
+import { useEditServerMutation } from "../../hooks/server-mutations";
 
 
 const formSchema = z.object({
@@ -40,7 +40,7 @@ const formSchema = z.object({
 
 const EditServerModal = () => {
   const { isOpen, onClose, type, data: { server } } = useModal();
-  const { editServerMutation } = useServerMutation(server?.id as string);
+  const editServerMutation = useEditServerMutation(server?.id as string);
   const isModalOpen = isOpen && type == "editServer";
   const [imageFile, setImageFile] = React.useState<File | null>(null);
   const { isUploading, uploadServerIcon } = useS3Uploads();
