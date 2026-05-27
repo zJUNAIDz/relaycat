@@ -13,13 +13,14 @@ const NavigationSidebar = () => {
     queryFn: async () => {
       const servers = await serverService.getCurrentUserServers();
       return servers;
-    }
+    },
+    staleTime: 1000 * 60 * 5, // 1 minute
   })
   if (query.isLoading) {
     return <LoadingNavigationSidebar />;
   }
   const servers = query.data || [];
-  // console.log("servers: ", servers)
+  
   return (
     <div
       className="space-y-4 flex flex-col h-full items-center text-primary w-full py-3 bg-background/70 border-r border-neutral-200 dark:border-neutral-800"

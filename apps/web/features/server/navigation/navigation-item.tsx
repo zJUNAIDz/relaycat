@@ -10,13 +10,11 @@ interface NavigationItemProps {
 }
 
 const NavigationItem: React.FC<NavigationItemProps> = ({ server }) => {
-  console.log("NavigationItem server: ", server)
   const params = useParams();
   const router = useRouter();
   const onClickServerIcon = () => {
     router.push(`/channels/${server.id}/${server.channels?.[0]?.id}`);
   };
-  // console.log("imageUrl", imageUrl)
   return (
     <ActionTooltip
       side="right"
