@@ -15,19 +15,21 @@ interface ChannelIdPageProps {
 }
 
 const ChannelIdPage = async ({ params }: ChannelIdPageProps) => {
+  const user = await getCurrentUser();
+  if (!user) {
+    unauthorized();
+  }
+
   const { channelId } = await params;
   const channel = await channelService.getChannelById(channelId)
   if (!channel) {
     notFound()
   }
-  const user = await getCurrentUser();
-  if (!user) {
-    unauthorized();
-  }
   const member = await memberService.getMemberByUserId(user.id)
   if (!member) {
     notFound()
   }
+
   return (
     <div className="h-screen flex flex-col">
       <ChatHeader type="channel" label={channel.name} />
@@ -39,7 +41,7 @@ const ChannelIdPage = async ({ params }: ChannelIdPageProps) => {
               chatId={channel.id}
               name={channel.name}
               type="channel"
-              apiUrl={`/messages`}
+              apiUrl={`/channels/${channel.id}/messages`}
               socketUrl={CONFIG.SOCKET_URL}
               socketQuery={{
                 channelId,
@@ -51,7 +53,7 @@ const ChannelIdPage = async ({ params }: ChannelIdPageProps) => {
             <ChatInput
               name={channel.name}
               type="channel"
-              apiUrl={`/messages`}
+              apiUrl={`/channels/${channel.id}/messages`}
               query={{
                 channelId,
                 memberId: member.id,
