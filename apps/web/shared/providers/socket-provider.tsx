@@ -1,8 +1,8 @@
 "use client"
-import { CONFIG } from "@/shared/lib/config";
 import React from "react";
-import { io as ClientIO, Socket } from "socket.io-client";
+import { Socket } from "socket.io-client";
 import { useAuth } from "./auth-provider";
+import { clientSocketManager } from "@/shared/lib/socket-manager";
 
 type SocketContextType = {
   socket: Socket | null;
@@ -19,57 +19,37 @@ const SocketContext = React.createContext<SocketContextType>({
 export const useSocket = () => React.useContext(SocketContext);
 
 export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
-  const [socket, setSocket] = React.useState<Socket | null>(null);
+  const { session, isLoading: isAuthLoading } = useAuth();
   const [isConnected, setIsConnected] = React.useState(false);
-  const [isConnecting, setIsConnecting] = React.useState(true);
-  const { session, isLoading: isAuthLoading } = useAuth()
-  const isLoading = isAuthLoading || isConnecting;
+
+  // 1. Handle actual connection completely outside of state cycles
   React.useEffect(() => {
-    if (isAuthLoading || !session) return;
+    if (isAuthLoading) return;
 
-    console.log("Initializing socket connection...");
-    setIsConnecting(true);
+    if (session?.token) {
+      clientSocketManager.connect(session.token);
+    } else {
+      clientSocketManager.disconnect();
+    }
+  }, [session?.token, isAuthLoading]);
 
-    const newSocket = ClientIO(CONFIG.SOCKET_URL, {
-      path: "/",
-      transports: ["websocket"],
-      auth: {
-        token: session.token,
-      },
+  // 2. Synchronize the connection state flag safely
+  React.useEffect(() => {
+    const unsubscribe = clientSocketManager.subscribeToStatus((status) => {
+      setIsConnected(status);
     });
-
-    const connectionHandler = () => {
-      console.log("WS Connected ID:", newSocket.id);
-      setIsConnected(true);
-      setIsConnecting(false);
-    };
-
-    const disconnectHandler = () => {
-      console.log("WS Disconnected: ", newSocket.id);
-      setIsConnected(false);
-    };
-
-    newSocket.on("connect", connectionHandler);
-    newSocket.on("disconnect", disconnectHandler);
-
-    setSocket((prev) => {
-      prev?.disconnect();
-      return newSocket;
-    });
-
-    return () => {
-      console.log("Cleaning up socket...");
-      newSocket.off("connect", connectionHandler);
-      newSocket.off("disconnect", disconnectHandler);
-      newSocket.disconnect();
-    };
-  }, [session, isAuthLoading]);
+    return () => unsubscribe();
+  }, []);
 
   return (
-    <SocketContext.Provider value={{ socket, isConnected, isLoading: isAuthLoading }}>
+    <SocketContext.Provider 
+      value={{ 
+        socket: clientSocketManager.socket, 
+        isConnected, 
+        isLoading: isAuthLoading 
+      }}
+    >
       {children}
     </SocketContext.Provider>
   );
 };
-
-export default SocketProvider;
