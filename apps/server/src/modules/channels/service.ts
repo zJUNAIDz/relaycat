@@ -67,7 +67,7 @@ class ChannelService {
       )
       .where(eq(channels.id, channelId))
       .limit(1);
-    return result ?? null;
+    return result.channel ?? null;
   }
 
   async getChannelsByServerId(
