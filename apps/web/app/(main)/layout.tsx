@@ -1,6 +1,6 @@
 import NavigationSidebar from "@/features/server/navigation/navigation-sidebar";
 import { ModalProvider } from "@/shared/providers/modal-provider";
-import SocketProvider from "@/shared/providers/socket-provider";
+import { SocketProvider } from "@/shared/providers/socket-provider";
 import { Ubuntu } from "next/font/google";
 
 const ubuntuFont = Ubuntu({ subsets: ['latin'], weight: ["300"] })
