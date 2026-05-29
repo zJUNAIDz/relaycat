@@ -27,7 +27,7 @@ export const ActionTooltip: React.FC<ActionTooltipProps> = ({
         <TooltipTrigger asChild>
           {children}
         </TooltipTrigger>
-        <TooltipContent className={cn("font-bold text-lg", className)} side={side} align={align}>
+        <TooltipContent  className={cn("font-bold text-sm ", className)} side={side} align={align}>
           {label}
         </TooltipContent>
       </Tooltip>
