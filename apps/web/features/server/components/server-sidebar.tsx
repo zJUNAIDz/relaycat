@@ -35,7 +35,8 @@ const ServerSidebar = ({ serverId, channelId }: { serverId: string; channelId: s
   const { data: server, isLoading: isServerDataLoading, isError: isServerDataError } = useQuery({
     queryKey: ["server", serverId],
     queryFn: () => serverService.getServer(serverId),
-    enabled: !!serverId
+    enabled: !!serverId,
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
   // Handle loading and error states for user
   if (isUserLoading || isServerDataLoading) {
