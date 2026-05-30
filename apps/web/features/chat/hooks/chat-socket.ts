@@ -44,7 +44,7 @@ export const useChatSocket = ({
   React.useEffect(() => {
     if (!socket) return;
 
-    const cacheKey = [queryKey];
+    const cacheKey = queryKey;
 
     // Handle incoming new messages
     const handleAddMessage = (payload: ChatItem) => {
