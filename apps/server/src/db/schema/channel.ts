@@ -1,19 +1,32 @@
-import {v7 as uuidv7 } from "uuid";
-import { pgEnum, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import {
+  index,
+  pgEnum,
+  pgTable,
+  text,
+  timestamp,
+  uuid,
+} from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
+import { v7 as uuidv7 } from "uuid";
 import { servers } from "./server";
 const channelTypes = ["TEXT", "VOICE"] as const;
 export const channelTypeEnum = pgEnum("channel_type", channelTypes);
-export const channels = pgTable("channels", {
-  id: uuid("id").$defaultFn(() => uuidv7()).primaryKey(),
-  name: text("name").notNull(),
-  type: channelTypeEnum("type").notNull().default("TEXT"),
-  serverId: uuid("server_id")
-    .references(() => servers.id, { onDelete: "cascade" })
-    .notNull(),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at"),
-});
+export const channels = pgTable(
+  "channels",
+  {
+    id: uuid("id")
+      .$defaultFn(() => uuidv7())
+      .primaryKey(),
+    name: text("name").notNull(),
+    type: channelTypeEnum("type").notNull().default("TEXT"),
+    serverId: uuid("server_id")
+      .references(() => servers.id, { onDelete: "cascade" })
+      .notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at"),
+  },
+  (table) => [index("channels_server_id_idx").on(table.serverId)],
+);
 
 export const ChannelType = channelTypes.reduce(
   (acc, type) => {

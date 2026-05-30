@@ -1,28 +1,42 @@
-import { v7 as uuidv7 } from "uuid";
-import { boolean, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import { User } from "better-auth";
+import {
+  boolean,
+  index,
+  pgTable,
+  text,
+  timestamp,
+  uuid,
+} from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
+import { v7 as uuidv7 } from "uuid";
 import { channels } from "./channel";
 import { Member, members } from "./member";
-import { User } from "better-auth";
 
-export const messages = pgTable("messages", {
-  id: uuid("id")
-    .$defaultFn(() => uuidv7())
-    .primaryKey(),
-  content: text("content"),
-  mentions: text("mentions").array().default([]),
-  mentionRoles: text("mention_roles").array().default([]),
-  reactions: text("reactions").array().default([]),
-  deleted: boolean("deleted").default(false).notNull(),
-  memberId: uuid("member_id")
-    .references(() => members.id, { onDelete: "cascade" })
-    .notNull(),
-  channelId: uuid("channel_id")
-    .references(() => channels.id, { onDelete: "cascade" })
-    .notNull(),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at"),
-});
+export const messages = pgTable(
+  "messages",
+  {
+    id: uuid("id")
+      .$defaultFn(() => uuidv7())
+      .primaryKey(),
+    content: text("content"),
+    mentions: text("mentions").array().default([]),
+    mentionRoles: text("mention_roles").array().default([]),
+    reactions: text("reactions").array().default([]),
+    deleted: boolean("deleted").default(false).notNull(),
+    memberId: uuid("member_id")
+      .references(() => members.id, { onDelete: "cascade" })
+      .notNull(),
+    channelId: uuid("channel_id")
+      .references(() => channels.id, { onDelete: "cascade" })
+      .notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at"),
+  },
+  (table) => [
+    index("messages_member_id_idx").on(table.memberId),
+    index("messages_channel_id_idx").on(table.channelId),
+  ],
+);
 
 export type Message = typeof messages.$inferSelect;
 export type MessageInput = typeof messages.$inferInsert;

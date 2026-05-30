@@ -1,27 +1,36 @@
-import {v7 as uuidv7 } from "uuid";
-import { pgEnum, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import { index, pgEnum, text, timestamp, uuid } from "drizzle-orm/pg-core";
 import { pgTable } from "drizzle-orm/pg-core/table";
+import { v7 as uuidv7 } from "uuid";
 import { user } from "./auth-schema";
 import { servers } from "./server";
 
 export const possibleMemberRoles = ["ADMIN", "MODERATOR", "MEMBER"] as const;
 export const memberRole = pgEnum("member_role", possibleMemberRoles);
-export const members = pgTable("members", {
-  id: uuid("id").$defaultFn(() => uuidv7()).primaryKey(),
+export const members = pgTable(
+  "members",
+  {
+    id: uuid("id")
+      .$defaultFn(() => uuidv7())
+      .primaryKey(),
 
-  userId: text("user_id")
-    .references(() => user.id)
-    .notNull(),
-  role: memberRole("role").default("ADMIN"),
-  serverId: uuid("server_id")
-    .references(() => servers.id, { onDelete: "cascade" })
-    .notNull(),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at"),
-});
+    userId: text("user_id")
+      .references(() => user.id)
+      .notNull(),
+    role: memberRole("role").default("ADMIN"),
+    serverId: uuid("server_id")
+      .references(() => servers.id, { onDelete: "cascade" })
+      .notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at"),
+  },
+  (table) => [
+    index("members_user_id_idx").on(table.userId),
+    index("members_server_id_idx").on(table.serverId),
+  ],
+);
 export type Member = typeof members.$inferSelect;
 export type MemberWithUser = Member & {
-  user: (typeof user.$inferSelect);
+  user: typeof user.$inferSelect;
 };
 // get memberRole as const so I can use it in other files MemberRole.ADMIN
 export const MemberRole = possibleMemberRoles.reduce(
