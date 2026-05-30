@@ -77,7 +77,7 @@ class MessageService {
     currentUserId: string,
     cursor?: z.infer<typeof cursorSchema>,
   ): Promise<
-    Result<{ result: MessageAndMember[]; nextCursor: string | null }>
+    Result<{ result: MessageWithMemberWithUser[]; nextCursor: string | null }>
   > {
     try {
       const { messagesList, nextCursor } = await db.transaction(async (tx) => {
@@ -116,7 +116,7 @@ class MessageService {
           cursor && cursor?.limit < this.MESSAGE_BATCH
             ? cursor?.limit
             : this.MESSAGE_BATCH;
-
+        console.log({ cursor, messageCount });
         const messagesList = await tx
           .select({
             message: messages,

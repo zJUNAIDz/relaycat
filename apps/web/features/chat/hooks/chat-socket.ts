@@ -77,8 +77,8 @@ export const useChatSocket = ({
           ...oldData,
           pages: oldData.pages.map((page) =>
             page.map((item) =>
-              item.message.id === updatedMessage.id
-                ? { ...item, message: updatedMessage }
+              item.message.id === updatedMessage.message.id
+                ? { ...item, message: updatedMessage.message }
                 : item,
             ),
           ),
@@ -95,7 +95,7 @@ export const useChatSocket = ({
           ...oldData,
           pages: oldData.pages.map((page) =>
             page.map((item) =>
-              item.message.id === deletedMessage.id
+              item.message.id === deletedMessage.message.id
                 ? { ...item, message: { ...item.message, deleted: true } }
                 : item,
             ),
