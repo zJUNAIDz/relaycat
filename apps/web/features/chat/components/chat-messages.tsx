@@ -1,6 +1,6 @@
 "use client"
 
-import { Member, Message, User } from "@/shared/types";
+import { Member, MessageWithMemberWithUser } from "@/shared/types";
 import { format } from "date-fns";
 import { Loader2 } from "lucide-react";
 import React from "react";
@@ -124,11 +124,14 @@ export const ChatMessages = ({
       )}
 
       {/* Standard column flow matching DOM positioning */}
-      <div className="flex flex-col mt-auto">
+      <div className="flex flex-col-reverse mt-auto">
         {/* Reverse pages array to render older pages at top, newer at bottom */}
-        {[...(data?.pages ?? [])].reverse().map((group, i) => (
+        {data?.pages.reverse().map((page, i) => (
           <React.Fragment key={i}>
-            {group.map(({ message, member, user }: { message: Message; member: Member; user: User & { image: string | null } }) => (
+            <div ref={bottomRef} className="h-1" />
+
+            {page.map(({ message, member, user }: MessageWithMemberWithUser) =>
+            (
               <ChatMessage
                 key={message.id}
                 id={message.id}
@@ -144,11 +147,12 @@ export const ChatMessages = ({
                 socketUrl={socketUrl}
                 socketQuery={socketQuery}
               />
-            ))}
+            ))
+            }
           </React.Fragment>
-        ))}
+        ))
+        }
         {/* This acts as our anchor element at the very bottom */}
-        <div ref={bottomRef} className="h-1" />
       </div>
     </div>
   );
