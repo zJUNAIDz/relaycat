@@ -14,7 +14,7 @@ type ChatSocketProps = {
   addKey: string;
   updateKey: string;
   deleteKey: string;
-  queryKey: string;
+  queryKey: unknown[];
 };
 
 // 1. A single chat item item structure
@@ -25,7 +25,10 @@ interface ChatItem {
 }
 
 // 2. A "Page" is simply an array of these items
-type ChatPage = ChatItem[];
+type ChatPage = {
+  result: ChatItem[];
+  nextCursor: string | null;
+};
 
 // 3. TanStack Query's internal cache representation
 type ChatInfiniteData = InfiniteData<ChatPage>;
@@ -51,16 +54,16 @@ export const useChatSocket = ({
         if (!oldData || !oldData.pages || oldData.pages.length === 0) {
           return {
             pageParams: [null],
-            pages: [[payload]], // Array of pages, containing an array of items
+            pages: [{ result: [payload], nextCursor: null }],
           };
         }
 
         return {
           ...oldData,
           pages: oldData.pages.map((page, index) => {
-            // Prepend the new message directly to the first page array
+            // Prepend the new message directly to the first page
             if (index === 0) {
-              return [payload, ...page];
+              return { ...page, result: [payload, ...page.result] };
             }
             return page;
           }),
@@ -76,11 +79,14 @@ export const useChatSocket = ({
         return {
           ...oldData,
           pages: oldData.pages.map((page) =>
-            page.map((item) =>
-              item.message.id === updatedMessage.message.id
-                ? { ...item, message: updatedMessage.message }
-                : item,
-            ),
+            ({
+              ...page,
+              result: page.result.map((item) =>
+                item.message.id === updatedMessage.message.id
+                  ? { ...item, message: updatedMessage.message }
+                  : item,
+              ),
+            }),
           ),
         };
       });
@@ -94,11 +100,14 @@ export const useChatSocket = ({
         return {
           ...oldData,
           pages: oldData.pages.map((page) =>
-            page.map((item) =>
-              item.message.id === deletedMessage.message.id
-                ? { ...item, message: { ...item.message, deleted: true } }
-                : item,
-            ),
+            ({
+              ...page,
+              result: page.result.map((item) =>
+                item.message.id === deletedMessage.message.id
+                  ? { ...item, message: { ...item.message, deleted: true } }
+                  : item,
+              ),
+            }),
           ),
         };
       });
