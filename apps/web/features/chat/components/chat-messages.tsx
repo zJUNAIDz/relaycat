@@ -9,7 +9,6 @@ import { useChatSocket } from "../hooks/chat-socket";
 import { useChatScroll } from "../hooks/use-chat-scroll";
 import { ChatMessage } from "./chat-message";
 import { ChatWelcome } from "./chat-welcome";
-
 interface ChatMessagesProps {
   name: string;
   member: Member;
@@ -24,7 +23,6 @@ interface ChatMessagesProps {
 
 
 const DATE_FORMAT = "dd/MM/yyyy, HH:mm"
-
 export const ChatMessages = ({
   name,
   member,
@@ -40,34 +38,44 @@ export const ChatMessages = ({
   const addKey = `chat:${chatId}:messages`;
   const updateKey = `chat:${chatId}:messages:update`;
   const deleteKey = `chat:${chatId}:messages:delete`;
+
   const chatRef = React.useRef<HTMLDivElement>(null);
   const bottomRef = React.useRef<HTMLDivElement>(null);
+
   const {
     data,
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
     status
-  } = useChatQuery({
+  } = useChatQuery<MessageWithMemberWithUser>({
     queryKey,
     apiUrl,
     paramKey,
     paramValue
-  })
-  useChatSocket({ addKey, updateKey, queryKey, deleteKey })
+  });
+
+  useChatSocket({
+    addKey,
+    updateKey,
+    deleteKey,
+    queryKey: [queryKey, paramKey, paramValue],
+  });
+
+  // Count the total number of individual messages across all pages
+  const totalMessagesCount =
+    data?.pages.reduce((acc, page) => acc + page.result.length, 0) ?? 0;
+
   useChatScroll({
     chatRef,
     bottomRef,
     loadMore: fetchNextPage,
     shouldLoadMore: !isFetchingNextPage && hasNextPage,
-    count: data?.pages?.length ?? 0,
-  })
-  React.useEffect(() => {
-    if (bottomRef.current) {
-      bottomRef.current.scrollIntoView({ behavior: "smooth" })
-    }
-  }, [data])
-  console.log({ reversedMessages: data?.pages[0].messages })
+    count: totalMessagesCount, // Now correctly detects every single message
+  });
+
+  // !!! REMOVED: The manual scrollIntoView useEffect that was overriding the hook !!!
+
   if (status === "pending") {
     return (
       <div className="flex flex-col flex-1 justify-center items-center">
@@ -76,9 +84,11 @@ export const ChatMessages = ({
           loading messages...
         </p>
       </div>
-    )
+    );
   }
+
   return (
+    // Keep standard column flow for calculation predictability
     <div ref={chatRef} className="flex-1 flex flex-col py-4 overflow-y-auto">
       {!hasNextPage && <div className="flex-1" />}
       {!hasNextPage && (
@@ -87,55 +97,56 @@ export const ChatMessages = ({
           type={type}
         />
       )}
-      {
-        hasNextPage && isFetchingNextPage
-          ? (
-            <div className="flex flex-col flex-1 justify-center items-center">
-              <Loader2 className="h-7 w-7 text-zinc-500 animate-spin my-4" />
-              <p
-                className="text-xs text-zinc-500 dark:text-zinc-400">
-                loading messages...
-              </p>
-            </div>
 
-          )
-          : hasNextPage && (
-            <button
-              onClick={() => fetchNextPage()}
-              className="text-zinc-500 ">
-              load previous messages
-            </button>
-          )
-      }
+      {hasNextPage && isFetchingNextPage ? (
+        <div className="flex flex-col flex-1 justify-center items-center">
+          <Loader2 className="h-7 w-7 text-zinc-500 animate-spin my-4" />
+          <p className="text-xs text-zinc-500 dark:text-zinc-400">
+            loading messages...
+          </p>
+        </div>
+      ) : (
+        hasNextPage && (
+          <button
+            onClick={() => fetchNextPage()}
+            className="text-zinc-500 text-sm hover:underline my-2">
+            load previous messages
+          </button>
+        )
+      )}
+
+      {/* Standard column flow matching DOM positioning */}
       <div className="flex flex-col-reverse mt-auto">
-        {
-          data?.pages.map((group, i) => {
-            return (
-              <React.Fragment key={i}>
-                {group.length !== 0 && group.messages.map((message: MessageWithMemberWithUser) => (
-                  <ChatMessage
-                    key={message.id}
-                    id={message.id}
-                    currentMember={member}
-                    member={message.member}
-                    content={message.content}
-                    fileUrl={message.fileUrl}
-                    deleted={message.deleted}
-                    timestamp={format(new Date(message.updatedAt || message.createdAt), DATE_FORMAT)}
-                    isUpdated={message.updatedAt !== message.createdAt}
-                    apiUrl={`${apiUrl}/${message.id}`}
-                    socketUrl={socketUrl}
-                    socketQuery={socketQuery}
-                  />
-                ))
-                }
-              </React.Fragment>
-            )
-          })
-        }
-        <div ref={bottomRef} />
-      </div>
-    </div >
-  )
+        {/* Anchor element at the very bottom (first child due to flex-col-reverse) */}
+        <div ref={bottomRef} className="h-1" />
 
-}
+        {data?.pages.map((page, i) => (
+          <React.Fragment key={i}>
+            {page.result.map(
+              ({ message, member, user }: MessageWithMemberWithUser) => (
+                <ChatMessage
+                  key={message.id}
+                  id={message.id}
+                  currentMember={member}
+                  member={member}
+                  user={user}
+                  content={message.content}
+                  fileUrl={message.fileUrl}
+                  deleted={message.deleted}
+                  timestamp={format(
+                    new Date(message.updatedAt || message.createdAt),
+                    DATE_FORMAT,
+                  )}
+                  isUpdated={message.updatedAt !== null}
+                  apiUrl={`${apiUrl}/${message.id}`}
+                  socketUrl={socketUrl}
+                  socketQuery={socketQuery}
+                />
+              ),
+            )}
+          </React.Fragment>
+        ))}
+      </div>
+    </div>
+  );
+};

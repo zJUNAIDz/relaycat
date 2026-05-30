@@ -39,11 +39,8 @@ export const ChatInput = ({ apiUrl, query, name, type }: ChatInputProps) => {
   const isLoading = form.formState.isSubmitting;
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      const url = queryString.stringifyUrl({
-        url: apiUrl,
-        query
-      })
-      await axiosClient.post(url, values);
+      
+      await axiosClient.post(apiUrl, values);
       router.refresh();
       form.reset();
       setTimeout(() => {
@@ -69,14 +66,14 @@ export const ChatInput = ({ apiUrl, query, name, type }: ChatInputProps) => {
                     <button
                       type="button"
                       onClick={() => onOpen("messageFile", { apiUrl, query })}
-                      className="absolute top-7 left-7 h-6 w-6 bg-zinc-500 dark:bg-zinc-400 hover:bg-zinc-600 dark:hover:bg-zinc-300 transition rounded-full p-1 flex items-center justify-center"
+                      className="absolute top-7 left-7 h-6 w-6  transition rounded-full p-1 flex items-center justify-center"
                     >
                       <Plus className="text-foreground" />
                     </button>
                     <Input
                       disabled={isLoading}
                       placeholder={`Message ${type === "conversation" ? name : "#" + name}`}
-                      className="px-14 py-6 bg-zinc-200/90 dark:bg-zinc-700/75 border-none border-0 focus-visible:ring-0 focus-visible:ring-offset-0 text-zinc-600 dark:text-zinc-200"
+                      className="px-14 py-6 bg-blend-lighten border-none border-0 focus-visible:ring-0 focus-visible:ring-offset-0 "
                       {...field}
                     />
                     <div className="absolute top-7 right-8">

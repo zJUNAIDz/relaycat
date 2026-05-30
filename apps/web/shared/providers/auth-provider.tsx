@@ -32,6 +32,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       if (error) throw new Error(error.message ?? "Error while fetching session")
       return data;
     },
+    staleTime: 5 * 60 * 1000, // 5 minutes  
   });
   const value = React.useMemo(() => ({
     user: data?.user as User | null,

@@ -6,11 +6,14 @@ import {
   MessageAndMember,
   MessageCreateSchema,
   messages,
+  MessageWithMemberWithUser,
 } from "@/db/schema/message";
 import { servers } from "@/db/schema/server";
 import { and, desc, eq, gt, lt } from "drizzle-orm";
 import z from "zod/v4";
 import { cursorSchema, Result } from "./types";
+import { user } from "@/db/schema/auth-schema";
+import { User } from "better-auth/types";
 
 class MessageService {
   private MESSAGE_BATCH = 10;
@@ -18,7 +21,7 @@ class MessageService {
     messageInput: z.infer<typeof MessageCreateSchema>,
     channelId: Channel["id"],
     currentUserId: Member["id"],
-  ): Promise<Result<Message>> {
+  ): Promise<Result<{ message: Message; member: Member; user: User }>> {
     try {
       const newMessage = await db.transaction(async (tx) => {
         console.log(channelId, currentUserId);
@@ -49,11 +52,15 @@ class MessageService {
           .values({
             ...messageInput,
             channelId,
-            memberId: currentUserId,
+            memberId: currentMember.id,
           })
           .returning();
-
-        return message;
+        const [currentUser] = await tx
+          .select()
+          .from(user)
+          .where(eq(user.id, currentMember.userId))
+          .limit(1);
+        return { message, member: currentMember, user: currentUser };
       });
       if (!newMessage) {
         return { ok: false, error: "Message not created" };
@@ -70,7 +77,7 @@ class MessageService {
     currentUserId: string,
     cursor?: z.infer<typeof cursorSchema>,
   ): Promise<
-    Result<{ result: MessageAndMember[]; nextCursor: string | null }>
+    Result<{ result: MessageWithMemberWithUser[]; nextCursor: string | null }>
   > {
     try {
       const { messagesList, nextCursor } = await db.transaction(async (tx) => {
@@ -109,20 +116,22 @@ class MessageService {
           cursor && cursor?.limit < this.MESSAGE_BATCH
             ? cursor?.limit
             : this.MESSAGE_BATCH;
-
+        console.log({ cursor, messageCount });
         const messagesList = await tx
           .select({
             message: messages,
             member: members,
+            user: user,
           })
           .from(messages)
           .where(and(eq(messages.channelId, channelId), cursorCondition))
           .leftJoin(members, eq(messages.memberId, members.id))
+          .leftJoin(user, eq(members.userId, user.id))
           .orderBy(desc(messages.id))
           .limit(messageCount);
         // Filter out any rows where member is null so the result conforms to MessageAndMember[]
         const filteredMessagesList = messagesList.filter(
-          (m): m is MessageAndMember => m.member !== null,
+          (m): m is MessageWithMemberWithUser => m.member !== null,
         );
 
         let nextCursor = null;

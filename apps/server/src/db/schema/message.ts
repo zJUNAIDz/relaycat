@@ -1,11 +1,14 @@
-import {v7 as uuidv7 } from "uuid";
+import { v7 as uuidv7 } from "uuid";
 import { boolean, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { channels } from "./channel";
 import { Member, members } from "./member";
+import { User } from "better-auth";
 
 export const messages = pgTable("messages", {
-  id: uuid("id").$defaultFn(() => uuidv7()).primaryKey(),
+  id: uuid("id")
+    .$defaultFn(() => uuidv7())
+    .primaryKey(),
   content: text("content"),
   mentions: text("mentions").array().default([]),
   mentionRoles: text("mention_roles").array().default([]),
@@ -24,6 +27,11 @@ export const messages = pgTable("messages", {
 export type Message = typeof messages.$inferSelect;
 export type MessageInput = typeof messages.$inferInsert;
 export type MessageAndMember = { message: Message; member: Member };
+export type MessageWithMemberWithUser = {
+  message: Message;
+  member: Member;
+  user: User & { image: string | null };
+};
 export const MessageInsertSchema = createInsertSchema(messages);
 export const MessageSelectSchema = createSelectSchema(messages);
 export const MessageCreateSchema = MessageInsertSchema.omit({

@@ -7,23 +7,20 @@ import z from "zod/v4";
 
 const messageRoute = new Hono<ProtectedAppContext>();
 
-messageRoute.get("/", async (c) => {
+messageRoute.get("/", async (c) => {  
   const channelId = z
     .string({ error: "channelId param is missing" })
-    .safeParse(c.req.query("channelId"));
+    .safeParse(c.req.param("channelId"));
   if (channelId.success === false) {
     return c.json({ error: channelId.error.message }, 400);
   }
-
+  
   const cursor = cursorSchema.safeParse(c.req.query());
-  if (!cursor.success) {
-    return c.json({ error: cursor.error.message }, 400);
-  }
 
   const res = await messageService.getMessagesByChannelId(
     channelId.data,
     c.get("user").id,
-    cursor.data,
+    cursor?.data,
   );
   if (res.ok === false) {
     return c.json({ error: res.error }, 400);

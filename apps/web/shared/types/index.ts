@@ -75,7 +75,7 @@ export type ServerWithMembersAndUser = Server & {
 export type ServerWithMembersUserAndChannels = Server & {
   members: (Member & { user: User })[];
   channels: Channel[];
-}
+};
 
 export type ServerWithMembersOnly = Server & {
   members: Member[];
@@ -99,8 +99,7 @@ export type UserAuthStatusType = keyof typeof UserAuthStatus;
 export type UserProfileResponse = {
   profile: User | null;
   status: UserAuthStatusType;
-}
-
+};
 
 export interface CreateServerRequest {
   name: string;
@@ -113,12 +112,17 @@ export const CreateServerResponseStatus = {
   ERROR: "ERROR",
 } as const;
 
-export type CreateServerResponseStatusType = keyof typeof CreateServerResponseStatus;
+export type CreateServerResponseStatusType =
+  keyof typeof CreateServerResponseStatus;
 
 export interface CreateServerResponse {
   server: Server | null;
   status: CreateServerResponseStatusType;
 }
 
-export type MessageWithMemberWithUser = Message & { member: Member & { user: User } }
-export type MemberWithUser = Member & { user: User }
+export type MessageWithMemberWithUser = {
+  message: Message;
+  member: Member;
+  user: User & { image: string | null };
+};
+export type MemberWithUser = Member & { user: User };

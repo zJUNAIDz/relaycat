@@ -5,9 +5,8 @@ import { Input } from "@/shared/components/ui/input";
 import { UserAvatar } from "@/shared/components/user-avatar";
 import { useModal } from "@/shared/hooks/use-modal-store";
 import axiosClient from "@/shared/lib/axios-client";
-import { CONFIG } from "@/shared/lib/config";
 import { useAuth } from "@/shared/providers/auth-provider";
-import { Member, MemberRole, MemberWithUser, Message } from "@/shared/types";
+import { Member, MemberRole, Message, User } from "@/shared/types";
 import { cn } from "@/shared/utils/cn";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Edit, Trash } from "lucide-react";
@@ -21,7 +20,8 @@ import { z } from "zod";
 interface ChatMessageProps {
   id: Message["id"];
   content: Message["content"];
-  member: MemberWithUser;
+  member: Member;
+  user: User & { image: string | null };
   timestamp: string;
   fileUrl: Message["fileUrl"];
   deleted: Message["deleted"];
@@ -43,6 +43,7 @@ export const ChatMessage = ({
   id,
   content,
   member,
+  user,
   timestamp,
   fileUrl,
   deleted,
@@ -79,11 +80,6 @@ export const ChatMessage = ({
     }
   }
 
-  const onMemberClick = () => {
-    if (member.userId !== currentMember.userId)
-      router.push(`/servers/${member.serverId}/conversations/${member.userId}`)
-    return
-  }
 
   React.useEffect(() => {
     const handleEscapeKeyDown = (e: KeyboardEvent) => {
@@ -114,13 +110,13 @@ export const ChatMessage = ({
     <div className="relative group flex items-center hover:bg-black/5 p-4 transition w-full">
       <div className="group flex gap-x-2 items-start w-full">
         <div className="cursor-pointer hover:drop-shadow-md transition">
-          <UserAvatar src={member.user.image ?? undefined} />
+          <UserAvatar src={user.image ?? undefined} />
         </div>
         <div className="flex flex-col w-full">
           <div className="flex items-center gap-x-2">
             <div className="flex items-center space-x-2">
-              <p onClick={onMemberClick} className="text-sm font-semibold hover:underline cursor-pointer">
-                {member.user.name}
+              <p className="text-sm font-semibold hover:underline cursor-pointer">
+                {user.name}
               </p>
               <ActionTooltip label={member.role} side="top" className="text-xs">
                 <RoleIcon role={member.role} />
@@ -161,8 +157,8 @@ export const ChatMessage = ({
           {
             !fileUrl && !isEditing && (
               <p className={cn(
-                "flex flex-col text-md text-zinc-800 dark:text-zinc-200 mt-1",
-                deleted && "italic text-zinc-500 dark:text-zinc-400 text-sm mt-1"
+                "flex flex-col text-md mt-1",
+                deleted && "italic text-sm mt-1"
               )}>
                 {!deleted ? content : "This message has been deleted."}
                 {isUpdated && !deleted && (
@@ -228,13 +224,13 @@ export const ChatMessage = ({
       </div>
       {
         canDeleteMessage && (
-          <div className="hidden group-hover:flex item-center gap-x-2 absolute p-1 top-2 right-5 bg-white dark:bg-zinc-800 border rounded-sm">
+          <div className="hidden group-hover:flex item-center gap-x-2 absolute p-1 top-2 right-5 rounded-sm">
             {
               canEditMessage && (
                 <ActionTooltip label="Edit" side="top">
                   <Edit
                     onClick={() => setIsEditing(true)}
-                    className="cursor-pointer ml-auto w-4 h-4 text-zinc-500 dark:text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
+                    className="cursor-pointer ml-auto w-4 h-4 text-accent-foreground"
                   />
                 </ActionTooltip>
               )
@@ -242,7 +238,7 @@ export const ChatMessage = ({
             <ActionTooltip label="Delete" side="top">
               <Trash
                 onClick={() => onOpen("deleteMessage", { apiUrl })}
-                className="cursor-pointer ml-auto w-4 h-4 text-zinc-500 dark:text-zinc-400 hover:text-red-600 dark:hover:text-red-300" />
+                className="cursor-pointer ml-auto w-4 h-4 text-accent-foreground hover:text-red-600 dark:hover:text-red-300" />
             </ActionTooltip>
           </div>
         )

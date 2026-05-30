@@ -24,12 +24,12 @@ export type ProtectedAppContext = {
 export const cursorSchema = z.discriminatedUnion("type", [
   z.object({
     type: z.literal("before"),
-    limit: z.coerce.number().min(1).max(100),
+    limit: z.coerce.number().min(1).max(100).default(20),
     before: z.string(),
   }),
   z.object({
     type: z.literal("after"),
-    limit: z.coerce.number().min(1).max(100),
+    limit: z.coerce.number().min(1).max(100).default(20),
     after: z.string(),
   }),
 ]);
