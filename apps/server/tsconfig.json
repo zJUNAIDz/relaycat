@@ -2,12 +2,14 @@
   "compilerOptions": {
     "strict": true,
     "jsx": "react-jsx",
+    "skipLibCheck": true,
     "jsxImportSource": "hono/jsx",
-      "paths": {
-        "@/*": [
-          "./src/*"
-        ]
-      }
+    "paths": {
+      "@/*": [
+        "./src/*"
+      ]
+    },
+    "esModuleInterop": true,
   },
   //  "exclude": [
   //   "node_modules",
