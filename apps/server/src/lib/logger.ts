@@ -25,7 +25,7 @@ const transport = pino.transport({
   ],
 });
 
-transport.on("error", (err) => {
+transport.on("error", (err: unknown) => {
   console.error("Pino transport error:", err);
 });
 
@@ -37,5 +37,5 @@ export const logger = pino(
       env: process.env.NODE_ENV || "development",
     },
   },
-  transport
+  transport,
 );
