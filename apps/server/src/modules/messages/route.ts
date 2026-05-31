@@ -1,9 +1,10 @@
-import { MessageCreateSchema } from "@/db/schema/message";
+import { CreateMessageDTO, EditMessageDTO } from "@repo/types";
 import { socketManager } from "@/lib/socket-manager";
 import { messageService } from "@/modules/messages/service";
 import { ProtectedAppContext, cursorSchema } from "@/types";
 import { Hono } from "hono";
 import z from "zod/v4";
+import { zValidator } from "@hono/zod-validator";
 
 const messageRoute = new Hono<ProtectedAppContext>();
 
@@ -29,14 +30,8 @@ messageRoute.get("/", async (c) => {
   return c.json(res.data);
 });
 
-messageRoute.post("/", async (c) => {
-  const messageInput = MessageCreateSchema.safeParse(await c.req.json());
-  if (!messageInput.success) {
-    return c.json(
-      { error: messageInput.error, message: "no message input found" },
-      400,
-    );
-  }
+messageRoute.post("/", zValidator("json", CreateMessageDTO), async (c) => {
+  const messageInput = c.req.valid("json");
 
   const channelId = z.string().safeParse(c.req.param("channelId"));
   if (channelId.success === false) {
@@ -46,7 +41,7 @@ messageRoute.post("/", async (c) => {
   const user = c.get("user");
 
   const res = await messageService.createMessage(
-    messageInput.data,
+    messageInput,
     channelId.data,
     user.id,
   );
@@ -59,7 +54,7 @@ messageRoute.post("/", async (c) => {
   return c.json(res.data);
 });
 
-messageRoute.patch("/:messageId", async (c) => {
+messageRoute.patch("/:messageId", zValidator("json", EditMessageDTO), async (c) => {
   const messageId = z.string().safeParse(c.req.param("messageId"));
   if (messageId.success === false) {
     return c.json({ error: messageId.error.message }, 400);
@@ -68,21 +63,12 @@ messageRoute.patch("/:messageId", async (c) => {
   if (channelId.success === false) {
     return c.json({ error: channelId.error.message }, 400);
   }
-  const messageInput = MessageCreateSchema.safeParse(await c.req.json());
-  if (!messageInput.success) {
-    return c.json(
-      { error: messageInput.error, message: "no message input found" },
-      400,
-    );
-  }
+  const messageInput = c.req.valid("json");
   const user = c.get("user")!;
-  if (!messageInput.data.content || messageInput.data.content.trim() === "") {
-    return c.json({ error: "Content is required" }, 400);
-  }
   const message = await messageService.updateMessage(
     messageId.data,
     user.id,
-    messageInput.data,
+    messageInput,
   );
   socketManager.io.emit(`chat:${channelId.data}:messages:update`, message);
   return c.json(message);

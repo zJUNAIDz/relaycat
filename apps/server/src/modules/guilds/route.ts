@@ -1,8 +1,11 @@
-import { Server, serverInsertSchema } from "@/db/schema/server";
+import { Server } from "@/db/schema/server";
+import { CreateServerDTO, EditServerDTO } from "@repo/types";
 import { serversService } from "@/modules/guilds/service";
 import { ProtectedAppContext } from "@/types";
 import { randomUUIDv7 } from "bun";
 import { Hono } from "hono";
+import { zValidator } from "@hono/zod-validator";
+
 const serverRoutes = new Hono<ProtectedAppContext>();
 
 // Get all servers for the current user
@@ -16,17 +19,12 @@ serverRoutes.get("/", async (c) => {
 });
 
 // Create a new server
-serverRoutes.post("/", async (c) => {
-  const body = await c.req.json();
+serverRoutes.post("/", zValidator("json", CreateServerDTO), async (c) => {
   const log = c.get("logger");
-  const serverData = serverInsertSchema.safeParse(body);
-  if (serverData.error) {
-    log.warn({ body, error: serverData.error }, "[NEW SERVER INVALID DATA]");
-    return c.json({ error: serverData.error.message }, 400);
-  }
+  const serverData = c.req.valid("json");
 
   const user = c.get("user");
-  const server = await serversService.createServer(user.id, serverData.data);
+  const server = await serversService.createServer(user.id, serverData);
   if (!server) {
     log.error({ user, serverData }, "[NEW SERVER CREATION FAILED]");
     return c.json({ error: "Failed to create server" }, 500);
@@ -47,16 +45,12 @@ serverRoutes.get("/:serverId", async (c) => {
 });
 
 // Edit a server
-serverRoutes.patch("/:serverId", async (c) => {
+serverRoutes.patch("/:serverId", zValidator("json", EditServerDTO), async (c) => {
   const serverId = c.req.param("serverId") as Server["id"];
-  const body = await c.req.json();
   const log = c.get("logger");
-  const serverData = serverInsertSchema.safeParse(body);
-  if (serverData.error) {
-    return c.json({ error: serverData.error.message }, 400);
-  }
+  const serverData = c.req.valid("json");
 
-  const server = await serversService.editServer(serverId, serverData.data);
+  const server = await serversService.editServer(serverId, serverData);
   if (!server) {
     return c.json({ error: "Failed to edit server" }, 400);
   }

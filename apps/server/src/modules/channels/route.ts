@@ -1,9 +1,9 @@
-import { ChannelInsertSchema } from "@/db/schema/channel";
+import { CreateChannelDTO, EditChannelDTO } from "@repo/types";
 import messageRoute from "@/modules/messages/route";
 import { ProtectedAppContext } from "@/types";
 import { Hono } from "hono";
 import { channelService } from "./service";
-import z from "zod";
+import { zValidator } from "@hono/zod-validator";
 
 const channelsRoute = new Hono<ProtectedAppContext>();
 channelsRoute.route("/:channelId/messages", messageRoute);
@@ -21,16 +21,12 @@ channelsRoute.get("/", async (c) => {
   return c.json(channels);
 });
 
-channelsRoute.post("/", async (c) => {
-  const body = await c.req.json();
+channelsRoute.post("/", zValidator("json", CreateChannelDTO), async (c) => {
   const log = c.get("logger");
-  const channelData = ChannelInsertSchema.safeParse(body);
-  if (channelData.error) {
-    return c.json({ error: channelData.error.message }, 400);
-  }
+  const channelData = c.req.valid("json");
   const user = c.get("user");
   const newChannel = await channelService.createChannel(
-    channelData.data,
+    channelData,
     user.id,
   );
   if (!newChannel) {
@@ -58,18 +54,13 @@ channelsRoute.get("/:channelId", async (c) => {
   return c.json({ channel });
 });
 
-channelsRoute.patch("/:channelId", async (c) => {
-  const body = await c.req.json();
-  const channelData = z.object({ name: z.string().min(1) }).safeParse(body);
-  if (channelData.error) {
-    return c.json({ error: channelData.error.message }, 400);
-  }
+channelsRoute.patch("/:channelId", zValidator("json", EditChannelDTO), async (c) => {
+  const channelData = c.req.valid("json");
   const { channelId } = c.req.param();
   const user = c.get("user");
   const log = c.get("logger");
-  // console.table({ name, type, channelId, userId });
   const channel = await channelService.editChannel(
-    channelData.data,
+    channelData,
     channelId,
     user.id,
   );

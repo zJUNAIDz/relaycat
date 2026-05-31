@@ -1,10 +1,8 @@
-import {
-  possibleMemberRoles
-} from "@/db/schema/member";
+import { ChangeMemberRoleDTO } from "@repo/types";
 import { membersService } from "@/modules/members/service";
 import { ProtectedAppContext } from "@/types";
 import { Hono } from "hono";
-import z from "zod";
+import { zValidator } from "@hono/zod-validator";
 
 const membersRoutes = new Hono<ProtectedAppContext>();
 
@@ -31,20 +29,8 @@ membersRoutes.get("/server/:serverId", async (c) => {
   return c.json({ members });
 });
 
-membersRoutes.patch("/changeRole", async (c) => {
-  const parsedBody = z
-    .object({
-      role: z.enum(possibleMemberRoles),
-      memberId: z.string(),
-    })
-    .safeParse(await c.req.json());
-  if (!parsedBody.success) {
-    return c.json(
-      { error: "Invalid request body", details: parsedBody.error.errors },
-      400,
-    );
-  }
-  const { role, memberId } = parsedBody.data;
+membersRoutes.patch("/changeRole", zValidator("json", ChangeMemberRoleDTO), async (c) => {
+  const { role, memberId } = c.req.valid("json");
   const member = await membersService.changeMemberRole(
     memberId,
     c.get("user").id,
