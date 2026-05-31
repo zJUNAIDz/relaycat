@@ -15,6 +15,13 @@
       "when": 1776070350948,
       "tag": "0001_strong_wolf_cub",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1780202493995,
+      "tag": "0002_colossal_celestials",
+      "breakpoints": true
     }
   ]
 }
