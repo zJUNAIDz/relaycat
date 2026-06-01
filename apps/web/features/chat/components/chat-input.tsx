@@ -6,10 +6,9 @@ import axiosClient from "@/shared/lib/axios-client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
-import queryString from "query-string";
 import React from "react";
 import { useForm } from "react-hook-form";
-import * as z from "zod";
+import * as z from "zod/v3";
 import { EmojiPicker } from "./emoji-picker";
 
 interface ChatInputProps {
@@ -37,11 +36,11 @@ export const ChatInput = ({ apiUrl, query, name, type }: ChatInputProps) => {
   React.useEffect(() => {
     form.setFocus("content")
   }, [form])
-  
+
   const isLoading = form.formState.isSubmitting;
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      
+
       await axiosClient.post(apiUrl, values);
       router.refresh();
       form.reset();

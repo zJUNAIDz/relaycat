@@ -24,7 +24,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import React, { useEffect } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { toast } from "sonner";
-import * as z from "zod";
+import * as z from "zod/v3";
 import { useS3Uploads } from "../../hooks/use-s3-uploads";
 import { useEditServerMutation } from "../../hooks/server-mutations";
 

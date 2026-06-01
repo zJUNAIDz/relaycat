@@ -3,7 +3,6 @@ import { CONFIG } from "@/shared/lib/config";
 import {
   Server,
   ServerWithMembersAndUser,
-  ServerWithMembersOnly,
   ServerWithMembersUserAndChannels,
 } from "@/shared/types";
 import { AxiosResponse } from "axios";
@@ -17,7 +16,7 @@ class ServerService {
 
   async getCurrentUserServers(): Promise<ServerWithMembersAndUser[] | null> {
     try {
-      const { data: servers }: { data: Server[] } =
+      const { data: servers }: { data: ServerWithMembersAndUser[] } =
         await axiosClient.get(`/servers`);
       if (!servers) return null;
       return servers;
@@ -50,14 +49,14 @@ class ServerService {
     inviteCode: string,
   ): Promise<{ serverId: Server["id"] | null; error: string | null }> {
     try {
-      const endpoint = `${this.API_URL}/servers/join/invite`;
+      const endpoint = `/servers/join/${inviteCode}`;
 
       const {
         data: { serverId, error },
       }: AxiosResponse<{
         serverId: Server["id"] | null;
         error: string | null;
-      }> = await axiosClient.patch(endpoint, { inviteCode });
+      }> = await axiosClient.patch(endpoint);
 
       if (!serverId) return { serverId: null, error };
       return { serverId, error: null };

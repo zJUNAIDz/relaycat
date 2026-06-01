@@ -24,7 +24,7 @@ import axios, { AxiosError } from "axios";
 import { useRouter } from "next/navigation";
 import React from "react";
 import { FormProvider, useForm } from "react-hook-form";
-import * as z from "zod";
+import * as z from "zod/v3";
 import { useS3Uploads } from "../../hooks/use-s3-uploads";
 import { useCreateServerMutation } from "../../hooks/server-mutations";
 import { toast } from "sonner";
