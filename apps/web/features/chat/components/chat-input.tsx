@@ -14,7 +14,7 @@ import { EmojiPicker } from "./emoji-picker";
 
 interface ChatInputProps {
   apiUrl: string;
-  query: Record<string, any>;
+  query: Record<string, unknown>;
   name: string;
   type: "conversation" | "channel";
 }

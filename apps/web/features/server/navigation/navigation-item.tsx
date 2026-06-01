@@ -2,11 +2,12 @@
 
 import defaultServerImage from "@/public/placeholder.webp";
 import { ActionTooltip } from "@/shared/components/action-tooltip";
+import { ServerWithMembersAndUser } from "@/shared/types";
 import { cn } from "@/shared/utils/cn";
 import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
 interface NavigationItemProps {
-  server: any
+  server: ServerWithMembersAndUser;
 }
 
 const NavigationItem: React.FC<NavigationItemProps> = ({ server }) => {

@@ -1,8 +1,8 @@
 import axiosClient from "@/shared/lib/axios-client";
-import axios from "axios";
+import { Member } from "@repo/types";
 
 class MemberService {
-  async getMemberById(memberId: string): Promise<any> {
+  async getMemberById(memberId: string): Promise<Member> {
     const {
       data: { member, error },
     } = await axiosClient.get(`/members/${memberId}`);
@@ -11,7 +11,7 @@ class MemberService {
     }
     return member;
   }
-  async getMemberByUserId(userId: string): Promise<any> {
+  async getMemberByUserId(userId: string): Promise<Member> {
     const {
       data: { member, error },
     } = await axiosClient.get(`/members/user/${userId}`);
@@ -20,11 +20,7 @@ class MemberService {
     }
     return member;
   }
-  async getMembersByServerId(
-    serverId: string,
-  ): Promise<
-    { members: any[]; error: null } | { member: null; error: string }
-  > {
+  async getMembersByServerId(serverId: string): Promise<Member[]> {
     const {
       data: { members, error },
     } = await axiosClient.get(`/members/server/${serverId}`);

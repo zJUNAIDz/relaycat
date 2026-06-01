@@ -15,9 +15,7 @@ class ServerService {
     this.API_URL = apiUrl;
   }
 
-  async getCurrentUserServers(): Promise<
-    ServerWithMembersAndUser[] | Server[] | null
-  > {
+  async getCurrentUserServers(): Promise<ServerWithMembersAndUser[] | null> {
     try {
       const { data: servers }: { data: Server[] } =
         await axiosClient.get(`/servers`);

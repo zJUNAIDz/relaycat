@@ -43,8 +43,8 @@ const AuthScreen = ({ isLoginParam }: { isLoginParam: boolean }) => {
         await signupWithEmail(email, password, name);
         setMode("verification-sent");
       }
-    } catch (err: any) {
-      setError(err.message || "An error occurred");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "An error occurred");
     } finally {
       setLoading(false);
     }
@@ -53,8 +53,8 @@ const AuthScreen = ({ isLoginParam }: { isLoginParam: boolean }) => {
   const handleSocialSignIn = async (provider: string) => {
     try {
       await signIn(provider);
-    } catch (err: any) {
-      setError(err.message || "An error occurred");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "An error occurred");
     }
   };
 

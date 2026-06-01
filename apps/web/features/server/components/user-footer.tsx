@@ -5,7 +5,6 @@ interface UserFooterProps {
     name?: string;
     username?: string;
     image?: string | null;
-    [key: string]: any; // for any additional user properties
   }
 }
 export const UserFooter = ({ user }: UserFooterProps) => {
