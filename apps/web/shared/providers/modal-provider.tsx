@@ -11,14 +11,11 @@ import EditServerModal from "@/features/server/components/modals/edit-server-mod
 import InviteModal from "@/features/server/components/modals/invite-modal";
 import LeaveServerModal from "@/features/server/components/modals/leave-server-modal";
 import MembersModal from "@/features/server/components/modals/members-modal";
-import React from "react";
 import { Toaster } from "@/shared/components/ui/sonner";
 
 export const ModalProvider = () => {
   //* workaround to make it render on client-side only
-  const [isMounted, setIsMounted] = React.useState<boolean>(false);
-  React.useEffect(() => setIsMounted(true), []);
-  if (!isMounted) return null;
+  if (typeof window === "undefined") return null;
 
   return (
     <>

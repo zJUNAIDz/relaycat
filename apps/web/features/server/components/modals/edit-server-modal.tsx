@@ -70,7 +70,7 @@ const EditServerModal = () => {
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      let imageUrl = imageFile ? await uploadServerIcon(imageFile, values.name) : values.image;
+      const imageUrl = imageFile ? await uploadServerIcon(imageFile, values.name) : values.image;
       const mutateResponse = await editServerMutation.mutateAsync({
         name: values.name,
         image: imageUrl,

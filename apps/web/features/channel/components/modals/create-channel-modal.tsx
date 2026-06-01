@@ -25,7 +25,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
-import * as z from "zod";
+import * as z from "zod/v3";
 
 
 const formSchema = z.object({
@@ -44,7 +44,7 @@ const CreateChannelModal = () => {
   const [errorMessage, setErrorMessage] = useState("");
   const { serverId } = useParams<{ serverId: string }>()
   const router = useRouter();
-  const form = useForm({
+  const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",

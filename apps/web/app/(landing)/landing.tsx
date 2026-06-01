@@ -14,7 +14,7 @@ import { authClient, User } from "@/shared/lib/auth-client";
 import { PAGE_ROUTES } from "@/shared/lib/routes";
 import { useAuth } from "@/shared/providers/auth-provider";
 import { motion } from "framer-motion";
-import { Github, MessageSquare, MoveRight, Server, Zap } from "lucide-react"; // Assuming you have lucide-react, standard with shadcn
+import { FolderGit, MessageSquare, MoveRight, Server, Zap } from "lucide-react";
 import { Inter, Space_Grotesk } from "next/font/google";
 import Link from "next/link";
 
@@ -40,7 +40,7 @@ const features = [
   {
     title: "Modern Tech Stack",
     description: "Built from the ground up using Next.js, Bun, and Hono to explore full-stack architecture and real-time state management.",
-    icon: <Github className="h-5 w-5 text-primary" />,
+    icon: <FolderGit className="h-5 w-5 text-primary" />,
   },
 ];
 

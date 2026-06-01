@@ -47,11 +47,9 @@ const InitialModal = () => {
   });
   const [imageFile, setImageFile] = React.useState<File | null>(null);
   //* workaround to avoid Hydration warnings
-  const [isMounted, setIsMounted] = React.useState(false);
   const [isLoading, setIsLoading] = React.useState(false);
   const [errorMessage, setErrorMessage] = React.useState("");
-  React.useEffect(() => setIsMounted(true), []);
-  if (!isMounted) return null;
+  if (typeof window === "undefined") return null;
 
   const resetForm = () => {
     form.reset({

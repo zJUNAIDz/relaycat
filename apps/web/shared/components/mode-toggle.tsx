@@ -3,18 +3,13 @@
 import { Button } from "@/shared/components/ui/button";
 import { useTheme } from "@wrksz/themes/client";
 import { Moon, Sun } from "lucide-react";
-import { useEffect, useState } from "react";
 import { cn } from "../utils/cn";
 
 export function ModeToggle() {
   const { setTheme, theme } = useTheme();
-  const [mounted, setMounted] = useState(false);
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
-  if (!mounted) {
+  if (typeof window === "undefined") {
     return (
       <Button variant="outline" className="bg-transparent border-0" size="icon" disabled>
         <Sun className="h-[1.2rem] w-[1.2rem]" />

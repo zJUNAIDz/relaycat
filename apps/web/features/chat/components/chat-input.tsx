@@ -25,9 +25,6 @@ const formSchema = z.object({
 
 
 export const ChatInput = ({ apiUrl, query, name, type }: ChatInputProps) => {
-  React.useEffect(() => {
-    form.setFocus("content")
-  })
   const { onOpen } = useModal();
   const router = useRouter();
   const form = useForm<z.infer<typeof formSchema>>({
@@ -36,6 +33,11 @@ export const ChatInput = ({ apiUrl, query, name, type }: ChatInputProps) => {
       content: ""
     }
   });
+
+  React.useEffect(() => {
+    form.setFocus("content")
+  }, [form])
+  
   const isLoading = form.formState.isSubmitting;
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {

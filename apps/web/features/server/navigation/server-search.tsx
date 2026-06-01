@@ -20,6 +20,8 @@ const cmdKey = navigator.userAgent.toUpperCase().indexOf("MAC") >= 0 ? "&#8984;"
 export const ServerSearch: React.FC<ServerSearchProps> = ({ data }) => {
   const router = useRouter()
   const params = useParams()
+  const [open, setOpen] = React.useState(false)
+
   useEffect(() => {
     const onKeyPress = (e: KeyboardEvent) => {
       if (e.key === "s" && (e.metaKey || e.ctrlKey)) {
@@ -30,8 +32,6 @@ export const ServerSearch: React.FC<ServerSearchProps> = ({ data }) => {
     document.addEventListener("keydown", onKeyPress);
     return () => document.removeEventListener("keydown", onKeyPress);
   }, [])
-
-  const [open, setOpen] = React.useState(false)
 
   const onClick = ({ id, type }: { id: string; type: "channel" | "member" }) => {
     setOpen(false)
