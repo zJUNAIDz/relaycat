@@ -1,19 +1,26 @@
 {
   "compilerOptions": {
+    "target": "esnext",
+    "module": "esnext",
+    "moduleResolution": "bundler",
     "strict": true,
     "jsx": "react-jsx",
     "skipLibCheck": true,
     "jsxImportSource": "hono/jsx",
-    "paths": {
-      "@/*": [
-        "./src/*"
-      ]
-    },
     "esModuleInterop": true,
+    "paths": {
+      "@/*": ["./src/*"]
+    }
   },
-  //  "exclude": [
-  //   "node_modules",
-  //   "dist",
-  //   ".mastra"
-  // ]
+  "include": ["src/**/*.ts", "src/**/*.tsx"],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "drizzle",
+    ".turbo",
+  ],
+  /* Link to your types package */
+  "references": [
+    { "path": "../../packages/types" }
+  ]
 }

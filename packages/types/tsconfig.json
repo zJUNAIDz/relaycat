@@ -1,6 +1,20 @@
 {
   "compilerOptions": {
+    "target": "esnext",
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "skipLibCheck": true,
+    /* Critical Performance Flags */
+    "composite": true, // Tells TS this is a distinct project dependency
+    "declaration": true, // Generates the .d.ts files in memory for other apps
+    "declarationMap": true, // Maps "Go to Definition" cleanly without full re-indexing
     "rootDir": "."
   },
-  "include": ["index.ts"]
+  "include": [
+    "index.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
 }

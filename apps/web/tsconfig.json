@@ -33,11 +33,18 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
-    "middleware",
-    "lib/current-profile.ts",
-    ".next/dev/types/**/*.ts"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    ".next",
+    "dist",
+    ".vercel",
+    ".turbo",
+    ".next"
+  ],
+  "references": [
+    {
+      "path": "../../packages/types"
+    }
   ]
 }
