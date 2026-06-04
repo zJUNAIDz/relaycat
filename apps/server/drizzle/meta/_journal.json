@@ -22,6 +22,13 @@
       "when": 1780202493995,
       "tag": "0002_colossal_celestials",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1780460714518,
+      "tag": "0003_clever_molly_hayes",
+      "breakpoints": true
     }
   ]
 }

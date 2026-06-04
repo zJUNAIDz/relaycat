@@ -1,4 +1,12 @@
-import { index, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import {
+  index,
+  pgTable,
+  text,
+  timestamp,
+  uuid,
+  integer,
+  boolean,
+} from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { v7 as uuidv7 } from "uuid";
 import { user } from "./auth-schema";
@@ -17,6 +25,10 @@ export const servers = pgTable(
       .notNull()
       .unique()
       .$defaultFn(() => uuidv7().replace(/-/g, "").slice(0, 8)),
+    banner: text("banner"),
+    description: text("description"),
+    memberCount: integer("member_count").default(0).notNull(),
+    isPublic: boolean("is_public").default(true).notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at"),
   },
