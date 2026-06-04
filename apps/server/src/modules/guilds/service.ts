@@ -269,6 +269,17 @@ class ServersService {
       return false;
     }
   }
+  async getPublicServers() {
+    try {
+      const publicServers = await db
+        .select()
+        .from(servers)
+        .where(eq(servers.isPublic, true));
+      return publicServers;
+    } catch (err) {
+      return [];
+    }
+  }
 }
 
 export const serversService = new ServersService();

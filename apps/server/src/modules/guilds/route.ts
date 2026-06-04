@@ -8,13 +8,15 @@ import { zValidator } from "@hono/zod-validator";
 
 const serverRoutes = new Hono<ProtectedAppContext>();
 
+serverRoutes.get("/public",async (c) => {
+  const servers = await serversService.getPublicServers();
+  return c.json(servers);
+})
+
 // Get all servers for the current user
 serverRoutes.get("/", async (c) => {
   const user = c.get("user");
   const servers = await serversService.getServersByUserId(user.id);
-  if (!servers) {
-    return c.json({ error: "No servers found" }, 404);
-  }
   return c.json(servers);
 });
 
@@ -125,5 +127,6 @@ serverRoutes.patch("/:serverId/invite-code", async (c) => {
   log.info({ userId: user.id, serverId }, "[SERVER_UPDATE_INVITE_CODE]");
   return c.json({ server });
 });
+
 
 export default serverRoutes;
