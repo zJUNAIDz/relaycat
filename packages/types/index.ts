@@ -31,12 +31,12 @@ export type Server = {
   name: string;
   image: string | null;
   inviteCode: string;
-  userId: string;
+  banner: string | null;
+  description: string | null;
+  memberCount: number;
+  isPublic: boolean;
   createdAt: Date;
   updatedAt: Date | null;
-  user?: User;
-  members?: Member[];
-  channels?: Channel[];
 };
 
 export type Member = {
@@ -129,7 +129,6 @@ export type MessageWithMemberWithUser = {
 
 export type MemberWithUser = Member & { user: User };
 
-
 // Server / Guild Module DTOs
 export const CreateServerDTO = z.object({
   name: z.string().min(1, "Server name is required").max(100),
@@ -142,7 +141,8 @@ export type EditServerInput = z.infer<typeof EditServerDTO>;
 
 // Channel Module DTOs
 export const CreateChannelDTO = z.object({
-  name: z.string()
+  name: z
+    .string()
     .min(1, "Channel name is required")
     .max(100)
     .refine((name) => name.toLowerCase() !== "general", {
@@ -154,7 +154,8 @@ export const CreateChannelDTO = z.object({
 export type CreateChannelInput = z.infer<typeof CreateChannelDTO>;
 
 export const EditChannelDTO = z.object({
-  name: z.string()
+  name: z
+    .string()
     .min(1, "Channel name is required")
     .max(100)
     .refine((name) => name.toLowerCase() !== "general", {
@@ -171,12 +172,14 @@ export const ChangeMemberRoleDTO = z.object({
 export type ChangeMemberRoleInput = z.infer<typeof ChangeMemberRoleDTO>;
 
 // Message Module DTOs
-export const CreateMessageDTO = z.object({
-  content: z.string().nullable().optional(),
-  fileUrl: z.string().nullable().optional(),
-}).refine(data => data.content || data.fileUrl, {
-  message: "Either content or fileUrl must be provided",
-});
+export const CreateMessageDTO = z
+  .object({
+    content: z.string().nullable().optional(),
+    fileUrl: z.string().nullable().optional(),
+  })
+  .refine((data) => data.content || data.fileUrl, {
+    message: "Either content or fileUrl must be provided",
+  });
 export type CreateMessageInput = z.infer<typeof CreateMessageDTO>;
 
 export const EditMessageDTO = z.object({
