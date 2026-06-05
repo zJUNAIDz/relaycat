@@ -1,5 +1,6 @@
 "use client";
 
+import "client-only";
 import CreateChannelModal from "@/features/channel/components/modals/create-channel-modal";
 import DeleteChannelModal from "@/features/channel/components/modals/delete-channel-model";
 import EditChannelModal from "@/features/channel/components/modals/edit-channel-modal";
@@ -15,7 +16,7 @@ import { Toaster } from "@/shared/components/ui/sonner";
 
 export const ModalProvider = () => {
   //* workaround to make it render on client-side only
-  if (typeof window === "undefined") return null;
+  // if (typeof window === "undefined") return null;  
 
   return (
     <>

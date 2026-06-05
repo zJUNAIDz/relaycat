@@ -1,5 +1,5 @@
 "use client";
-
+import "client-only";
 import FileUpload from "@/shared/components/file-uploads";
 import { Button } from "@/shared/components/ui/button";
 import {
@@ -49,7 +49,7 @@ const InitialModal = () => {
   //* workaround to avoid Hydration warnings
   const [isLoading, setIsLoading] = React.useState(false);
   const [errorMessage, setErrorMessage] = React.useState("");
-  if (typeof window === "undefined") return null;
+  
 
   const resetForm = () => {
     form.reset({

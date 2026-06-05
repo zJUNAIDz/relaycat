@@ -1,5 +1,6 @@
 "use client";
 
+import "client-only";
 import { Button } from "@/shared/components/ui/button";
 import { useTheme } from "@wrksz/themes/client";
 import { Moon, Sun } from "lucide-react";
@@ -33,7 +34,7 @@ export function ModeToggle() {
           isDark ? "rotate-90 scale-0" : "rotate-0 scale-100 text-yellow-500"
         )}
       />
-      <Moon
+        <Moon
         className={cn(
           "absolute h-[1.2rem] w-[1.2rem] transition-all",
           isDark ? "rotate-0 scale-100 text-gray-400" : "-rotate-90 scale-0 "
