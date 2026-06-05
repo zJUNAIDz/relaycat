@@ -1,10 +1,6 @@
 import axiosClient from "@/shared/lib/axios-client";
 import { CONFIG } from "@/shared/lib/config";
-import {
-  Server,
-  ServerWithMembersAndUser,
-  ServerWithMembersUserAndChannels,
-} from "@/shared/types";
+import { Server, ServerWithMembersUserAndChannels } from "@/shared/types";
 import { AxiosResponse } from "axios";
 import queryString from "query-string";
 
@@ -14,9 +10,11 @@ class ServerService {
     this.API_URL = apiUrl;
   }
 
-  async getCurrentUserServers(): Promise<ServerWithMembersAndUser[] | null> {
+  async getCurrentUserServers(): Promise<
+    ServerWithMembersUserAndChannels[] | null
+  > {
     try {
-      const { data: servers }: { data: ServerWithMembersAndUser[] } =
+      const { data: servers }: { data: ServerWithMembersUserAndChannels[] } =
         await axiosClient.get(`/servers`);
       if (!servers) return null;
       return servers;
