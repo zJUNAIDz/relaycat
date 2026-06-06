@@ -9,7 +9,9 @@ import {
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { v7 as uuidv7 } from "uuid";
 import { servers } from "./server";
-const channelTypes = ["TEXT", "VOICE"] as const;
+// TEXT/VOICE are server channels; DM is a 1-1 direct-message channel that has
+// no server (serverId is null) and tracks its members via `dm_participants`.
+const channelTypes = ["TEXT", "VOICE", "DM"] as const;
 export const channelTypeEnum = pgEnum("channel_type", channelTypes);
 export const channels = pgTable(
   "channels",
@@ -19,9 +21,10 @@ export const channels = pgTable(
       .primaryKey(),
     name: text("name").notNull(),
     type: channelTypeEnum("type").notNull().default("TEXT"),
-    serverId: uuid("server_id")
-      .references(() => servers.id, { onDelete: "cascade" })
-      .notNull(),
+    // Nullable: DM channels are not owned by any server.
+    serverId: uuid("server_id").references(() => servers.id, {
+      onDelete: "cascade",
+    }),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at"),
   },
