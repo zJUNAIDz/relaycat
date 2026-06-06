@@ -113,7 +113,7 @@ const MembersModal = () => {
                     </div>
                   </div>
                   {
-                    server.userId != member.user.id && loadingId != member.id &&
+                    member.role != MemberRole.ADMIN  && loadingId != member.id &&
                     (
                       <div className="ml-auto">
                         <DropdownMenu>
