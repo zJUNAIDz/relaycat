@@ -6,6 +6,7 @@ import { serverService } from "../server-service";
 import NavigationItem from "./navigation-item";
 import { CreateServerButton } from "./create-server-button";
 import { useQuery } from "@tanstack/react-query";
+import {DiscoverButton} from "./server-discover-button";
 
 const NavigationSidebar = () => {
   const query = useQuery({
@@ -38,6 +39,7 @@ const NavigationSidebar = () => {
       <div className="pb-3 mt-auto flex items-center flex-col gap-y-4">
         <Separator className="h-0.5 bg-zinc-300 dark:bg-zinc-700 rounded-md w-10 mx-auto" />
         <CreateServerButton />
+        <DiscoverButton />
         <ModeToggle />
       </div>
     </div>
