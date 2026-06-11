@@ -51,8 +51,8 @@ serverRoutes.patch("/:serverId", zValidator("json", EditServerDTO), async (c) =>
   const serverId = c.req.param("serverId") as Server["id"];
   const log = c.get("logger");
   const serverData = c.req.valid("json");
-
-  const server = await serversService.editServer(serverId, serverData);
+  const user = c.get("user");
+  const server = await serversService.editServer(user.id, serverId, serverData);
   if (!server) {
     return c.json({ error: "Failed to edit server" }, 400);
   }

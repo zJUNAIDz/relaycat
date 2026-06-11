@@ -232,16 +232,21 @@ class ServersService {
     }
   }
 
-  async editServer(serverId: string, data: Partial<Server>) {
+  async editServer(userId: string,serverId: string, data: Partial<Server>) {
     try {
-      const server = await db
-        .update(servers)
-        .set(data)
-        .where(eq(servers.id, serverId))
-        .returning();
-      if (!server) {
-        return null;
-      }
+      const [server] = await db.transaction(async (tx) => {
+        const [member] = await tx
+          .select()
+          .from(members)
+          .where(
+            and(
+              eq(members.serverId, serverId),
+              eq(members.userId, userId),
+              eq(members.role, MemberRole.ADMIN),
+            ),
+          )
+          .limit(1);
+      });
       return server;
     } catch (err) {
       return null;
