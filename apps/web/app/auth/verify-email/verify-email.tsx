@@ -1,62 +1,72 @@
 "use client";
+import { useAuth } from "@/shared/providers/auth-provider";
 import { PAGE_ROUTES } from "@/shared/lib/routes";
 import { Space_Grotesk } from "next/font/google";
 import { useRouter } from "next/navigation";
-import { use, useEffect, useState } from "react";
+import { use, useEffect, useRef, useState } from "react";
 
 const spaceGrotesk = Space_Grotesk({ subsets: ["latin"], weight: ["700"] });
 
 export default function ClientVerifyEmail({ searchParams }: { searchParams: Promise<{ token?: string }> }) {
   const router = useRouter();
-  const params = use(searchParams)
+  const { token } = use(searchParams);
+  const refetch = useAuth((state) => state.refetch);
   const [status, setStatus] = useState<"verifying" | "success" | "error">("verifying");
   const [message, setMessage] = useState("Verifying your email...");
+  // StrictMode mounts effects twice in dev; guard against a double verify.
+  const startedRef = useRef(false);
 
   useEffect(() => {
-    const verifyEmail = async () => {
-      try {
-        const token = params.token;
-        if (!token) {
-          setStatus("error");
-          setMessage("Invalid verification link");
-          return;
-        }
+    if (startedRef.current) return;
+    startedRef.current = true;
 
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/verify-email?token=${encodeURIComponent(token)}`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
+    let redirectTimer: ReturnType<typeof setTimeout> | undefined;
+
+    const verifyEmail = async () => {
+      if (!token) {
+        setStatus("error");
+        setMessage("Invalid verification link");
+        return;
+      }
+
+      try {
+        // No callbackURL -> the endpoint returns JSON instead of redirecting.
+        // credentials: "include" stores the session cookie from
+        // autoSignInAfterVerification so the user lands logged in.
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/auth/verify-email?token=${encodeURIComponent(token)}`,
+          { method: "GET", credentials: "include" },
+        );
 
         if (!response.ok) {
-          const errorData = await response.json().catch(() => ({ message: 'Verification failed' }));
+          const errorData = await response
+            .json()
+            .catch(() => ({ message: "Verification failed" }));
           setStatus("error");
-          setMessage(errorData.message || "Failed to verify email. The link may be invalid or expired.");
+          setMessage(
+            errorData.message ||
+              "Failed to verify email. The link may be invalid or expired.",
+          );
           return;
         }
 
+        // Pull the freshly created session into the store before redirecting.
+        await refetch().catch(() => {});
         setStatus("success");
         setMessage("Email verified successfully! Redirecting...");
-
-        const timeoutId = setTimeout(() => {
-          router.push(PAGE_ROUTES.HOME);
-        }, 2000);
-
-        return () => clearTimeout(timeoutId);
-      } catch (error) {
+        redirectTimer = setTimeout(() => router.push(PAGE_ROUTES.HOME), 2000);
+      } catch {
         setStatus("error");
         setMessage("Failed to verify email. Please try again.");
       }
     };
 
-    const cleanup = verifyEmail();
+    verifyEmail();
+
     return () => {
-      if (cleanup instanceof Promise) {
-        cleanup.then((cleanupFn) => cleanupFn && cleanupFn());
-      }
+      if (redirectTimer) clearTimeout(redirectTimer);
     };
-  }, [searchParams, router, params]);
+  }, [token, router, refetch]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-neutral-50 dark:bg-neutral-900">
