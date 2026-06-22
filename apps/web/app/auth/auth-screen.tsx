@@ -5,7 +5,7 @@ import { signIn, signinWithEmail, signupWithEmail } from "@/shared/lib/auth-clie
 import { PAGE_ROUTES } from "@/shared/lib/routes";
 import { useAuth } from "@/shared/providers/auth-provider";
 import { Space_Grotesk } from "next/font/google";
-import { redirect, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { FaGithub, FaGoogle } from "react-icons/fa";
 
@@ -24,33 +24,46 @@ const AuthScreen = ({ isLoginParam }: { isLoginParam: boolean }) => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // Already authenticated (e.g. arrived via OAuth redirect or an existing
+  // session) -> bounce to the app. router.replace avoids a back-button loop.
   useEffect(() => {
     if (user) {
-      redirect(PAGE_ROUTES.HOME);
+      router.replace(PAGE_ROUTES.HOME);
     }
-  }, [user]);
+  }, [user, router]);
 
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (loading) return;
     setError("");
     setLoading(true);
 
     try {
       if (mode === "login") {
         await signinWithEmail(email, password);
-        router.push(PAGE_ROUTES.HOME);
+        // Session is now set; AuthProvider syncs the store and the effect
+        // above redirects. Replace explicitly so it happens immediately.
+        router.replace(PAGE_ROUTES.HOME);
       } else if (mode === "signup") {
         await signupWithEmail(email, password, name);
         setMode("verification-sent");
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "An error occurred");
+      const message =
+        err instanceof Error ? err.message : "An error occurred";
+      // Signing in with an unverified email -> guide the user to verify.
+      if (/verify/i.test(message)) {
+        setMode("verification-sent");
+      } else {
+        setError(message);
+      }
     } finally {
       setLoading(false);
     }
   };
 
   const handleSocialSignIn = async (provider: string) => {
+    setError("");
     try {
       await signIn(provider);
     } catch (err) {
