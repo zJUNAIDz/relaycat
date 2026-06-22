@@ -32,8 +32,9 @@ app.use("*", setAuthContext);
 app.use("/static/*", serveStatic({ root: "./" }));
 
 //* PROTECTED ROUTES
+// setAuthContext already ran at the app level (line above), so the session is
+// on the context — only enforce auth + logging here.
 const protectedApp = new Hono<ProtectedAppContext>();
-protectedApp.use("*", setAuthContext);
 protectedApp.use("*", requireAuth);
 protectedApp.use("*", loggerMiddleware);
 
