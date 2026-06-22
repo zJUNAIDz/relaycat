@@ -2,13 +2,30 @@
 'use client';
 
 import { ModeToggle } from '@/shared/components/mode-toggle';
-import { authClient } from '@/shared/lib/auth-client';
+import { useAuth } from '@/shared/providers/auth-provider';
 import { PAGE_ROUTES } from '@/shared/lib/routes';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 import { HiLogout } from 'react-icons/hi';
 
 export default function LogOutPage() {
+  const router = useRouter();
+  const signOut = useAuth((state) => state.signOut);
+  const [signingOut, setSigningOut] = useState(false);
+
+  const handleSignOut = async () => {
+    if (signingOut) return;
+    setSigningOut(true);
+    try {
+      await signOut();
+      router.replace(PAGE_ROUTES.AUTH);
+    } finally {
+      setSigningOut(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-linear-to-br from-gray-50 to-blue-50 dark:from-gray-900 dark:via-blue-900 dark:to-gray-800 flex items-center justify-center p-4">
       <motion.div
@@ -41,10 +58,11 @@ export default function LogOutPage() {
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              onClick={() => authClient.signOut()}
-              className="w-full bg-red-600 hover:bg-red-700 text-white py-3 rounded-lg font-medium transition-colors"
+              onClick={handleSignOut}
+              disabled={signingOut}
+              className="w-full bg-red-600 hover:bg-red-700 disabled:opacity-60 disabled:cursor-not-allowed text-white py-3 rounded-lg font-medium transition-colors"
             >
-              Sign out
+              {signingOut ? 'Signing out…' : 'Sign out'}
             </motion.button>
 
             <Link href={PAGE_ROUTES.HOME}>

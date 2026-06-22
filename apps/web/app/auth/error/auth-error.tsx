@@ -1,7 +1,9 @@
+"use client"
+
 import { ModeToggle } from "@/shared/components/mode-toggle"
 import { PAGE_ROUTES } from "@/shared/lib/routes"
 import { motion } from "framer-motion"
-import { Link } from "lucide-react"
+import Link from "next/link"
 import { HiArrowLeft, HiExclamation } from "react-icons/hi"
 
 const AuthErrorComponent = ({ getErrorMessage }: { getErrorMessage: () => string }) => {
@@ -43,7 +45,7 @@ const AuthErrorComponent = ({ getErrorMessage }: { getErrorMessage: () => string
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              className="w-full text-white py-3 rounded-lg font-medium flex items-center justify-center gap-2 transition-colors"
+              className="w-full bg-sky-500 hover:bg-sky-600 text-white py-3 rounded-lg font-medium flex items-center justify-center gap-2 transition-colors"
             >
               <HiArrowLeft className="w-5 h-5" />
               Return to Login
