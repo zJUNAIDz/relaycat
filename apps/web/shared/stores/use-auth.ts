@@ -3,57 +3,71 @@
 import { create } from "zustand";
 import { authClient, Session, User } from "@/shared/lib/auth-client";
 
+export type AuthStatus = "loading" | "authenticated" | "unauthenticated";
+
 interface AuthState {
   user: User | null;
   session: Session | null;
+  status: AuthStatus;
   isLoading: boolean;
-  error: string | null;
+  error: Error | null;
 
-  fetchSession: () => Promise<void>;
-  setUser: (user: User | null) => void;
-  setSession: (session: Session | null) => void;
-  logout: () => void;
+  /**
+   * Mirror Better Auth's reactive session into the store. Called by
+   * AuthProvider whenever `authClient.useSession()` changes, so the whole app
+   * reads a single, always-fresh source of truth.
+   */
+  sync: (input: {
+    user: User | null;
+    session: Session | null;
+    isPending: boolean;
+    error: Error | null;
+  }) => void;
+
+  /** Sign out and clear local state immediately. */
+  signOut: () => Promise<void>;
+
+  /** Force a session refetch (updates Better Auth's store -> re-syncs here). */
+  refetch: () => Promise<void>;
 }
 
 export const useAuth = create<AuthState>((set) => ({
   user: null,
   session: null,
+  status: "loading",
   isLoading: true,
   error: null,
 
-  fetchSession: async () => {
-    set({ isLoading: true });
+  sync: ({ user, session, isPending, error }) =>
+    set({
+      user,
+      session,
+      error,
+      isLoading: isPending,
+      status: isPending
+        ? "loading"
+        : user
+          ? "authenticated"
+          : "unauthenticated",
+    }),
 
+  signOut: async () => {
     try {
-      const { data, error } = await authClient.getSession();
-
-      if (error) {
-        return set({ error: error.message, user: null, session: null });
-      }
-
+      await authClient.signOut();
+    } finally {
       set({
-        user: data?.user ?? null,
-        session: data?.session ?? null,
-        error: null,
-      });
-    } catch {
-      set({
-        error: "Network error - failed to fetch token",
         user: null,
         session: null,
+        status: "unauthenticated",
+        isLoading: false,
+        error: null,
       });
-    } finally {
-      set({ isLoading: false });
     }
   },
 
-  setUser: (user) => set({ user }),
-  setSession: (session) => set({ session }),
-
-  logout: () =>
-    set({
-      user: null,
-      session: null,
-      error: null,
-    }),
+  refetch: async () => {
+    // getSession() updates Better Auth's shared session store, which
+    // AuthProvider observes via useSession() and pushes back through sync().
+    await authClient.getSession();
+  },
 }));

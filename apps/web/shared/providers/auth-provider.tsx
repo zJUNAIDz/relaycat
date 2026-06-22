@@ -1,49 +1,32 @@
-"use client"
-import React, { useMemo } from "react";
+"use client";
+
+import React, { useEffect } from "react";
 import { authClient, Session, User } from "../lib/auth-client";
-import { useQuery } from "@tanstack/react-query";
+import { useAuth } from "../stores/use-auth";
 
-type AuthContextType = {
-  isLoading: boolean;
-  error: Error | null;
-  isError: boolean;
-  session: Session | null;
-  user: User | null;
-}
-const AuthContext = React.createContext<AuthContextType>({
-  user: null,
-  session: null,
-  isLoading: true,
-  error: null,
-  isError: false,
-});
+// Re-export so existing `import { useAuth } from "@/shared/providers/auth-provider"`
+// keeps working while the zustand store is the single source of truth.
+export { useAuth } from "../stores/use-auth";
 
-export const useAuth = () => {
-  const ctx = React.useContext(AuthContext)
-  if (ctx === undefined) throw new Error("useAuth must be used within AuthProvider")
-  return ctx;
-};
-
+/**
+ * Subscribes to Better Auth's reactive session and mirrors it into the zustand
+ * store. Mounting this once (in the root layout) keeps auth state in sync across
+ * the whole app — including after sign-in, sign-out and email verification.
+ */
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const { data, error, isLoading, isError } = useQuery({
-    queryKey: ["auth", "session"],
-    queryFn: async () => {
-      const { data, error } = await authClient.getSession()
-      if (error) throw new Error(error.message ?? "Error while fetching session")
-      return data;
-    },
-    staleTime: 5 * 60 * 1000, // 5 minutes  
-  });
-  const value = React.useMemo(() => ({
-    user: data?.user as User | null,
-    session: data?.session as Session | null,
-    isLoading,
-    error,
-    isError,
-  }), [data, error, isLoading, isError]);
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+  const { data, isPending, error } = authClient.useSession();
+  const sync = useAuth((state) => state.sync);
+
+  useEffect(() => {
+    sync({
+      user: (data?.user as User | undefined) ?? null,
+      session: (data?.session as Session | undefined) ?? null,
+      isPending,
+      error: error
+        ? new Error(error.message ?? "Error while fetching session")
+        : null,
+    });
+  }, [data, isPending, error, sync]);
+
+  return <>{children}</>;
 };
