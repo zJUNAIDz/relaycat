@@ -29,6 +29,13 @@
       "when": 1780460714518,
       "tag": "0003_clever_molly_hayes",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1782221056727,
+      "tag": "0004_striped_grandmaster",
+      "breakpoints": true
     }
   ]
 }
