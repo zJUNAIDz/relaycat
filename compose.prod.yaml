@@ -1,0 +1,142 @@
+# =========================================================================
+# RelayCat — production stack (container-first).
+#
+# Every service runs in a container on the default compose network, so
+# `server` can reach `postgres` / `minio` / `loki` by name. Public ports are
+# published to 127.0.0.1 ONLY — the host nginx (see deploy/nginx) reverse
+# proxies the rc* subdomains to them, and Cloudflare Tunnel fronts nginx.
+#
+#   relaycat.zjunaidz.me  -> web    127.0.0.1:3000
+#   rcapi.zjunaidz.me     -> server 127.0.0.1:8080  (Hono HTTP)
+#   rcws.zjunaidz.me      -> server 127.0.0.1:4001  (Socket.IO)
+#   rcmedia.zjunaidz.me   -> minio  127.0.0.1:9000  (S3, path-style)
+#
+#   make prod-up   # build + start
+#   make prod-down # stop + remove
+# =========================================================================
+
+services:
+  postgres:
+    image: postgres:18
+    container_name: relaycat-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: relaycat
+      POSTGRES_PASSWORD: relaycat
+      POSTGRES_DB: relaycat
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/18/docker
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U relaycat -d relaycat"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  minio:
+    image: firstfinger/minio:latest
+    container_name: relaycat-minio
+    restart: unless-stopped
+    # NOTE: firstfinger/minio runs its own /usr/bin/start.sh entrypoint and is
+    # configured purely via env vars — do NOT override `command:` (that bypasses
+    # the start script and tries to exec the bare arg as a binary).
+    environment:
+      MINIO_ROOT_USER: relaycat
+      MINIO_ROOT_PASSWORD: relaycat
+    ports:
+      - "127.0.0.1:9000:9000" # S3 API     (public via rcmedia.zjunaidz.me)
+      - "127.0.0.1:9001:9001" # console UI  (local only)
+      - "127.0.0.1:9002:9002" # admin console (local only)
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "mc ready local || curl -f http://localhost:9000/minio/health/live || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # One-shot: create the bucket + app service account, make media public-read.
+  minio-init:
+    image: minio/mc:latest
+    container_name: relaycat-minio-init
+    depends_on:
+      minio:
+        condition: service_started
+    restart: "no"
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        until mc alias set local http://minio:9000 relaycat relaycat; do
+          echo "waiting for minio..."; sleep 2;
+        done
+        mc mb --ignore-existing local/relaycat
+        mc admin user add local relaycat_app relaycat_app || true
+        mc admin policy attach local readwrite --user relaycat_app || true
+        mc anonymous set download local/relaycat || true
+        echo "minio init complete"
+
+  loki:
+    image: grafana/loki:latest
+    container_name: relaycat-loki
+    restart: unless-stopped
+    command: -config.file=/etc/loki/local-config.yaml
+    ports:
+      - "127.0.0.1:3100:3100"
+    volumes:
+      - loki_data:/loki
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: relaycat-grafana
+    restart: unless-stopped
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+    ports:
+      - "127.0.0.1:3200:3000" # local-only dashboard
+    volumes:
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      - loki
+
+  server:
+    build:
+      context: .
+      dockerfile: apps/server/Dockerfile
+    image: relaycat-server
+    container_name: relaycat-server
+    restart: unless-stopped
+    env_file:
+      - apps/server/.env.prod
+    ports:
+      - "127.0.0.1:8080:8080" # Hono HTTP  -> rcapi.zjunaidz.me
+      - "127.0.0.1:4001:4001" # Socket.IO  -> rcws.zjunaidz.me
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_started
+      loki:
+        condition: service_started
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    image: relaycat-web
+    container_name: relaycat-web
+    restart: unless-stopped
+    env_file:
+      - apps/web/.env.prod
+    ports:
+      - "127.0.0.1:3000:3000" # Next.js -> relaycat.zjunaidz.me
+    depends_on:
+      - server
+
+volumes:
+  postgres_data:
+  minio_data:
+  loki_data:
+  grafana_data:
