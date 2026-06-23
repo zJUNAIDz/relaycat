@@ -39,9 +39,17 @@ export const useS3Uploads = () => {
   const uploadServerIcon = (imageFile: File, serverName: string) =>
     uploadFile(imageFile, "server-icon", serverName);
 
+  const uploadProfileAvatar = (imageFile: File, name?: string) =>
+    uploadFile(imageFile, "profile-picture", name ?? "avatar");
+
+  const uploadProfileBanner = (imageFile: File, name?: string) =>
+    uploadFile(imageFile, "profile-banner", name ?? "banner");
+
   return {
     uploadFile,
     uploadServerIcon,
+    uploadProfileAvatar,
+    uploadProfileBanner,
     isUploading,
   };
 };
