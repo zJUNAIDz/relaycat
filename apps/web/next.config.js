@@ -2,13 +2,13 @@
 // const withbundleAnalyzer = require("@next/bundle-analyzer")({
 //   enabled: process.env.ANALYZE === "true",
 // });
-import { join } from "path";
+// import { join } from "path";
 
 const nextConfig = {
   // Self-contained server bundle for Docker. `outputFileTracingRoot` points at
   // the monorepo root so workspace deps are traced correctly.
   output: "standalone",
-  outputFileTracingRoot: join(__dirname, "../../"),
+  // outputFileTracingRoot: join(__dirname, "../../"),
 
   images: {
     qualities: [30, 75],
