@@ -1,0 +1,29 @@
+# =========================================================================
+# RelayCat — Cloudflare Tunnel config (example).
+#
+# Every public hostname points at the host nginx on :80; nginx routes by
+# Host header. Copy to /etc/cloudflared/config.yml, fill in your tunnel id,
+# create the DNS routes, then run the tunnel.
+#
+#   cloudflared tunnel login
+#   cloudflared tunnel create relaycat
+#   cloudflared tunnel route dns relaycat relaycat.zjunaidz.me
+#   cloudflared tunnel route dns relaycat rcapi.zjunaidz.me
+#   cloudflared tunnel route dns relaycat rcws.zjunaidz.me
+#   cloudflared tunnel route dns relaycat rcmedia.zjunaidz.me
+#   sudo cloudflared service install   # or: cloudflared tunnel run relaycat
+# =========================================================================
+
+tunnel: <YOUR_TUNNEL_ID>
+credentials-file: /etc/cloudflared/<YOUR_TUNNEL_ID>.json
+
+ingress:
+  - hostname: relaycat.zjunaidz.me
+    service: http://localhost:80
+  - hostname: rcapi.zjunaidz.me
+    service: http://localhost:80
+  - hostname: rcws.zjunaidz.me
+    service: http://localhost:80
+  - hostname: rcmedia.zjunaidz.me
+    service: http://localhost:80
+  - service: http_status:404
