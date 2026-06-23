@@ -2,6 +2,7 @@ import { Server } from "@/db/schema/server";
 import { CreateServerDTO, EditServerDTO } from "@repo/types";
 import { serversService } from "@/modules/guilds/service";
 import { ProtectedAppContext } from "@/types";
+import { withResolvedMedia } from "@/utils/media";
 import { randomUUIDv7 } from "bun";
 import { Hono } from "hono";
 import { zValidator } from "@hono/zod-validator";
@@ -10,14 +11,14 @@ const serverRoutes = new Hono<ProtectedAppContext>();
 
 serverRoutes.get("/public",async (c) => {
   const servers = await serversService.getPublicServers();
-  return c.json(servers);
+  return c.json(withResolvedMedia(servers));
 })
 
 // Get all servers for the current user
 serverRoutes.get("/", async (c) => {
   const user = c.get("user");
   const servers = await serversService.getServersByUserId(user.id);
-  return c.json(servers);
+  return c.json(withResolvedMedia(servers));
 });
 
 // Create a new server
@@ -32,7 +33,7 @@ serverRoutes.post("/", zValidator("json", CreateServerDTO), async (c) => {
     return c.json({ error: "Failed to create server" }, 500);
   }
   log.info({ server }, "[NEW SERVER CREATED]");
-  return c.json(server);
+  return c.json(withResolvedMedia(server));
 });
 
 // Get a specific server by ID
@@ -43,7 +44,7 @@ serverRoutes.get("/:serverId", async (c) => {
   if (!server) {
     return c.json({ error: "server not found" }, 404);
   }
-  return c.json(server);
+  return c.json(withResolvedMedia(server));
 });
 
 // Edit a server
@@ -57,7 +58,7 @@ serverRoutes.patch("/:serverId", zValidator("json", EditServerDTO), async (c) =>
     return c.json({ error: "Failed to edit server" }, 400);
   }
   log.info({ serverId }, "[SERVER PATCH EDITED]");
-  return c.json(server);
+  return c.json(withResolvedMedia(server));
 });
 
 // Delete a server

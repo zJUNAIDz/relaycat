@@ -8,6 +8,7 @@ import {
   ServerWithMembersAndUsersAndChannels,
   type Server,
 } from "@/db/schema/server";
+import { toMediaPath } from "@/utils/media";
 import { and, eq, inArray, not, notExists } from "drizzle-orm";
 
 class ServersService {
@@ -21,7 +22,7 @@ class ServersService {
           let server: ServerWithMembersAndUsersAndChannels | null = null;
           const [newServer] = await tx
             .insert(servers)
-            .values(serverData)
+            .values({ ...serverData, image: toMediaPath(serverData.image) })
             .returning();
           const [channel] = await tx
             .insert(channels)
@@ -232,9 +233,9 @@ class ServersService {
     }
   }
 
-  async editServer(userId: string,serverId: string, data: Partial<Server>) {
+  async editServer(userId: string, serverId: string, data: Partial<Server>) {
     try {
-      const [server] = await db.transaction(async (tx) => {
+      return await db.transaction(async (tx) => {
         const [member] = await tx
           .select()
           .from(members)
@@ -246,8 +247,20 @@ class ServersService {
             ),
           )
           .limit(1);
+        if (!member) return null; // not an admin of this server
+
+        const { id, createdAt, ...rest } = data;
+        const [server] = await tx
+          .update(servers)
+          .set({
+            ...rest,
+            ...("image" in data ? { image: toMediaPath(data.image) } : {}),
+            updatedAt: new Date(),
+          })
+          .where(eq(servers.id, serverId))
+          .returning();
+        return server ?? null;
       });
-      return server;
     } catch (err) {
       return null;
     }
