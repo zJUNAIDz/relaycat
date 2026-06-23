@@ -2,6 +2,7 @@ import { db } from "@/db";
 import * as authSchema from "@/db/schema/auth-schema";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { profileService } from "@/services/profile.service";
 import { logger } from "./logger";
 import { mailService } from "./mail";
 
@@ -53,6 +54,25 @@ export const auth = betterAuth({
       prompt: "select_account",
       clientId: process.env.AUTH_GOOGLE_ID as string,
       clientSecret: process.env.AUTH_GOOGLE_SECRET as string,
+    },
+  },
+  databaseHooks: {
+    user: {
+      create: {
+        // Every new user (email or OAuth) gets a companion profile row in our
+        // own `profiles` table. For OAuth sign-ups we also re-host the provider
+        // avatar into our bucket so we never depend on — or get rate limited
+        // by Google/GitHub's image CDN. Re-host runs fire-and-forget.
+        after: async (createdUser) => {
+          await profileService.ensureProfile(createdUser.id, createdUser.name);
+          if (createdUser.image) {
+            void profileService.rehostExternalAvatar(
+              createdUser.id,
+              createdUser.image,
+            );
+          }
+        },
+      },
     },
   },
   account: {
