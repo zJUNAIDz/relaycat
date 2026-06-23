@@ -63,7 +63,7 @@ export const ProfileImageField = ({
             : undefined
         }
         className={cn(
-          "group relative flex items-center justify-center overflow-hidden border border-dashed border-neutral-300 bg-muted/40 transition hover:border-neutral-400 disabled:cursor-not-allowed disabled:opacity-60 dark:border-neutral-700",
+          "group relative flex items-center justify-center overflow-hidden border border-dashed border-input bg-muted/40 transition hover:border-muted-foreground/50 disabled:cursor-not-allowed disabled:opacity-60",
           isAvatar
             ? "h-24 w-24 rounded-full"
             : "h-32 w-full rounded-xl md:h-40",
@@ -97,7 +97,7 @@ export const ProfileImageField = ({
             onClear();
           }}
           className={cn(
-            "absolute z-10 rounded-full bg-rose-500 p-1 text-white shadow disabled:opacity-60",
+            "absolute z-10 rounded-full bg-destructive p-1 text-destructive-foreground shadow disabled:opacity-60",
             isAvatar ? "right-0 top-0" : "right-2 top-2",
           )}
         >

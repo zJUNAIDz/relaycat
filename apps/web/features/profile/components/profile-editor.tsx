@@ -306,7 +306,7 @@ export const ProfileEditor = () => {
                   disabled={isSaving}
                   onClick={() => remove(i)}
                 >
-                  <Trash2 className="h-4 w-4 text-rose-500" />
+                  <Trash2 className="h-4 w-4 text-destructive" />
                 </Button>
               </div>
             ))}

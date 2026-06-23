@@ -55,10 +55,7 @@ export const ProfilePreview = ({
             className="h-full w-full object-cover"
           />
         )}
-        <div
-          className="absolute -bottom-9 left-5 rounded-full p-1"
-          style={{ backgroundColor: "var(--card)" }}
-        >
+        <div className="absolute -bottom-9 left-5 rounded-full bg-card p-1">
           <UserAvatar
             src={avatarUrl || undefined}
             className="h-20 w-20 border-4 md:h-20 md:w-20"
