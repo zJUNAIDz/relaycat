@@ -10,6 +10,25 @@ export type User = {
   updatedAt: Date;
 };
 
+export type ProfileLink = { label: string; url: string };
+
+export type Profile = {
+  id: string;
+  userId: string;
+  displayName: string | null;
+  bio: string | null;
+  avatar: string | null;
+  banner: string | null;
+  accentColor: string | null;
+  pronouns: string | null;
+  status: string | null;
+  links: ProfileLink[];
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+export type ProfileWithUser = Profile & { user: User };
+
 export const MemberRole = {
   ADMIN: "ADMIN",
   MODERATOR: "MODERATOR",
@@ -186,3 +205,27 @@ export const EditMessageDTO = z.object({
   content: z.string().min(1, "Content cannot be empty"),
 });
 export type EditMessageInput = z.infer<typeof EditMessageDTO>;
+
+// Profile Module DTOs
+const HEX_COLOR = /^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/;
+
+export const ProfileLinkDTO = z.object({
+  label: z.string().min(1, "Label is required").max(40),
+  url: z.string().url("Must be a valid URL").max(300),
+});
+
+export const UpdateProfileDTO = z.object({
+  displayName: z.string().min(1).max(50).nullable().optional(),
+  bio: z.string().max(500).nullable().optional(),
+  avatar: z.string().nullable().optional(),
+  banner: z.string().nullable().optional(),
+  accentColor: z
+    .string()
+    .regex(HEX_COLOR, "Must be a hex color like #5865F2")
+    .nullable()
+    .optional(),
+  pronouns: z.string().max(40).nullable().optional(),
+  status: z.string().max(128).nullable().optional(),
+  links: z.array(ProfileLinkDTO).max(5).optional(),
+});
+export type UpdateProfileInput = z.infer<typeof UpdateProfileDTO>;

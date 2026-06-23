@@ -8,6 +8,27 @@ export type User = {
     createdAt: Date;
     updatedAt: Date;
 };
+export type ProfileLink = {
+    label: string;
+    url: string;
+};
+export type Profile = {
+    id: string;
+    userId: string;
+    displayName: string | null;
+    bio: string | null;
+    avatar: string | null;
+    banner: string | null;
+    accentColor: string | null;
+    pronouns: string | null;
+    status: string | null;
+    links: ProfileLink[];
+    createdAt: Date;
+    updatedAt: Date;
+};
+export type ProfileWithUser = Profile & {
+    user: User;
+};
 export declare const MemberRole: {
     readonly ADMIN: "ADMIN";
     readonly MODERATOR: "MODERATOR";
@@ -194,4 +215,58 @@ export declare const EditMessageDTO: z.ZodObject<{
     content: string;
 }>;
 export type EditMessageInput = z.infer<typeof EditMessageDTO>;
+export declare const ProfileLinkDTO: z.ZodObject<{
+    label: z.ZodString;
+    url: z.ZodString;
+}, "strip", z.ZodTypeAny, {
+    label: string;
+    url: string;
+}, {
+    label: string;
+    url: string;
+}>;
+export declare const UpdateProfileDTO: z.ZodObject<{
+    displayName: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+    bio: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+    avatar: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+    banner: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+    accentColor: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+    pronouns: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+    status: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+    links: z.ZodOptional<z.ZodArray<z.ZodObject<{
+        label: z.ZodString;
+        url: z.ZodString;
+    }, "strip", z.ZodTypeAny, {
+        label: string;
+        url: string;
+    }, {
+        label: string;
+        url: string;
+    }>, "many">>;
+}, "strip", z.ZodTypeAny, {
+    status?: string | null | undefined;
+    displayName?: string | null | undefined;
+    bio?: string | null | undefined;
+    avatar?: string | null | undefined;
+    banner?: string | null | undefined;
+    accentColor?: string | null | undefined;
+    pronouns?: string | null | undefined;
+    links?: {
+        label: string;
+        url: string;
+    }[] | undefined;
+}, {
+    status?: string | null | undefined;
+    displayName?: string | null | undefined;
+    bio?: string | null | undefined;
+    avatar?: string | null | undefined;
+    banner?: string | null | undefined;
+    accentColor?: string | null | undefined;
+    pronouns?: string | null | undefined;
+    links?: {
+        label: string;
+        url: string;
+    }[] | undefined;
+}>;
+export type UpdateProfileInput = z.infer<typeof UpdateProfileDTO>;
 //# sourceMappingURL=index.d.ts.map
