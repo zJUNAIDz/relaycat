@@ -2,8 +2,13 @@
 // const withbundleAnalyzer = require("@next/bundle-analyzer")({
 //   enabled: process.env.ANALYZE === "true",
 // });
+import { join } from "path";
+
 const nextConfig = {
-  // output: "standalone",
+  // Self-contained server bundle for Docker. `outputFileTracingRoot` points at
+  // the monorepo root so workspace deps are traced correctly.
+  output: "standalone",
+  outputFileTracingRoot: join(__dirname, "../../"),
 
   images: {
     qualities: [30, 75],
@@ -52,9 +57,14 @@ const nextConfig = {
         port: "9000",
         pathname: "/**",
       },
+      {
+        protocol: "https",
+        hostname: "rcmedia.zjunaidz.me",
+        pathname: "/**",
+      },
     ],
     dangerouslyAllowLocalIP: true,
   },
 };
 
-module.exports = nextConfig;
+export default nextConfig;
