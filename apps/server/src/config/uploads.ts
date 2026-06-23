@@ -18,6 +18,19 @@ export const USER_PROFILE_POLICY: UploadPolicy = {
   signedUrlExpirationSeconds: 1 * 60 * 60, // 1 hour
 };
 
+export const USER_BANNER_POLICY: UploadPolicy = {
+  pathPrefix: "user-banners/",
+  allowedFileTypes: [
+    "image/png",
+    "image/jpeg",
+    "image/gif",
+    "image/jpg",
+    "image/webp",
+  ],
+  maxFileSizeInBytes: 8 * 1024 * 1024, // 8 MB
+  signedUrlExpirationSeconds: 1 * 60 * 60, // 1 hour
+};
+
 export const SERVER_ICON_POLICY: UploadPolicy = {
   pathPrefix: "server-icons/",
   allowedFileTypes: [
@@ -80,6 +93,7 @@ export const MESSAGE_FILE_POLICY: UploadPolicy = {
 export const policyMap: Record<string, UploadPolicy> = {
   "server-icon": SERVER_ICON_POLICY,
   "profile-picture": USER_PROFILE_POLICY,
+  "profile-banner": USER_BANNER_POLICY,
   "message-image": MESSAGE_IMAGE_POLICY,
   "message-document": MESSAGE_DOCUMENT_POLICY,
   "message-video": MESSAGE_VIDEO_POLICY,
