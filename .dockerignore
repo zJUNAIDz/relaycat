@@ -1,0 +1,22 @@
+# Build context is the monorepo root for both Dockerfiles.
+# NOTE: .env.prod is intentionally NOT ignored — the web build inlines
+# NEXT_PUBLIC_* from it. Plain `.env` (dev) IS ignored to avoid interference.
+**/node_modules
+**/.next
+**/dist
+**/.turbo
+**/coverage
+**/.vercel
+**/*.tsbuildinfo
+**/.env
+**/.env.local
+**/.env.development
+**/.env.development.local
+**/logs
+.git
+.github
+deploy
+nginx
+minio_config
+README.md
+DEPLOYMENT.md
