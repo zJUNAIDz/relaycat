@@ -1,61 +1,28 @@
 import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import "dotenv/config";
-import { generateErrorMessage } from "../utils/error-handler";
 import { UploadPolicy } from "../config/uploads";
-import { file } from "bun";
+import { generateErrorMessage } from "../utils/error-handler";
 
-type getSignedUrlResponse =
-  | {
-      success: true;
-      data: {
-        signedUrl: string;
-        bucketName: string;
-        key: string;
-      };
-      error: null;
-    }
-  | {
-      success: false;
-      data: null;
-      error: { message: string };
-    };
-interface S3ServiceOptions {
-  allowedFileTypes?: string[];
-  signedUrlExpirationSeconds?: number;
-}
+type GeneratePresignedUrlResult =
+  | { success: true; data: { signedUrl: string; key: string }; error: null }
+  | { success: false; data: null; error: { message: string } };
 
 export class S3Service {
-  private ALLOWED_FILE_TYPES: string[];
-  private SIGNED_URL_EXPIRATION_SECONDS: number;
   constructor(
     private readonly s3Client: S3Client,
     private readonly bucketName: string,
-    private readonly options: S3ServiceOptions = {},
-  ) {
-    this.ALLOWED_FILE_TYPES = this.options.allowedFileTypes ?? [
-      "image/png",
-      "image/jpeg",
-      "image/gif",
-      "image/jpg",
-      "image/webp",
-    ];
-    this.SIGNED_URL_EXPIRATION_SECONDS =
-      this.options.signedUrlExpirationSeconds ?? 1 * 60 * 60; // 1 hour default
-  }
+  ) {}
 
   /**
-   * Returns a signed url for uploading a new image
-   * @param fileName  The key of the object
-   * @param fileType  The type of the file
-   * @returns { data: {signedUrl:string, bucketName:string} | null, error: string | null }
-   * @example getUploadNewImageUrl("my-bucket", "my-key", "image/png") => { signedUrl: "https://amazonaws.com/my-bucket.s3/my-key", error: null } || { signedUrl: null, error: "File type not supported" }
+   * Returns a presigned PUT url plus the object key (relative path) to store.
+   * The key is what callers persist; the public host is appended at read time.
    */
   async generatePresignedUrl(
     fileName: string,
     fileType: string,
     policy: UploadPolicy,
-  ): Promise<getSignedUrlResponse> {
+  ): Promise<GeneratePresignedUrlResult> {
     if (!policy.allowedFileTypes.includes(fileType)) {
       return {
         data: null,
@@ -78,17 +45,9 @@ export class S3Service {
 
       const signedUrl = await getSignedUrl(this.s3Client, command, {
         expiresIn: policy.signedUrlExpirationSeconds,
-        signableHeaders:new Set(["Content-Type"]),
+        signableHeaders: new Set(["Content-Type"]),
       });
-      return {
-        data: {
-          signedUrl,
-          bucketName: this.bucketName,
-          key,
-        },
-        success: true,
-        error: null,
-      };
+      return { data: { signedUrl, key }, success: true, error: null };
     } catch (err: unknown) {
       return {
         data: null,
@@ -97,7 +56,7 @@ export class S3Service {
           message: generateErrorMessage(
             err,
             "An unknown error occurred while generating the signed URL.",
-            "[s3Service/getUploadImageUrlError]",
+            "[s3Service/generatePresignedUrl]",
           ),
         },
       };

@@ -23,10 +23,6 @@ const s3Routes = new Hono<AppContext>();
 s3Routes.get("/uploads/:uploadType", async (c: Context) => {
   const { serverName, fileType } = c.req.query();
 
-  if (!serverName || serverName.trim() === "") {
-    return c.json({ error: "serverName is required" }, 400);
-  }
-
   if (!fileType || fileType.trim() === "") {
     return c.json({ error: "fileType is required" }, 400);
   }
@@ -38,16 +34,17 @@ s3Routes.get("/uploads/:uploadType", async (c: Context) => {
     return c.json({ error: "Invalid upload type" }, 400);
   }
 
+  const fileName = serverName?.trim() || "upload";
   const response = await s3Service.generatePresignedUrl(
-    serverName,
+    fileName,
     fileType,
     policy
   );
   if (!response.success) {
     return c.json({ error: response.error }, 500);
   }
-  const { signedUrl, bucketName, key } = response.data;
-  return c.json({ signedUrl, key, bucketName });
+  const { signedUrl, key } = response.data;
+  return c.json({ signedUrl, key });
 });
 
 export default s3Routes;
