@@ -15,11 +15,12 @@ import {
   FormItem
 } from "@/shared/components/ui/form";
 import { useModal } from "@/shared/hooks/use-modal-store";
+import { useS3Uploads } from "@/features/server/hooks/use-s3-uploads";
 import axiosClient from "@/shared/lib/axios-client";
 import { CONFIG } from "@/shared/lib/config";
 // import { api } from "@/lib/api-client";
 import { zodResolver } from "@hookform/resolvers/zod";
-import axios, { AxiosError } from "axios";
+import { AxiosError } from "axios";
 import { useRouter } from "next/navigation";
 import React from "react";
 import { FormProvider, useForm } from "react-hook-form";
@@ -49,6 +50,7 @@ const MessageFileModal = () => {
   const [file, setFile] = React.useState<File | null>(null);
   const [isLoading, setIsLoading] = React.useState(false);
   const [errorMessage, setErrorMessage] = React.useState("");
+  const { uploadFile } = useS3Uploads();
 
   const router = useRouter();
   const form = useForm({
@@ -87,19 +89,8 @@ const MessageFileModal = () => {
         return;
       }
 
-      const { data: { signedUrl, key, bucketName } } = await axiosClient.get(`/s3/uploads/server-icon?fileType=${file.type}`);
-
-      if (!signedUrl || !key || !bucketName) {
-        setErrorMessage("Error uploading image");
-        return;
-      }
-      const s3BaseUrl = process.env.NEXT_PUBLIC_S3_URL!;
-      const imageUrl = `${s3BaseUrl}/${bucketName}/${key}`;
-
-      await axios.put(signedUrl, file, {
-        headers: { "Content-Type": file.type },
-      });
-      await axiosClient.post(apiUrl, { imageUrl });
+      const key = await uploadFile(file, "message-image");
+      await axiosClient.post(apiUrl, { image: key });
       resetForm();
       router.refresh();
       onClose();
