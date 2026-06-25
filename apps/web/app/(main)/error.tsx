@@ -5,12 +5,8 @@ import { useEffect } from "react";
 import { ErrorState } from "@/shared/components/error-state";
 import { getErrorMessage, logError } from "@/shared/utils/error";
 
-/**
- * Root error boundary. Next.js renders this when a route throws during render.
- * It receives the error and a `reset` callback to re-render the segment — this
- * is NOT the 404 page (see `not-found.tsx` for that).
- */
-const ErrorPage = ({
+/** Error boundary for the authenticated app shell. */
+const MainError = ({
   error,
   reset,
 }: {
@@ -18,16 +14,17 @@ const ErrorPage = ({
   reset: () => void;
 }) => {
   useEffect(() => {
-    logError("app/error", error);
+    logError("app/(main)/error", error);
   }, [error]);
 
   return (
     <ErrorState
-      title="Something went wrong"
       description={getErrorMessage(error)}
       onRetry={reset}
+      homeHref="/channels/me"
+      homeLabel="Go to Direct Messages"
     />
   );
 };
 
-export default ErrorPage;
+export default MainError;
