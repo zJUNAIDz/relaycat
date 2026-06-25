@@ -15,6 +15,7 @@ export type ProfileLink = { label: string; url: string };
 export type Profile = {
   id: string;
   userId: string;
+  username: string | null;
   displayName: string | null;
   bio: string | null;
   avatar: string | null;
@@ -147,11 +148,13 @@ export type MessageWithMemberWithUser = {
 };
 
 export type MemberWithUser = Member & { user: User };
-
 // Server / Guild Module DTOs
 export const CreateServerDTO = z.object({
   name: z.string().min(1, "Server name is required").max(100),
   image: z.string().nullable().optional(),
+  description: z.string().max(500).nullable().optional(),
+  banner: z.string().nullable().optional(),
+  isPublic: z.boolean().optional(),
 });
 export type CreateServerInput = z.infer<typeof CreateServerDTO>;
 
@@ -214,7 +217,18 @@ export const ProfileLinkDTO = z.object({
   url: z.string().url("Must be a valid URL").max(300),
 });
 
+// Username: 2-32 chars, lowercase letters/numbers/._, must start alphanumeric.
+export const USERNAME_REGEX = /^[a-z0-9][a-z0-9._]{1,31}$/;
+
 export const UpdateProfileDTO = z.object({
+  username: z
+    .string()
+    .regex(
+      USERNAME_REGEX,
+      "2-32 chars: lowercase letters, numbers, dot or underscore",
+    )
+    .nullable()
+    .optional(),
   displayName: z.string().min(1).max(50).nullable().optional(),
   bio: z.string().max(500).nullable().optional(),
   avatar: z.string().nullable().optional(),
@@ -229,3 +243,71 @@ export const UpdateProfileDTO = z.object({
   links: z.array(ProfileLinkDTO).max(5).optional(),
 });
 export type UpdateProfileInput = z.infer<typeof UpdateProfileDTO>;
+
+// ---------------------------------------------------------------------------
+// Friends Module
+// ---------------------------------------------------------------------------
+export const FriendshipStatus = {
+  PENDING: "PENDING",
+  ACCEPTED: "ACCEPTED",
+  BLOCKED: "BLOCKED",
+} as const;
+export type FriendshipStatus = keyof typeof FriendshipStatus;
+
+/** A user as surfaced in friend search / friend lists. */
+export type FriendUser = {
+  userId: string;
+  username: string | null;
+  displayName: string | null;
+  name: string;
+  avatar: string | null;
+};
+
+/** Direction of a pending request relative to the current user. */
+export type FriendRequestDirection = "incoming" | "outgoing";
+
+export type Friendship = {
+  id: string;
+  requesterId: string;
+  addresseeId: string;
+  status: FriendshipStatus;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+/** A pending request annotated with the other user and its direction. */
+export type FriendRequest = {
+  friendshipId: string;
+  direction: FriendRequestDirection;
+  user: FriendUser;
+  createdAt: Date;
+};
+
+// Send a friend request by username.
+export const SendFriendRequestDTO = z.object({
+  username: z.string().min(1, "Username is required"),
+});
+export type SendFriendRequestInput = z.infer<typeof SendFriendRequestDTO>;
+
+// Search users by (partial) username.
+export const SearchUsersDTO = z.object({
+  q: z.string().min(1).max(32),
+});
+export type SearchUsersInput = z.infer<typeof SearchUsersDTO>;
+
+// ---------------------------------------------------------------------------
+// Direct Messages Module
+// ---------------------------------------------------------------------------
+/** A 1-1 DM channel projected for the current user (the "other" participant). */
+export type DmChannel = {
+  id: string;
+  createdAt: Date;
+  updatedAt: Date | null;
+  otherUser: FriendUser;
+};
+
+// Open (get-or-create) a DM with another user by their id.
+export const OpenDmDTO = z.object({
+  userId: z.string().min(1, "userId is required"),
+});
+export type OpenDmInput = z.infer<typeof OpenDmDTO>;

@@ -9,7 +9,9 @@
     "composite": true, // Tells TS this is a distinct project dependency
     "declaration": true, // Generates the .d.ts files in memory for other apps
     "declarationMap": true, // Maps "Go to Definition" cleanly without full re-indexing
-    "rootDir": "."
+    "rootDir": ".",
+    "outDir": "./dist",
+    "tsBuildInfoFile": "./dist/tsconfig.tsbuildinfo"
   },
   "include": [
     "index.ts"
