@@ -34,6 +34,7 @@ const ACCENT_SWATCHES = [
 const FALLBACK_ACCENT = "#5865F2";
 
 interface FormValues {
+  username: string;
   displayName: string;
   bio: string;
   pronouns: string;
@@ -66,6 +67,7 @@ export const ProfileEditor = () => {
 
   const form = useForm<FormValues>({
     defaultValues: {
+      username: "",
       displayName: "",
       bio: "",
       pronouns: "",
@@ -81,6 +83,7 @@ export const ProfileEditor = () => {
   useEffect(() => {
     if (!profile) return;
     reset({
+      username: profile.username ?? "",
       displayName: profile.displayName ?? "",
       bio: profile.bio ?? "",
       pronouns: profile.pronouns ?? "",
@@ -98,6 +101,10 @@ export const ProfileEditor = () => {
   const onSubmit = async (data: FormValues) => {
     try {
       const payload: UpdateProfileInput = {
+        // Normalise to the server's username rules (lowercase handle).
+        username: data.username.trim()
+          ? data.username.trim().toLowerCase()
+          : null,
         displayName: orNull(data.displayName),
         bio: orNull(data.bio),
         pronouns: orNull(data.pronouns),
@@ -139,7 +146,7 @@ export const ProfileEditor = () => {
     );
   }
 
-  const username = profile?.user?.name ?? "user";
+  const authName = profile?.user?.name ?? "user";
 
   return (
     <form
@@ -184,10 +191,24 @@ export const ProfileEditor = () => {
         {/* Identity */}
         <section className="space-y-4">
           <div className="space-y-2">
+            <Label htmlFor="username">Username</Label>
+            <Input
+              id="username"
+              placeholder="your_handle"
+              disabled={isSaving}
+              {...register("username")}
+            />
+            <p className="text-xs text-muted-foreground">
+              Your unique handle (lowercase letters, numbers, dot or
+              underscore). Friends find you by this.
+            </p>
+          </div>
+
+          <div className="space-y-2">
             <Label htmlFor="displayName">Display name</Label>
             <Input
               id="displayName"
-              placeholder={username}
+              placeholder={authName}
               disabled={isSaving}
               {...register("displayName")}
             />
@@ -335,7 +356,7 @@ export const ProfileEditor = () => {
         </p>
         <ProfilePreview
           displayName={values.displayName}
-          username={username}
+          username={values.username || authName}
           bio={values.bio}
           pronouns={values.pronouns}
           status={values.status}
