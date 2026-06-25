@@ -4,6 +4,7 @@ import { requireAuth, setAuthContext } from "@/middlewares/auth";
 import { loggerMiddleware } from "@/middlewares/logger";
 import channelsRoute from "@/modules/channels/route";
 import dmRoute from "@/modules/dm/route";
+import friendsRoute from "@/modules/friends/route";
 import serverRoutes from "@/modules/guilds/route";
 import membersRoutes from "@/modules/members/route";
 import profilesRoute from "@/routes/profiles.route";
@@ -44,6 +45,7 @@ protectedApp.route("/profiles", profilesRoute);
 protectedApp.route("/servers", serverRoutes);
 protectedApp.route("/members", membersRoutes);
 protectedApp.route("/channels", channelsRoute);
+protectedApp.route("/friends", friendsRoute);
 protectedApp.route("/dm", dmRoute);
 protectedApp.get("/", (c) => {
   return c.html(`<h1>禁止</h1>`);
