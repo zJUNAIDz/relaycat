@@ -12,15 +12,19 @@ const roleIconMap: Record<string, string> = {
   "MODERATOR": "/icons/moderator.png",
   "GUEST": "/icons/guest.png",
 };
-export const RoleIcon: React.FC<RoleIconProps> = ({ role, className }) => (
-  <Image
-    className={className || ""}
-    src={roleIconMap[role]}
-    alt={role}
-    height={20}
-    width={20}
-  />
-);
+export const RoleIcon: React.FC<RoleIconProps> = ({ role, className }) => {
+  const src = roleIconMap[role];
+  if (!src) return null;
+  return (
+    <Image
+      className={className || ""}
+      src={src}
+      alt={role}
+      height={20}
+      width={20}
+    />
+  );
+};
 
 interface ChannelIconProps {
   type: string;
@@ -34,13 +38,16 @@ const channelIconMap: Record<string, string> = {
   "VIDEO": "/icons/video.png",
 };
 
-export const ChannelIcon: React.FC<ChannelIconProps> = ({ type, className, height, width }) => (
-  <Image
-    className={className || ""}
-    src={channelIconMap[type]}
-    alt={type}
-    height={height || 20}
-    width={width || 20}
-  />
-
-)
+export const ChannelIcon: React.FC<ChannelIconProps> = ({ type, className, height, width }) => {
+  const src = channelIconMap[type];
+  if (!src) return null;
+  return (
+    <Image
+      className={className || ""}
+      src={src}
+      alt={type}
+      height={height || 20}
+      width={width || 20}
+    />
+  );
+};
