@@ -3,6 +3,7 @@ import { RoleIcon } from "@/shared/components/icons";
 import { Form, FormControl, FormField, FormItem } from "@/shared/components/ui/form";
 import { Input } from "@/shared/components/ui/input";
 import { UserAvatar } from "@/shared/components/user-avatar";
+import { UserProfilePopover } from "@/features/profile/components/user-profile-popover";
 import { useModal } from "@/shared/hooks/use-modal-store";
 import axiosClient from "@/shared/lib/axios-client";
 import { useAuth } from "@/shared/providers/auth-provider";
@@ -13,7 +14,6 @@ import { Edit, Trash } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import queryString from "query-string";
 import React from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod/v3";
@@ -68,11 +68,9 @@ export const ChatMessage = ({
   const isLoading = form.formState.isSubmitting;
   const onMessageEdit = async (values: z.infer<typeof formSchema>) => {
     try {
-      const url = queryString.stringifyUrl({
-        url: `/messages/${id}`,
-        query: socketQuery,
-      });
-      await axiosClient.patch(url, values)
+      // `apiUrl` is the fully-qualified message resource (…/messages/:id) for
+      // both server channels and DMs, so edits work the same in either context.
+      await axiosClient.patch(apiUrl, values)
 
       setIsEditing(false);
     } catch (err) {
@@ -109,15 +107,19 @@ export const ChatMessage = ({
   return (
     <div className="relative group flex items-center hover:bg-black/5 p-4 transition w-full">
       <div className="group flex gap-x-2 items-start w-full">
-        <div className="cursor-pointer hover:drop-shadow-md transition">
-          <UserAvatar src={user.image ?? undefined} />
-        </div>
+        <UserProfilePopover userId={user.id} name={user.name} avatarUrl={user.image}>
+          <div className="cursor-pointer hover:drop-shadow-md transition">
+            <UserAvatar src={user.image ?? undefined} />
+          </div>
+        </UserProfilePopover>
         <div className="flex flex-col w-full">
           <div className="flex items-center gap-x-2">
             <div className="flex items-center space-x-2">
-              <p className="text-sm font-semibold hover:underline cursor-pointer">
-                {user.name}
-              </p>
+              <UserProfilePopover userId={user.id} name={user.name} avatarUrl={user.image}>
+                <p className="text-sm font-semibold hover:underline cursor-pointer">
+                  {user.name}
+                </p>
+              </UserProfilePopover>
               <ActionTooltip label={member.role} side="top" className="text-xs">
                 <RoleIcon role={member.role} />
               </ActionTooltip>
