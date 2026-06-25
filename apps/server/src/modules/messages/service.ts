@@ -53,6 +53,7 @@ class MessageService {
             ...messageInput,
             channelId,
             memberId: currentMember.id,
+            authorId: currentMember.userId,
           })
           .returning();
         const [currentUser] = await tx
