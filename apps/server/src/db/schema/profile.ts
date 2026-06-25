@@ -25,6 +25,9 @@ export const profiles = pgTable(
       .notNull()
       .unique()
       .references(() => user.id, { onDelete: "cascade" }),
+    // Unique, user-facing handle used to find and add friends. Nullable so
+    // existing rows backfill lazily; set via the profile editor.
+    username: text("username").unique(),
     displayName: text("display_name"),
     bio: text("bio"),
     avatar: text("avatar"),
@@ -39,7 +42,10 @@ export const profiles = pgTable(
       .$onUpdate(() => /* @__PURE__ */ new Date())
       .notNull(),
   },
-  (table) => [index("profiles_user_id_idx").on(table.userId)],
+  (table) => [
+    index("profiles_user_id_idx").on(table.userId),
+    index("profiles_username_idx").on(table.username),
+  ],
 );
 
 export const profileRelations = relations(profiles, ({ one }) => ({
