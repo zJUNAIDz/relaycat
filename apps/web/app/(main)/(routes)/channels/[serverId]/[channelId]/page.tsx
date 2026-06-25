@@ -4,9 +4,10 @@ import { ChatInput } from "@/features/chat/components/chat-input";
 import { ChatMessages } from "@/features/chat/components/chat-messages";
 import { memberService } from "@/features/member/member-service";
 import { CONFIG } from "@/shared/lib/config";
+import { PAGE_ROUTES } from "@/shared/lib/routes";
 import { ChannelType } from "@/shared/types";
 import { getCurrentUser } from "@/shared/utils/server";
-import { notFound, unauthorized } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 interface ChannelIdPageProps {
   params: Promise<{
     serverId: string;
@@ -17,7 +18,7 @@ interface ChannelIdPageProps {
 const ChannelIdPage = async ({ params }: ChannelIdPageProps) => {
   const user = await getCurrentUser();
   if (!user) {
-    unauthorized();
+    redirect(PAGE_ROUTES.AUTH)
   }
 
   const { channelId } = await params;
