@@ -1,4 +1,5 @@
 
+import { Toaster } from "@/shared/components/ui/sonner";
 import { AuthProvider } from "@/shared/providers/auth-provider";
 import { QueryProvider } from "@/shared/providers/query-provider";
 import { cn } from "@/shared/utils/cn";
@@ -35,6 +36,7 @@ export default async function RootLayout({
               {children}
             </AuthProvider>
           </QueryProvider>
+          <Toaster />
         </ThemeProvider>
       </body>
     </html>
