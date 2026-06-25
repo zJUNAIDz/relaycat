@@ -2,7 +2,6 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { toast } from "sonner";
 import { conversationService } from "../conversation-service";
 
 export const dmKeys = {
@@ -39,7 +38,6 @@ export function useOpenDm() {
       queryClient.invalidateQueries({ queryKey: dmKeys.list });
       router.push(`/channels/me/${channel.id}`);
     },
-    onError: (e: any) =>
-      toast.error(e?.response?.data?.error ?? "Could not open DM"),
+    // Errors are surfaced by the global mutation handler (see QueryProvider).
   });
 }

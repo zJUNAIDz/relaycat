@@ -68,14 +68,13 @@ export function useFriendActions() {
     queryClient.invalidateQueries({ queryKey: friendKeys.requests });
   };
 
+  // Errors are surfaced by the global mutation handler (see QueryProvider).
   const sendRequest = useMutation({
     mutationFn: (username: string) => friendService.sendRequest(username),
     onSuccess: () => {
       toast.success("Friend request sent");
       invalidate();
     },
-    onError: (e: any) =>
-      toast.error(e?.response?.data?.error ?? "Could not send request"),
   });
 
   const sendRequestToUser = useMutation({
@@ -84,8 +83,6 @@ export function useFriendActions() {
       toast.success("Friend request sent");
       invalidate();
     },
-    onError: (e: any) =>
-      toast.error(e?.response?.data?.error ?? "Could not send request"),
   });
 
   const accept = useMutation({
@@ -94,15 +91,11 @@ export function useFriendActions() {
       toast.success("Friend added");
       invalidate();
     },
-    onError: (e: any) =>
-      toast.error(e?.response?.data?.error ?? "Could not accept"),
   });
 
   const decline = useMutation({
     mutationFn: (id: string) => friendService.decline(id),
     onSuccess: invalidate,
-    onError: (e: any) =>
-      toast.error(e?.response?.data?.error ?? "Could not decline"),
   });
 
   const remove = useMutation({
@@ -111,8 +104,6 @@ export function useFriendActions() {
       toast.success("Removed");
       invalidate();
     },
-    onError: (e: any) =>
-      toast.error(e?.response?.data?.error ?? "Could not remove"),
   });
 
   const block = useMutation({
@@ -121,8 +112,6 @@ export function useFriendActions() {
       toast.success("Blocked");
       invalidate();
     },
-    onError: (e: any) =>
-      toast.error(e?.response?.data?.error ?? "Could not block"),
   });
 
   return { sendRequest, sendRequestToUser, accept, decline, remove, block };

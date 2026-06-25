@@ -12,7 +12,6 @@ import EditServerModal from "@/features/server/components/modals/edit-server-mod
 import InviteModal from "@/features/server/components/modals/invite-modal";
 import LeaveServerModal from "@/features/server/components/modals/leave-server-modal";
 import MembersModal from "@/features/server/components/modals/members-modal";
-import { Toaster } from "@/shared/components/ui/sonner";
 
 export const ModalProvider = () => {
   //* workaround to make it render on client-side only
@@ -31,7 +30,6 @@ export const ModalProvider = () => {
       <EditChannelModal />
       <MessageFileModal />
       <DeleteMessageModal />
-      <Toaster />
     </>
   );
 };
