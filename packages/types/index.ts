@@ -283,6 +283,57 @@ export type FriendRequest = {
   createdAt: Date;
 };
 
+// ---------------------------------------------------------------------------
+// Presence Module
+// ---------------------------------------------------------------------------
+/**
+ * Presence is intentionally split into two vocabularies:
+ *
+ *  - {@link PresenceStatus} is what *other* users see. "invisible" never leaks
+ *    here — an invisible user is reported as "offline" to everyone else.
+ *  - {@link PresenceSettableStatus} is what a user can *choose* for themselves.
+ *    It adds "invisible" (appear offline while staying connected).
+ *
+ * "online"/"idle"/"dnd"/"offline" map to the green/yellow/red/grey dots.
+ */
+export const PRESENCE_STATUSES = ["online", "idle", "dnd", "offline"] as const;
+export type PresenceStatus = (typeof PRESENCE_STATUSES)[number];
+
+export const SETTABLE_PRESENCE_STATUSES = [
+  "online",
+  "idle",
+  "dnd",
+  "invisible",
+] as const;
+export type PresenceSettableStatus =
+  (typeof SETTABLE_PRESENCE_STATUSES)[number];
+
+/** A single user's presence as broadcast to watchers. */
+export type PresenceUpdate = {
+  userId: string;
+  status: PresenceStatus;
+  /** ISO timestamp; only set when the user is offline (null otherwise). */
+  lastSeen: string | null;
+};
+
+/** Socket.IO event names for the presence protocol (shared client/server). */
+export const PRESENCE_EVENTS = {
+  /** server -> watchers: a single user's presence changed. */
+  update: "presence:update",
+  /** server -> requester: full snapshot answering a `subscribe`. */
+  sync: "presence:sync",
+  /** server -> own sockets: this user's chosen (settable) status. */
+  self: "presence:self",
+  /** client -> server: watch presence for these userIds. */
+  subscribe: "presence:subscribe",
+  /** client -> server: stop watching these userIds. */
+  unsubscribe: "presence:unsubscribe",
+  /** client -> server: set my own status (online/idle/dnd/invisible). */
+  set: "presence:set",
+  /** client -> server: keep my connection's presence TTL alive. */
+  heartbeat: "presence:heartbeat",
+} as const;
+
 // Send a friend request by username.
 export const SendFriendRequestDTO = z.object({
   username: z.string().min(1, "Username is required"),
