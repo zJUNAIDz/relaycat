@@ -14,6 +14,7 @@ import { eq } from "drizzle-orm";
 export type UpdateProfileInput = Partial<
   Pick<
     Profile,
+    | "username"
     | "displayName"
     | "bio"
     | "avatar"
