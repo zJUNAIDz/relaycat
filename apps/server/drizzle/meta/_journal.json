@@ -36,6 +36,13 @@
       "when": 1782221056727,
       "tag": "0004_striped_grandmaster",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1782231961681,
+      "tag": "0005_dm_and_friends",
+      "breakpoints": true
     }
   ]
 }
