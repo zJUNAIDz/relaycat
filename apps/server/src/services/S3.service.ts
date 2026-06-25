@@ -12,6 +12,20 @@ type UploadFromUrlResult =
   | { success: true; data: { key: string }; error: null }
   | { success: false; data: null; error: { message: string } };
 
+/**
+ * Make a user-supplied name safe to embed in an S3 object key: no spaces or
+ * special characters that would produce invalid/awkward URLs at read time.
+ */
+function slugifyFileName(name: string): string {
+  const slug = name
+    .normalize("NFKD")
+    .replace(/[^\w.-]+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^[-.]+|[-.]+$/g, "")
+    .toLowerCase();
+  return slug || "upload";
+}
+
 export class S3Service {
   constructor(
     private readonly s3Client: S3Client,
@@ -40,7 +54,7 @@ export class S3Service {
       const fileExtension = fileType.includes("/")
         ? fileType.split("/")[1]
         : fileType;
-      const key = `${policy.pathPrefix}${fileName}-${crypto.randomUUID()}.${fileExtension}`;
+      const key = `${policy.pathPrefix}${slugifyFileName(fileName)}-${crypto.randomUUID()}.${fileExtension}`;
       const command = new PutObjectCommand({
         Bucket: this.bucketName,
         Key: key,
@@ -109,7 +123,7 @@ export class S3Service {
       const fileExtension = contentType.includes("/")
         ? contentType.split("/")[1]
         : contentType;
-      const key = `${policy.pathPrefix}${fileName}-${crypto.randomUUID()}.${fileExtension}`;
+      const key = `${policy.pathPrefix}${slugifyFileName(fileName)}-${crypto.randomUUID()}.${fileExtension}`;
       await this.s3Client.send(
         new PutObjectCommand({
           Bucket: this.bucketName,

@@ -33,8 +33,14 @@ export function resolveMediaUrl(path?: string | null): string | null {
   if (!path) return path ?? null;
   if (ABSOLUTE_URL.test(path)) return path;
   const base = mediaBaseUrl();
-  const clean = path.replace(/^\/+/, "");
-  return base ? `${base}/${clean}` : `/${clean}`;
+  // Encode each segment so legacy keys containing spaces or other unsafe
+  // characters resolve to a valid URL (e.g. "server-icons/My Server-uuid.jpeg").
+  const encoded = path
+    .replace(/^\/+/, "")
+    .split("/")
+    .map(encodeURIComponent)
+    .join("/");
+  return base ? `${base}/${encoded}` : `/${encoded}`;
 }
 
 const MEDIA_KEYS = new Set(["image", "url", "banner", "avatar"]);
