@@ -1,4 +1,4 @@
-"use client"
+  "use client"
 
 import { Member, MessageWithMemberWithUser } from "@/shared/types";
 import { format } from "date-fns";
@@ -23,6 +23,14 @@ interface ChatMessagesProps {
 
 
 const DATE_FORMAT = "dd/MM/yyyy, HH:mm"
+
+/** Format a message timestamp, tolerating missing or malformed dates. */
+const formatTimestamp = (value: Date | string | null | undefined): string => {
+  if (!value) return "";
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? "" : format(date, DATE_FORMAT);
+};
+
 export const ChatMessages = ({
   name,
   member,
@@ -133,9 +141,8 @@ export const ChatMessages = ({
                   content={message.content}
                   fileUrl={message.fileUrl}
                   deleted={message.deleted}
-                  timestamp={format(
-                    new Date(message.updatedAt || message.createdAt),
-                    DATE_FORMAT,
+                  timestamp={formatTimestamp(
+                    message.updatedAt || message.createdAt,
                   )}
                   isUpdated={message.updatedAt !== null}
                   apiUrl={`${apiUrl}/${message.id}`}

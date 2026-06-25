@@ -45,6 +45,12 @@ export function resolveMediaUrl(path?: string | null): string | null {
 
 const MEDIA_KEYS = new Set(["image", "url", "banner", "avatar"]);
 
+/** True only for `{}`-style objects, not class instances (Date, Buffer, etc.). */
+function isPlainObject(value: object): boolean {
+  const proto = Object.getPrototypeOf(value);
+  return proto === Object.prototype || proto === null;
+}
+
 /**
  * Recursively walk an API payload and resolve any media-path fields to full
  * URLs. Returns a new object; the input is not mutated.
@@ -53,7 +59,10 @@ export function withResolvedMedia<T>(value: T): T {
   if (Array.isArray(value)) {
     return value.map((item) => withResolvedMedia(item)) as unknown as T;
   }
-  if (value && typeof value === "object") {
+  // Only descend into plain objects. Class instances such as Date have no
+  // enumerable own keys, so recursing would replace them with `{}` and corrupt
+  // fields like `createdAt` (the client would then build `new Date({})`).
+  if (value && typeof value === "object" && isPlainObject(value)) {
     const out: Record<string, unknown> = {};
     for (const [key, val] of Object.entries(value)) {
       out[key] =
