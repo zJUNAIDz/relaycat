@@ -2,11 +2,12 @@
 import { Button } from "@/shared/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/shared/components/ui/card"
 import { Input } from "@/shared/components/ui/input"
+import defaultServerImage from "@/public/placeholder.webp"
+import { ImageWithFallback } from "@/shared/components/image-with-fallback"
 import axiosClient from "@/shared/lib/axios-client"
 import { Server } from "@repo/types"
 import { useQuery } from "@tanstack/react-query"
 import { Users } from "lucide-react"
-import Image from "next/image"
 import Link from "next/link"
 
 export default function ServerDiscovery() {
@@ -68,11 +69,10 @@ export default function ServerDiscovery() {
                 <div className={`h-32 bg-linear-to-r bg-transparent relative shrink-0 p-3 flex items-end`}>
                   {/* Pseudo Icon placeholder positioning */}
                   <div className="absolute -bottom-6 left-3 h-12 w-12 flex items-center justify-center font-bold text-white group-hover:rounded-xl transition-all duration-200">
-                    <Image
-                      src={server.image!}
+                    <ImageWithFallback
+                      src={server.image ?? defaultServerImage}
+                      fallbackSrc={defaultServerImage}
                       alt={`${server.name} icon`}
-                      placeholder="blur"
-                      blurDataURL={process.env.NEXT_PUBLIC_DEFAULT_SERVER_IMAGE_URL}
                       width={48}
                       height={48}
                       className="object-cover rounded-full group-hover:rounded-xl transition-all duration-200 fill-inherit"

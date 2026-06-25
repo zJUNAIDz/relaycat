@@ -2,9 +2,9 @@
 
 import defaultServerImage from "@/public/placeholder.webp";
 import { ActionTooltip } from "@/shared/components/action-tooltip";
+import { ImageWithFallback } from "@/shared/components/image-with-fallback";
 import { ServerWithMembersUserAndChannels } from "@/shared/types";
 import { cn } from "@/shared/utils/cn";
-import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
 interface NavigationItemProps {
   server: ServerWithMembersUserAndChannels;
@@ -34,9 +34,10 @@ const NavigationItem: React.FC<NavigationItemProps> = ({ server }) => {
             params?.serverId !== server.id && "bg-primary/10 text-primary rounded-2xl"
           )}
         >
-          <Image
+          <ImageWithFallback
             fill
-            src={server.image ? `${server.image}` : defaultServerImage}
+            src={server.image ?? defaultServerImage}
+            fallbackSrc={defaultServerImage}
             sizes="(max-width: 768px) 50px, (max-width: 1200px) 70px"
             quality={30}
             alt={`Server: ${server.name}`}
