@@ -18,6 +18,14 @@ import {
   FormMessage,
 } from "@/shared/components/ui/form";
 import { Input } from "@/shared/components/ui/input";
+import { Textarea } from "@/shared/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/shared/components/ui/select";
 import { useModal } from "@/shared/hooks/use-modal-store";
 import { CONFIG } from "@/shared/lib/config";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -36,6 +44,10 @@ const formSchema = z.object({
   image: z.string().min(1, {
     message: "Server image is required.",
   }).default(CONFIG.DEFAULT_SERVER_IMAGE_URL),
+  description: z.string().max(500, {
+    message: "Description must be 500 characters or fewer.",
+  }).optional().default(""),
+  isPublic: z.boolean().default(true),
 });
 
 const EditServerModal = () => {
@@ -49,6 +61,8 @@ const EditServerModal = () => {
     defaultValues: {
       name: server?.name || "",
       image: server?.image || CONFIG.DEFAULT_SERVER_IMAGE_URL,
+      description: server?.description || "",
+      isPublic: server?.isPublic ?? true,
     },
   });
   const isSubmitting = form.formState.isSubmitting || isUploading || editServerMutation.isPending;
@@ -58,6 +72,8 @@ const EditServerModal = () => {
       form.reset({
         name: server.name,
         image: server.image || CONFIG.DEFAULT_SERVER_IMAGE_URL,
+        description: server.description || "",
+        isPublic: server.isPublic ?? true,
       });
     }
   }, [server, isModalOpen, form]);
@@ -74,6 +90,8 @@ const EditServerModal = () => {
       const mutateResponse = await editServerMutation.mutateAsync({
         name: values.name,
         image: imageUrl,
+        description: values.description?.trim() ? values.description.trim() : null,
+        isPublic: values.isPublic,
       })
       if (mutateResponse.status !== 200) {
         throw new Error("Failed to update server with new image.");
@@ -140,6 +158,59 @@ const EditServerModal = () => {
                         {...field}
                       />
                     </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="uppercase text-xs font-bold">
+                      Description
+                    </FormLabel>
+                    <FormControl>
+                      <Textarea
+                        disabled={isSubmitting}
+                        className="border resize-none focus-visible:ring-0 focus-visible:ring-offset-0 bg-transparent"
+                        placeholder="What is your server about?"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="isPublic"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="uppercase text-xs font-bold">
+                      Visibility
+                    </FormLabel>
+                    <Select
+                      disabled={isSubmitting}
+                      value={field.value ? "public" : "private"}
+                      onValueChange={(value) => field.onChange(value === "public")}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="border bg-transparent">
+                          <SelectValue />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="public">
+                          Public — anyone can discover and join
+                        </SelectItem>
+                        <SelectItem value="private">
+                          Private — invite only
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}

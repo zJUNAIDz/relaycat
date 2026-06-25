@@ -1,15 +1,19 @@
 import axiosClient from "@/shared/lib/axios-client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
+export type ServerMutationPayload = {
+  name: string;
+  image: string;
+  description?: string | null;
+  isPublic?: boolean;
+};
+
 export function useEditServerMutation(serverId: string) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationKey: ["server", serverId],
-    mutationFn: async ({ name, image }: { name: string; image: string }) => {
-      const response = await axiosClient.patch(`/servers/${serverId}`, {
-        name,
-        image,
-      });
+    mutationFn: async (payload: ServerMutationPayload) => {
+      const response = await axiosClient.patch(`/servers/${serverId}`, payload);
       return response;
     },
     onSuccess: () => {
@@ -22,11 +26,8 @@ export function useCreateServerMutation() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationKey: ["createServer"],
-    mutationFn: async ({ name, image }: { name: string; image: string }) => {
-      const response = await axiosClient.post(`/servers`, {
-        name,
-        image,
-      });
+    mutationFn: async (payload: ServerMutationPayload) => {
+      const response = await axiosClient.post(`/servers`, payload);
       return response;
     },
     onSuccess: () => {

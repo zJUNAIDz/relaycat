@@ -17,6 +17,14 @@ import {
   FormMessage,
 } from "@/shared/components/ui/form";
 import { Input } from "@/shared/components/ui/input";
+import { Textarea } from "@/shared/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/shared/components/ui/select";
 import { useModal } from "@/shared/hooks/use-modal-store";
 import { CONFIG } from "@/shared/lib/config";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -35,6 +43,10 @@ const formSchema = z.object({
     message: "Server name is required.",
   }),
   image: z.string().optional().default(CONFIG.DEFAULT_SERVER_IMAGE_URL),
+  description: z.string().max(500, {
+    message: "Description must be 500 characters or fewer.",
+  }).optional().default(""),
+  isPublic: z.boolean().default(true),
 });
 
 const CreateServerModal = () => {
@@ -53,6 +65,8 @@ const CreateServerModal = () => {
       name: "",
       image:
         CONFIG.DEFAULT_SERVER_IMAGE_URL,
+      description: "",
+      isPublic: true,
     },
   });
 
@@ -60,6 +74,8 @@ const CreateServerModal = () => {
     form.reset({
       name: "",
       image: CONFIG.DEFAULT_SERVER_IMAGE_URL,
+      description: "",
+      isPublic: true,
     });
     setImageFile(null);
   }
@@ -77,6 +93,8 @@ const CreateServerModal = () => {
       const response = await createServerMutation.mutateAsync({
         name: values.name,
         image: image,
+        description: values.description?.trim() ? values.description.trim() : null,
+        isPublic: values.isPublic,
       });
       resetForm();
       handleCloseModal();
@@ -155,6 +173,59 @@ const CreateServerModal = () => {
                         {...field}
                       />
                     </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="uppercase text-xs font-bold">
+                      Description
+                    </FormLabel>
+                    <FormControl>
+                      <Textarea
+                        disabled={isLoading}
+                        className="border border-gray-300 resize-none focus-visible:ring-1 focus-visible:ring-offset-1"
+                        placeholder="What is your server about?"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="isPublic"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="uppercase text-xs font-bold">
+                      Visibility
+                    </FormLabel>
+                    <Select
+                      disabled={isLoading}
+                      value={field.value ? "public" : "private"}
+                      onValueChange={(value) => field.onChange(value === "public")}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="border border-gray-300">
+                          <SelectValue />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="public">
+                          Public — anyone can discover and join
+                        </SelectItem>
+                        <SelectItem value="private">
+                          Private — invite only
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
