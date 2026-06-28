@@ -1,6 +1,7 @@
 import type { Server } from "socket.io";
 import { registerSocketAuth } from "./auth";
 import { registerPresenceHandler } from "./presence.handler";
+import { registerTypingHandler } from "./typing.handler";
 
 /**
  * Wire all realtime behaviour onto the root Socket.IO namespace (the one the
@@ -12,4 +13,5 @@ import { registerPresenceHandler } from "./presence.handler";
 export function registerSocketHandlers(io: Server) {
   registerSocketAuth(io);
   registerPresenceHandler(io);
+  registerTypingHandler(io);
 }
