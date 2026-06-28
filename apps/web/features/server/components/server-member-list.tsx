@@ -1,3 +1,5 @@
+"use client";
+import { useWatchPresence } from "@/features/presence/presence-provider";
 import { ServerWithMembersAndUser } from "@/shared/types";
 import { ServerMember } from "./server-member";
 import { ServerSection } from "./server-section";
@@ -6,6 +8,8 @@ interface ServerMembersListProps {
   serverId: ServerWithMembersAndUser["id"]
 }
 export const ServerMembersList: React.FC<ServerMembersListProps> = ({ members, serverId }) => {
+  // One subscription for the whole roster; dots read from the presence store.
+  useWatchPresence((members ?? []).map((m) => m.user.id));
   //TODO: fix this
   //* Impossible edge case
   if (!members?.length) return <div>No members</div>
