@@ -111,6 +111,20 @@ class DmService {
     return !!row;
   }
 
+  /** The other participant(s) of a DM channel — the recipients to notify. */
+  async recipientIds(channelId: string, senderId: string): Promise<string[]> {
+    const rows = await db
+      .select({ userId: dmParticipants.userId })
+      .from(dmParticipants)
+      .where(
+        and(
+          eq(dmParticipants.channelId, channelId),
+          ne(dmParticipants.userId, senderId),
+        ),
+      );
+    return rows.map((r) => r.userId);
+  }
+
   /** Get-or-create the 1-1 DM channel between the current user and `otherUserId`. */
   async getOrCreate(
     currentUserId: string,

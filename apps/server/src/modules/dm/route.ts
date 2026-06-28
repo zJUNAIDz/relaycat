@@ -1,3 +1,4 @@
+import { notify } from "@/lib/notifier";
 import { socketManager } from "@/lib/socket-manager";
 import { ProtectedAppContext } from "@/types";
 import { withResolvedMedia } from "@/utils/media";
@@ -65,6 +66,28 @@ dmRoute.post(
     if (!res.ok) return c.json({ error: res.error }, 400);
     const payload = withResolvedMedia(res.data);
     socketManager.io.emit(`chat:${channelId}:messages`, payload);
+
+    // Notify the other participant(s) of the new DM.
+    const sender = c.get("user");
+    const preview = res.data.message.content?.slice(0, 140) ?? "Sent an attachment";
+    void dmService
+      .recipientIds(channelId, sender.id)
+      .then((recipients) =>
+        Promise.all(
+          recipients.map((userId) =>
+            notify({
+              userId,
+              type: "DM",
+              title: `New message from ${sender.name}`,
+              body: preview,
+              actorId: sender.id,
+              channelId,
+            }),
+          ),
+        ),
+      )
+      .catch(() => {});
+
     return c.json(payload);
   },
 );

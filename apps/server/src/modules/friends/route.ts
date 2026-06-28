@@ -1,3 +1,4 @@
+import { notify } from "@/lib/notifier";
 import { socketManager } from "@/lib/socket-manager";
 import { ProtectedAppContext } from "@/types";
 import { withResolvedMedia } from "@/utils/media";
@@ -40,29 +41,44 @@ friendsRoute.post(
   zValidator("json", SendFriendRequestDTO),
   async (c) => {
     const { username } = c.req.valid("json");
-    const me = c.get("user").id;
+    const actor = c.get("user");
+    const me = actor.id;
     const res = await friendsService.sendRequestByUsername(me, username);
     if (!res.ok) return c.json({ error: res.error }, 400);
     notifyFriendsChanged(me);
     notifyFriendsChanged(res.data.addresseeId);
+    void notify({
+      userId: res.data.addresseeId,
+      type: "FRIEND_REQUEST",
+      title: `${actor.name} sent you a friend request`,
+      actorId: me,
+    });
     return c.json({ friendship: res.data });
   },
 );
 
 // Send a friend request to a user by id (used by profile popups).
 friendsRoute.post("/:userId/request", async (c) => {
-  const me = c.get("user").id;
+  const actor = c.get("user");
+  const me = actor.id;
   const otherUserId = c.req.param("userId");
   const res = await friendsService.sendRequestByUserId(me, otherUserId);
   if (!res.ok) return c.json({ error: res.error }, 400);
   notifyFriendsChanged(me);
   notifyFriendsChanged(res.data.addresseeId);
+  void notify({
+    userId: res.data.addresseeId,
+    type: "FRIEND_REQUEST",
+    title: `${actor.name} sent you a friend request`,
+    actorId: me,
+  });
   return c.json({ friendship: res.data });
 });
 
 // Accept a pending incoming request.
 friendsRoute.post("/requests/:id/accept", async (c) => {
-  const me = c.get("user").id;
+  const actor = c.get("user");
+  const me = actor.id;
   const res = await friendsService.respondToRequest(
     me,
     c.req.param("id"),
@@ -71,6 +87,12 @@ friendsRoute.post("/requests/:id/accept", async (c) => {
   if (!res.ok) return c.json({ error: res.error }, 400);
   notifyFriendsChanged(me);
   notifyFriendsChanged(res.data.requesterId);
+  void notify({
+    userId: res.data.requesterId,
+    type: "FRIEND_ACCEPT",
+    title: `${actor.name} accepted your friend request`,
+    actorId: me,
+  });
   return c.json({ friendship: res.data });
 });
 

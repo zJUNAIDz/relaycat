@@ -1,4 +1,5 @@
 import { CreateMessageDTO, EditMessageDTO } from "@repo/types";
+import { notify } from "@/lib/notifier";
 import { socketManager } from "@/lib/socket-manager";
 import { messageService } from "@/modules/messages/service";
 import { ProtectedAppContext, cursorSchema } from "@/types";
@@ -50,6 +51,26 @@ messageRoute.post("/", zValidator("json", CreateMessageDTO), async (c) => {
   }
 
   socketManager.io.emit(`chat:${channelId.data}:messages`, res.data);
+
+  // Notify @-mentioned users (notifier drops the author if self-mentioned).
+  const mentions = res.data.message.mentions ?? [];
+  if (mentions.length) {
+    const preview = res.data.message.content?.slice(0, 140) ?? null;
+    void Promise.all(
+      mentions.map((mentionedId) =>
+        notify({
+          userId: mentionedId,
+          type: "MENTION",
+          title: `${res.data.user.name} mentioned you`,
+          body: preview,
+          actorId: user.id,
+          channelId: channelId.data,
+          serverId: res.data.member.serverId,
+          messageId: res.data.message.id,
+        }),
+      ),
+    ).catch(() => {});
+  }
 
   return c.json(res.data);
 });
