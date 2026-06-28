@@ -334,6 +334,37 @@ export const PRESENCE_EVENTS = {
   heartbeat: "presence:heartbeat",
 } as const;
 
+/** A typing transition for one user in one chat (channel or DM). */
+export type TypingUpdate = {
+  /** The channel/conversation id the typing is happening in. */
+  chatId: string;
+  userId: string;
+  /** The typer's display name, for rendering "<name> is typing…". */
+  name: string;
+  /** true = started typing, false = stopped. */
+  typing: boolean;
+};
+
+/**
+ * Socket.IO event names for the typing protocol (shared client/server).
+ *
+ * Fully ephemeral — nothing is persisted. Viewers `subscribe` to a chat to join
+ * its room; typers emit `start`/`stop`, which the server relays as `update` to
+ * everyone else in that room.
+ */
+export const TYPING_EVENTS = {
+  /** server -> room: someone started or stopped typing. */
+  update: "typing:update",
+  /** client -> server: I started typing in this chat. */
+  start: "typing:start",
+  /** client -> server: I stopped typing in this chat. */
+  stop: "typing:stop",
+  /** client -> server: join this chat's room to receive typing updates. */
+  subscribe: "typing:subscribe",
+  /** client -> server: leave this chat's room. */
+  unsubscribe: "typing:unsubscribe",
+} as const;
+
 // Send a friend request by username.
 export const SendFriendRequestDTO = z.object({
   username: z.string().min(1, "Username is required"),
