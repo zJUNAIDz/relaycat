@@ -1,6 +1,6 @@
 "use client"
+import { PresenceAvatar } from "@/features/presence/components/presence-avatar";
 import { RoleIcon } from "@/shared/components/icons";
-import { UserAvatar } from "@/shared/components/user-avatar";
 import { Server, ServerWithMembersAndUser } from "@/shared/types";
 import { cn } from "@/shared/utils/cn";
 import { useParams, useRouter } from "next/navigation";
@@ -27,7 +27,8 @@ export const ServerMember: React.FC<ServerMemberProps> = ({ member, serverId }) 
         // member.user.id === profileId && "cursor-default"
       )}
     >
-      <UserAvatar
+      <PresenceAvatar
+        userId={member.user.id}
         src={member.user.image ?? undefined}
         className="h-4 w-4 md:h-8 md:w-8"
       />
