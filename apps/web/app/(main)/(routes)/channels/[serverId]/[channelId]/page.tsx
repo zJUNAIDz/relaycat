@@ -2,6 +2,7 @@ import { channelService } from "@/features/channel/channel-service";
 import ChatHeader from "@/features/chat/components/chat-header";
 import { ChatInput } from "@/features/chat/components/chat-input";
 import { ChatMessages } from "@/features/chat/components/chat-messages";
+import { TypingIndicator } from "@/features/typing/components/typing-indicator";
 import { memberService } from "@/features/member/member-service";
 import { CONFIG } from "@/shared/lib/config";
 import { PAGE_ROUTES } from "@/shared/lib/routes";
@@ -51,10 +52,13 @@ const ChannelIdPage = async ({ params }: ChannelIdPageProps) => {
               paramKey="channelId"
               paramValue={channelId}
             />
+            <TypingIndicator chatId={channel.id} currentUserId={user.id} />
             <ChatInput
               name={channel.name}
               type="channel"
               apiUrl={`/channels/${channel.id}/messages`}
+              chatId={channel.id}
+              selfName={user.name}
               query={{
                 channelId,
                 memberId: member.id,

@@ -2,6 +2,7 @@ import { conversationService } from "@/features/conversation/conversation-servic
 import ChatHeader from "@/features/chat/components/chat-header";
 import { ChatInput } from "@/features/chat/components/chat-input";
 import { ChatMessages } from "@/features/chat/components/chat-messages";
+import { TypingIndicator } from "@/features/typing/components/typing-indicator";
 import { CONFIG } from "@/shared/lib/config";
 import type { Member } from "@/shared/types";
 import { getCurrentUser } from "@/shared/utils/server";
@@ -55,10 +56,13 @@ const DmChannelPage = async ({ params }: DmPageProps) => {
         paramKey="conversationId"
         paramValue={channelId}
       />
+      <TypingIndicator chatId={channelId} currentUserId={user.id} />
       <ChatInput
         name={name}
         type="conversation"
         apiUrl={`/dm/${channelId}/messages`}
+        chatId={channelId}
+        selfName={user.name}
         query={{ channelId }}
       />
     </div>
