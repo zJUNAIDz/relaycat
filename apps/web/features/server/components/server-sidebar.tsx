@@ -122,7 +122,7 @@ const ServerSidebar = ({ serverId, channelId }: { serverId: string; channelId: s
         />
         <ServerMembersList members={server.members} serverId={server.id} />
       </ScrollArea>
-      <UserFooter user={{name: user.name || "NA", username:  "NA", image: user.image || ""}} />
+      <UserFooter user={{name: user.name || "NA", username: "NA", image: user.image || ""}} />
     </WrapperDiv>
   );
 };
