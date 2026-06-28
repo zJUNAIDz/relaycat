@@ -21,13 +21,14 @@ import {
 } from "@/shared/components/ui/dropdown-menu";
 import { ScrollArea } from "@/shared/components/ui/scroll-area";
 import { UserAvatar } from "@/shared/components/user-avatar";
-import { memberService } from "@/features/member/member-service";
+import {
+  useChangeMemberRoleMutation,
+  useKickMemberMutation,
+} from "@/features/member/hooks/member-mutations";
 import { useModal } from "@/shared/hooks/use-modal-store";
 import { MemberRole, ServerWithMembersAndUser } from "@/shared/types";
 import { capitalizeFirstLetter } from "@/shared/utils/misc";
 import { Check, Gavel, Loader2, MoreVertical, Shield } from "lucide-react";
-import { useRouter } from "next/navigation";
-import React from "react";
 
 const MembersModal = () => {
   const {
@@ -37,37 +38,43 @@ const MembersModal = () => {
     type,
     data,
   } = useModal();
-  const router = useRouter()
-  const [loadingId, setLoadingId] = React.useState("")
+  const kickMutation = useKickMemberMutation();
+  const changeRoleMutation = useChangeMemberRoleMutation();
   const { server } = data as { server: ServerWithMembersAndUser };
   const isModalOpen = isOpen && type == "members";
   const membersCount = server?.members?.length || 0;
 
-  const onKick = async (memberId: string) => {
-    try {
-      setLoadingId(memberId)
-      const updatedServer = await memberService.kick(server.id, memberId)
-      router.refresh()
-      onOpen("members", { server: updatedServer })
-    } catch (err) {
-      console.error("[MEMBERS_MODAL:onKick] ", err)
-    } finally {
-      setLoadingId("")
-    }
-  }
+  // The kicked/updated member id for either in-flight mutation, used to show a
+  // per-row spinner. React Query exposes the in-flight variables for us.
+  const loadingId =
+    (kickMutation.isPending && kickMutation.variables?.memberId) ||
+    (changeRoleMutation.isPending && changeRoleMutation.variables?.memberId) ||
+    "";
 
-  const onRoleChange = async (memberId: string, role: MemberRole) => {
-    try {
-      setLoadingId(memberId)
-      const updatedServer = await memberService.changeRole(server.id, memberId, role)
-      router.refresh()
-      onOpen("members", { server: updatedServer })
-    } catch (error) {
-      console.error("[onRoleChange] ", error)
-    } finally {
-      setLoadingId("")
-    }
-  }
+  // Re-feed the modal store with the server returned by the mutation so the
+  // member list re-renders; the mutation already invalidated the sidebar query.
+  const refreshMembers = (updatedServer: ServerWithMembersAndUser) =>
+    onOpen("members", { server: updatedServer });
+
+  const onKick = (memberId: string) => {
+    kickMutation.mutate(
+      { serverId: server.id, memberId },
+      {
+        onSuccess: refreshMembers,
+        onError: (err) => console.error("[MEMBERS_MODAL:onKick] ", err),
+      },
+    );
+  };
+
+  const onRoleChange = (memberId: string, role: MemberRole) => {
+    changeRoleMutation.mutate(
+      { serverId: server.id, memberId, role },
+      {
+        onSuccess: refreshMembers,
+        onError: (err) => console.error("[onRoleChange] ", err),
+      },
+    );
+  };
 
 
   return (

@@ -1,10 +1,5 @@
 import type { NotificationEvent } from "@/shared/types";
-import {
-  fetchNotifications,
-  fetchUnreadCount,
-  markAllNotificationsRead,
-  markNotificationRead,
-} from "./api";
+import { notificationService } from "./notification-service";
 import { useNotificationStore } from "./notification-store";
 
 /**
@@ -19,8 +14,8 @@ const store = useNotificationStore;
 /** Initial REST hydration: recent history + authoritative unread count. */
 export async function loadInitialNotifications(): Promise<void> {
   const [res, unread] = await Promise.all([
-    fetchNotifications(),
-    fetchUnreadCount(),
+    notificationService.list(),
+    notificationService.unreadCount(),
   ]);
   store.getState().setAll(res.notifications, unread, res.nextCursor);
 }
@@ -40,7 +35,7 @@ export async function markNotificationReadAction(id: string): Promise<void> {
   if (!current || current.read) return;
   s.markRead(id, Math.max(0, s.unread - 1));
   try {
-    s.setUnread(await markNotificationRead(id));
+    s.setUnread(await notificationService.markRead(id));
   } catch {
     /* keep optimistic state; next load reconciles */
   }
@@ -50,7 +45,7 @@ export async function markNotificationReadAction(id: string): Promise<void> {
 export async function markAllNotificationsReadAction(): Promise<void> {
   store.getState().markAllRead();
   try {
-    await markAllNotificationsRead();
+    await notificationService.markAllRead();
   } catch {
     /* keep optimistic state */
   }
@@ -60,7 +55,7 @@ export async function markAllNotificationsReadAction(): Promise<void> {
 export async function loadMoreNotifications(): Promise<void> {
   const s = store.getState();
   if (!s.nextCursor) return;
-  const res = await fetchNotifications(s.nextCursor);
+  const res = await notificationService.list(s.nextCursor);
   store.getState().appendPage(res.notifications, res.nextCursor);
 }
 

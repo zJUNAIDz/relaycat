@@ -8,7 +8,7 @@ import {
 } from "@/shared/components/ui/dialog";
 import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
-import { serverService } from "@/features/server/server-service";
+import { useRegenerateInviteMutation } from "@/features/server/hooks/server-mutations";
 import { useModal } from "@/shared/hooks/use-modal-store";
 import { useOrigin } from "@/shared/hooks/use-origin";
 import { Check, Copy, RefreshCw } from "lucide-react";
@@ -19,7 +19,7 @@ import { toast } from "sonner";
 const InviteModal = () => {
   //* component beginning
   const [copied, setCopied] = React.useState(false);
-  const [isLoading, setIsLoading] = React.useState(false);
+  const regenerateInvite = useRegenerateInviteMutation();
   const {
     isOpen,
     onOpen,
@@ -29,6 +29,7 @@ const InviteModal = () => {
   } = useModal();
   const origin = useOrigin();
   const isModalOpen = isOpen && type == "invite";
+  const isLoading = regenerateInvite.isPending;
   const inviteUrl = `${origin}/invite/${server?.inviteCode}`;
 
   const onCopy = () => {
@@ -36,18 +37,15 @@ const InviteModal = () => {
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
-  const onGenerate = async () => {
+  const onGenerate = () => {
     if (!server) return;
-    try {
-      setIsLoading(true);
-      const updatedServer = await serverService.regenerateInviteCode(server.id);
-      onOpen("invite", { server: updatedServer });
-    } catch (err) {
-      console.error("Failed to generate new invite link: ", err);
-      toast.error("Failed to generate new invite link. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
+    regenerateInvite.mutate(server.id, {
+      onSuccess: (updatedServer) => onOpen("invite", { server: updatedServer }),
+      onError: (err) => {
+        console.error("Failed to generate new invite link: ", err);
+        toast.error("Failed to generate new invite link. Please try again.");
+      },
+    });
   };
   const handleCloseModal = () => {
     onClose()

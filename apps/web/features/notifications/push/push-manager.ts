@@ -1,4 +1,4 @@
-import { fetchVapidPublicKey, subscribePush, unsubscribePush } from "./api";
+import { pushService } from "./push-service";
 
 export type PushStatus =
   | "loading"
@@ -83,7 +83,7 @@ class PushManager {
         this.set({ status: permission === "denied" ? "denied" : "off" });
         return;
       }
-      const publicKey = await fetchVapidPublicKey();
+      const publicKey = await pushService.getVapidPublicKey();
       if (!publicKey) {
         // Server has push disabled — nothing the client can do.
         this.set({ status: "off" });
@@ -96,7 +96,7 @@ class PushManager {
           userVisibleOnly: true,
           applicationServerKey: urlBase64ToBytes(publicKey),
         }));
-      await subscribePush(sub.toJSON());
+      await pushService.subscribe(sub.toJSON());
       this.set({ status: "on" });
     } catch {
       this.set({ status: "off" });
@@ -112,7 +112,7 @@ class PushManager {
       const reg = await getRegistration();
       const sub = await reg.pushManager.getSubscription();
       if (sub) {
-        await unsubscribePush(sub.endpoint);
+        await pushService.unsubscribe(sub.endpoint);
         await sub.unsubscribe();
       }
       this.set({ status: "off" });

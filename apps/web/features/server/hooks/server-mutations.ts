@@ -1,3 +1,4 @@
+import { serverService } from "@/features/server/server-service";
 import axiosClient from "@/shared/lib/axios-client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
@@ -46,5 +47,14 @@ export function useDeleteServerMutation(serverId: string) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["currentUserServers"] });
     },
+  });
+}
+
+/** Rotate a server's invite code, resolving to the updated server. */
+export function useRegenerateInviteMutation() {
+  return useMutation({
+    mutationKey: ["regenerateInvite"],
+    mutationFn: (serverId: string) =>
+      serverService.regenerateInviteCode(serverId),
   });
 }
