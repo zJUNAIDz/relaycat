@@ -1,7 +1,7 @@
 "use client"
 import { CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/shared/components/ui/command";
-import { Dialog, DialogHeader, DialogTitle } from "@/shared/components/ui/dialog";
-import { Router, Search } from "lucide-react";
+import { DialogHeader, DialogTitle } from "@/shared/components/ui/dialog";
+import { Search } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import React, { useEffect } from "react";
 
@@ -16,7 +16,15 @@ interface ServerSearchProps {
     }[] | undefined
   }[]
 }
-const cmdKey = navigator.userAgent.toUpperCase().indexOf("MAC") >= 0 ? "&#8984;" : "CTRL";
+
+// Guarded so it never touches `navigator` during SSR; `⌘` is the literal glyph
+// (an `&#8984;` HTML entity would render verbatim inside JSX).
+const getCmdKey = () =>
+  typeof navigator !== "undefined" &&
+    navigator.userAgent.toUpperCase().includes("MAC")
+    ? "⌘"
+    : "CTRL";
+
 export const ServerSearch: React.FC<ServerSearchProps> = ({ data }) => {
   const router = useRouter()
   const params = useParams()
@@ -55,7 +63,7 @@ export const ServerSearch: React.FC<ServerSearchProps> = ({ data }) => {
           Search
         </p>
         <kbd className="pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted  px-1.5  font-mono text-[10px] font-medium  text-muted-foreground ml-auto">
-          <span className="text-xs">{cmdKey}</span> S
+          <span className="text-xs">{getCmdKey()}</span> S
         </kbd>
       </button>
       <CommandDialog open={open} onOpenChange={setOpen}>

@@ -7,10 +7,9 @@ import {
   DialogDescription,
   DialogTitle
 } from "@/shared/components/ui/dialog";
+import { chatService } from "@/features/chat/chat-service";
 import { useModal } from "@/shared/hooks/use-modal-store";
-import axiosClient from "@/shared/lib/axios-client";
 import { useRouter } from "next/navigation";
-import qs from "query-string";
 import React from "react";
 
 const DeleteMessageModal = () => {
@@ -25,12 +24,10 @@ const DeleteMessageModal = () => {
   const isModalOpen = isOpen && type == "deleteMessage";
   const [isLoading, setIsLoading] = React.useState(false);
   const deleteMessage = async () => {
+    if (!apiUrl) return;
     try {
       setIsLoading(true)
-      const url = qs.stringifyUrl({
-        url: apiUrl || "",
-      })
-      await axiosClient.delete(url)
+      await chatService.deleteMessage(apiUrl)
       onClose()
       router.refresh()
     } catch (err) {
@@ -43,9 +40,9 @@ const DeleteMessageModal = () => {
 
   return (
     <Dialog open={isModalOpen} onOpenChange={onClose}>
-      <DialogContent aria-description="Invite Link" className="overflow-hidden w-full">
+      <DialogContent aria-description="Delete Message" className="overflow-hidden w-full">
         <DialogTitle className="text-center text-2xl font-bold">
-          Delete Server
+          Delete Message
         </DialogTitle>
         <DialogDescription className="text-center">
           Are you sure want to Delete this message?

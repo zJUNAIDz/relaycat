@@ -4,8 +4,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/shared/c
 import { Input } from "@/shared/components/ui/input"
 import defaultServerImage from "@/public/placeholder.webp"
 import { ImageWithFallback } from "@/shared/components/image-with-fallback"
-import axiosClient from "@/shared/lib/axios-client"
-import { Server } from "@repo/types"
+import { serverService } from "@/features/server/server-service"
 import { useQuery } from "@tanstack/react-query"
 import { Users } from "lucide-react"
 import Link from "next/link"
@@ -123,10 +122,7 @@ export default function ServerDiscovery() {
 function useDiscoverableServers() {
   const query = useQuery({
     queryKey: ["discoverableServers"],
-    queryFn: async () => {
-      const { data } = await axiosClient.get<Server[]>("/servers/public");
-      return data;
-    },
+    queryFn: () => serverService.getPublicServers(),
     staleTime: 1000 * 60 * 5, // 5 minutes
     refetchInterval: 1000 * 60 * 5, // 5 minutes
   })

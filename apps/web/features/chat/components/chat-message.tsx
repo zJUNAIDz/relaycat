@@ -4,8 +4,8 @@ import { Form, FormControl, FormField, FormItem } from "@/shared/components/ui/f
 import { Input } from "@/shared/components/ui/input";
 import { UserAvatar } from "@/shared/components/user-avatar";
 import { UserProfilePopover } from "@/features/profile/components/user-profile-popover";
+import { chatService } from "@/features/chat/chat-service";
 import { useModal } from "@/shared/hooks/use-modal-store";
-import axiosClient from "@/shared/lib/axios-client";
 import { useAuth } from "@/shared/providers/auth-provider";
 import { Member, MemberRole, Message, User } from "@/shared/types";
 import { cn } from "@/shared/utils/cn";
@@ -13,7 +13,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Edit, Trash } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import React from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod/v4";
@@ -56,7 +55,6 @@ export const ChatMessage = ({
 
   const [isEditing, setIsEditing] = React.useState(false);
   const { isLoading: isLoadingAuth, error } = useAuth()
-  const router = useRouter();
   const { onOpen } = useModal();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -70,16 +68,17 @@ export const ChatMessage = ({
     try {
       // `apiUrl` is the fully-qualified message resource (…/messages/:id) for
       // both server channels and DMs, so edits work the same in either context.
-      await axiosClient.patch(apiUrl, values)
+      await chatService.editMessage(apiUrl, values.content)
 
       setIsEditing(false);
     } catch (err) {
-      console.log("[onMessageEdit] ", err)
+      console.error("[onMessageEdit] ", err)
     }
   }
 
 
   React.useEffect(() => {
+    if (!isEditing) return;
     const handleEscapeKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         setIsEditing(false);
@@ -88,10 +87,10 @@ export const ChatMessage = ({
 
     window.addEventListener("keydown", handleEscapeKeyDown);
     return () => window.removeEventListener("keydown", handleEscapeKeyDown);
-  })
+  }, [isEditing])
   React.useEffect(() => {
     form.reset({
-      content: content || " ",
+      content: content || "",
     })
   }, [content, form]);
   const isAdmin = member.role === MemberRole.ADMIN;

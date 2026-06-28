@@ -1,8 +1,8 @@
 "use client"
 import { Form, FormControl, FormField, FormItem } from "@/shared/components/ui/form";
 import { Input } from "@/shared/components/ui/input";
+import { chatService } from "@/features/chat/chat-service";
 import { useModal } from "@/shared/hooks/use-modal-store";
-import axiosClient from "@/shared/lib/axios-client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -46,17 +46,13 @@ export const ChatInput = ({ apiUrl, query, name, type, chatId, selfName }: ChatI
   const isLoading = form.formState.isSubmitting;
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-
-      await axiosClient.post(apiUrl, values);
+      await chatService.sendMessage(apiUrl, values.content);
       router.refresh();
       form.reset();
-      setTimeout(() => {
-        form.setFocus("content")
-      }, 50)
     } catch (error) {
-
+      console.error("[ChatInput:onSubmit] ", error);
     } finally {
-      form.setFocus("content")
+      form.setFocus("content");
     }
   }
   return (

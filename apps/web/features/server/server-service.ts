@@ -67,6 +67,12 @@ class ServerService {
     }
   }
 
+  /** Public servers available to join from the discover page. */
+  async getPublicServers(): Promise<Server[]> {
+    const { data } = await axiosClient.get<Server[]>("/servers/public");
+    return data;
+  }
+
   /** Rotate the server's invite code and return the updated server. */
   async regenerateInviteCode(
     serverId: string,
