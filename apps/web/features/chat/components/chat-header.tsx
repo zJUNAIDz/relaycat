@@ -1,3 +1,4 @@
+import { MembersToggle } from "@/features/server/components/members-toggle";
 import { SocketIndicator } from "@/features/socket/components/socket-indicator";
 import { MobileToggle } from "@/shared/components/mobile-toggle";
 import { UserAvatar } from "@/shared/components/user-avatar";
@@ -28,6 +29,11 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({ type, label, imageUrl }) => {
       <p className="text-lg">
         {`${label}`}
       </p>
+      {type === "channel" && (
+        <div className="ml-auto flex items-center">
+          <MembersToggle />
+        </div>
+      )}
     </div>
   )
 }

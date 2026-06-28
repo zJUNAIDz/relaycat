@@ -13,7 +13,6 @@ import { Hash, Mic, Video } from "lucide-react";
 import { redirect } from "next/navigation";
 import { serverService } from "../server-service";
 import ServerHeader from "./server-header";
-import { ServerMembersList } from "./server-member-list";
 import { UserFooter } from "./user-footer";
 
 
@@ -120,7 +119,6 @@ const ServerSidebar = ({ serverId, channelId }: { serverId: string; channelId: s
           role={role}
           server={server}
         />
-        <ServerMembersList members={server.members} serverId={server.id} />
       </ScrollArea>
       <UserFooter user={{name: user.name || "NA", username: "NA", image: user.image || ""}} />
     </WrapperDiv>
@@ -203,20 +201,6 @@ const ServerSidebarLoading = () => {
           ))}
         </div>
 
-        {/* Members Section */}
-        <div className="space-y-2 mt-4">
-          <div className="flex items-center justify-between py-2">
-            <Skeleton className="h-3 w-1/4 rounded-md bg-border" />
-            <Skeleton className="h-3 w-3 rounded bg-border" />
-          </div>
-          {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="flex items-center px-2 py-2 gap-x-2 mb-1">
-              <Skeleton className="h-4 w-4 rounded-full shrink-0 bg-border" />
-              <Skeleton className="h-4 w-2/5 rounded-md flex-1 bg-border" />
-              <Skeleton className="h-3 w-3 rounded bg-border" />
-            </div>
-          ))}
-        </div>
       </div>
 
       {/* Footer - h-14 to match UserFooter */}
