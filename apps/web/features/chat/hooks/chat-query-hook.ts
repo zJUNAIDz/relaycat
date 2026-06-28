@@ -2,7 +2,7 @@ import axiosClient from "@/shared/lib/axios-client";
 import { useAuth } from "@/shared/providers/auth-provider";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import queryString from "query-string";
-import { z } from "zod/v3";
+import { z } from "zod/v4";
 
 export const cursorSchema = z.discriminatedUnion("type", [
   z.object({

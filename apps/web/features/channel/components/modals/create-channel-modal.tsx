@@ -25,7 +25,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
-import * as z from "zod/v3";
+import * as z from "zod/v4";
 
 
 const formSchema = z.object({

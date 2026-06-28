@@ -16,7 +16,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React from "react";
 import { useForm } from "react-hook-form";
-import { z } from "zod/v3";
+import { z } from "zod/v4";
 interface ChatMessageProps {
   id: Message["id"];
   content: Message["content"];

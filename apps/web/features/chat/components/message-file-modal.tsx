@@ -24,7 +24,7 @@ import { AxiosError } from "axios";
 import { useRouter } from "next/navigation";
 import React from "react";
 import { FormProvider, useForm } from "react-hook-form";
-import * as z from "zod/v3";
+import * as z from "zod/v4";
 
 
 const formSchema = z.object({

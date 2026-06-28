@@ -8,7 +8,7 @@ import { Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React from "react";
 import { useForm } from "react-hook-form";
-import * as z from "zod/v3";
+import * as z from "zod/v4";
 import { useTypingNotifier } from "@/features/typing/use-typing";
 import { EmojiPicker } from "./emoji-picker";
 
