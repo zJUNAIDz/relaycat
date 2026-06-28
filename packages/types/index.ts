@@ -393,3 +393,66 @@ export const OpenDmDTO = z.object({
   userId: z.string().min(1, "userId is required"),
 });
 export type OpenDmInput = z.infer<typeof OpenDmDTO>;
+
+// ---------------------------------------------------------------------------
+// Notifications Module
+// ---------------------------------------------------------------------------
+/**
+ * The kinds of events that produce a notification. Kept as a const map so both
+ * the server (when creating) and the client (when rendering an icon/label) draw
+ * from one vocabulary.
+ */
+export const NOTIFICATION_TYPES = {
+  /** Someone @-mentioned you in a server channel. */
+  MENTION: "MENTION",
+  /** You received a direct message. */
+  DM: "DM",
+  /** Someone sent you a friend request. */
+  FRIEND_REQUEST: "FRIEND_REQUEST",
+  /** Someone accepted your friend request. */
+  FRIEND_ACCEPT: "FRIEND_ACCEPT",
+} as const;
+export type NotificationType =
+  (typeof NOTIFICATION_TYPES)[keyof typeof NOTIFICATION_TYPES];
+
+/** The actor (who triggered the notification) as surfaced to the recipient. */
+export type NotificationActor = {
+  id: string;
+  name: string;
+  avatar: string | null;
+};
+
+/** A single notification as delivered to / listed for the recipient. */
+export type Notification = {
+  id: string;
+  type: NotificationType;
+  /** Short headline, e.g. "Alice mentioned you in #general". */
+  title: string;
+  /** Optional preview text (a message snippet). */
+  body: string | null;
+  read: boolean;
+  /** Who caused it (null for system notifications). */
+  actor: NotificationActor | null;
+  /** Navigation context — where clicking the notification should take you. */
+  channelId: string | null;
+  serverId: string | null;
+  messageId: string | null;
+  createdAt: string;
+};
+
+/** Server -> client payload announcing a newly created notification. */
+export type NotificationEvent = {
+  notification: Notification;
+  /** The recipient's total unread count after this notification. */
+  unread: number;
+};
+
+/**
+ * Socket.IO event name (per-recipient) for live notification delivery.
+ *
+ * Follows the existing per-user broadcast convention (see the friends module):
+ * the server emits on a userId-scoped event name and each client listens only
+ * on its own. History and read-state mutations go over REST.
+ */
+export const notificationEvent = (userId: string) =>
+  `user:${userId}:notifications`;
