@@ -14,11 +14,10 @@ import {
   FormField,
   FormItem
 } from "@/shared/components/ui/form";
-import { useModal } from "@/shared/hooks/use-modal-store";
+import { chatService } from "@/features/chat/chat-service";
 import { useS3Uploads } from "@/features/server/hooks/use-s3-uploads";
-import axiosClient from "@/shared/lib/axios-client";
+import { useModal } from "@/shared/hooks/use-modal-store";
 import { CONFIG } from "@/shared/lib/config";
-// import { api } from "@/lib/api-client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AxiosError } from "axios";
 import { useRouter } from "next/navigation";
@@ -90,7 +89,7 @@ const MessageFileModal = () => {
       }
 
       const key = await uploadFile(file, "message-image");
-      await axiosClient.post(apiUrl, { image: key });
+      await chatService.sendAttachment(apiUrl, key);
       resetForm();
       router.refresh();
       onClose();
