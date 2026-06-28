@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation";
 import React from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod/v3";
+import { useTypingNotifier } from "@/features/typing/use-typing";
 import { EmojiPicker } from "./emoji-picker";
 
 interface ChatInputProps {
@@ -16,6 +17,10 @@ interface ChatInputProps {
   query: Record<string, unknown>;
   name: string;
   type: "conversation" | "channel";
+  /** The chat (channel/conversation) id this input posts to. */
+  chatId: string;
+  /** The current user's display name, broadcast with typing events. */
+  selfName: string;
 }
 
 const formSchema = z.object({
@@ -23,9 +28,10 @@ const formSchema = z.object({
 })
 
 
-export const ChatInput = ({ apiUrl, query, name, type }: ChatInputProps) => {
+export const ChatInput = ({ apiUrl, query, name, type, chatId, selfName }: ChatInputProps) => {
   const { onOpen } = useModal();
   const router = useRouter();
+  const notifyTyping = useTypingNotifier(chatId, selfName);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -76,6 +82,10 @@ export const ChatInput = ({ apiUrl, query, name, type }: ChatInputProps) => {
                       placeholder={`Message ${type === "conversation" ? name : "#" + name}`}
                       className="px-14 py-6 bg-blend-lighten border-none border-0 focus-visible:ring-0 focus-visible:ring-offset-0 "
                       {...field}
+                      onChange={(e) => {
+                        field.onChange(e);
+                        notifyTyping();
+                      }}
                     />
                     <div className="absolute top-7 right-8">
                       <EmojiPicker onChange={(value) => field.onChange(field.value + value)} />
