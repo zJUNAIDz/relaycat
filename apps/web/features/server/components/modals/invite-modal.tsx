@@ -8,9 +8,9 @@ import {
 } from "@/shared/components/ui/dialog";
 import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
+import { serverService } from "@/features/server/server-service";
 import { useModal } from "@/shared/hooks/use-modal-store";
 import { useOrigin } from "@/shared/hooks/use-origin";
-import axiosClient from "@/shared/lib/axios-client";
 import { Check, Copy, RefreshCw } from "lucide-react";
 import React from "react";
 import { toast } from "sonner";
@@ -37,16 +37,11 @@ const InviteModal = () => {
     setTimeout(() => setCopied(false), 2000);
   };
   const onGenerate = async () => {
+    if (!server) return;
     try {
       setIsLoading(true);
-      const { data, status } = await axiosClient.patch(`/servers/${server?.id}/invite-code`);
-      if (status !== 200) {
-        toast.error("Failed to generate new invite link. Please try again.");
-        return;
-      }
-      // router.refresh()
-      console.log("New invite code generated: ", data.server);
-      onOpen("invite", { server: data.server });
+      const updatedServer = await serverService.regenerateInviteCode(server.id);
+      onOpen("invite", { server: updatedServer });
     } catch (err) {
       console.error("Failed to generate new invite link: ", err);
       toast.error("Failed to generate new invite link. Please try again.");
@@ -55,7 +50,6 @@ const InviteModal = () => {
     }
   };
   const handleCloseModal = () => {
-    // router.refresh()
     onClose()
   }
   return (

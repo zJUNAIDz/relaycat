@@ -7,11 +7,9 @@ import {
   DialogDescription,
   DialogTitle
 } from "@/shared/components/ui/dialog";
+import { serverService } from "@/features/server/server-service";
 import { useModal } from "@/shared/hooks/use-modal-store";
-import axiosClient from "@/shared/lib/axios-client";
-import { CONFIG } from "@/shared/lib/config";
 import { useRouter } from "next/navigation";
-import qs from "query-string";
 import React from "react";
 
 const LeaveServerModal = () => {
@@ -26,15 +24,10 @@ const LeaveServerModal = () => {
   const isModalOpen = isOpen && type == "leaveServer";
   const [isLoading, setIsLoading] = React.useState(false);
   const leaveServer = async () => {
+    if (!server) return;
     try {
       setIsLoading(true)
-      const url = qs.stringifyUrl({
-        url: `/servers/leave`,
-        query: {
-          serverId: server?.id
-        }
-      })
-      await axiosClient.patch(url, { serverId: server?.id })
+      await serverService.leaveServer(server.id)
       onClose()
       router.refresh()
       router.push("/")

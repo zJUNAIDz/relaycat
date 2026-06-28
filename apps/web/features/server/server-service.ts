@@ -66,6 +66,25 @@ class ServerService {
       };
     }
   }
+
+  /** Rotate the server's invite code and return the updated server. */
+  async regenerateInviteCode(
+    serverId: string,
+  ): Promise<ServerWithMembersUserAndChannels> {
+    const { data } = await axiosClient.patch<{
+      server: ServerWithMembersUserAndChannels;
+    }>(`/servers/${serverId}/invite-code`);
+    return data.server;
+  }
+
+  /** Leave a server the current user is a member of. */
+  async leaveServer(serverId: string): Promise<void> {
+    const url = queryString.stringifyUrl({
+      url: `/servers/leave`,
+      query: { serverId },
+    });
+    await axiosClient.patch(url, { serverId });
+  }
 }
 
 export const serverService = new ServerService(CONFIG.API_URL);
