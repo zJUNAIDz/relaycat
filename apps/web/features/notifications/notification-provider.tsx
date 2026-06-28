@@ -2,16 +2,19 @@
 
 import { useAuth } from "@/shared/providers/auth-provider";
 import { useSocket } from "@/shared/providers/socket-provider";
-import type { NotificationEvent } from "@/shared/types";
 import { notificationEvent } from "@/shared/types";
 import React from "react";
-import { fetchNotifications, fetchUnreadCount } from "./api";
-import { useNotificationStore } from "./notification-store";
+import {
+  handleIncomingNotification,
+  loadInitialNotifications,
+  resetNotifications,
+} from "./notification-actions";
 
 /**
- * Owns the live notification feed: loads recent history once on mount and then
- * mirrors server-pushed notifications into the store. Read-state mutations are
- * driven from the UI via {@link useNotifications}.
+ * Binds the notification feed to the authenticated socket: hydrates history and
+ * subscribes to live delivery while signed in, and clears on sign-out. All the
+ * work lives in `notification-actions`; this is the minimal glue that ties those
+ * plain functions to the socket/user that only React context can provide.
  *
  * Mount once inside the authenticated socket tree (alongside PresenceProvider).
  */
@@ -22,42 +25,23 @@ export const NotificationProvider = ({
 }) => {
   const { socket } = useSocket();
   const userId = useAuth((s) => s.user?.id);
-  const setAll = useNotificationStore((s) => s.setAll);
-  const prepend = useNotificationStore((s) => s.prepend);
-  const reset = useNotificationStore((s) => s.reset);
 
-  // Initial history load (also gives us the authoritative unread count).
   React.useEffect(() => {
-    if (!userId) return;
-    let cancelled = false;
-    Promise.all([fetchNotifications(), fetchUnreadCount()])
-      .then(([res, unread]) => {
-        if (cancelled) return;
-        setAll(res.notifications, unread, res.nextCursor);
-      })
-      .catch(() => {});
-    return () => {
-      cancelled = true;
-    };
-  }, [userId, setAll]);
+    if (!userId) {
+      resetNotifications();
+      return;
+    }
 
-  // Live delivery on the per-user event name.
-  React.useEffect(() => {
-    if (!socket || !userId) return;
+    // Hydrate (also resyncs after a socket reconnect).
+    void loadInitialNotifications();
+
+    if (!socket) return;
     const event = notificationEvent(userId);
-    const onNotification = ({ notification, unread }: NotificationEvent) =>
-      prepend(notification, unread);
-
-    socket.on(event, onNotification);
+    socket.on(event, handleIncomingNotification);
     return () => {
-      socket.off(event, onNotification);
+      socket.off(event, handleIncomingNotification);
     };
-  }, [socket, userId, prepend]);
-
-  // Clear on sign-out.
-  React.useEffect(() => {
-    if (!userId) reset();
-  }, [userId, reset]);
+  }, [socket, userId]);
 
   return <>{children}</>;
 };
