@@ -50,6 +50,13 @@
       "when": 1782646957823,
       "tag": "0006_pale_morph",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1782650218913,
+      "tag": "0007_push_subscriptions",
+      "breakpoints": true
     }
   ]
 }
