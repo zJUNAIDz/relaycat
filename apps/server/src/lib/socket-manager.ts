@@ -1,7 +1,10 @@
 import { Server as SocketIOServer } from "socket.io";
 import { createServer } from "http";
 import { instrument } from "@socket.io/admin-ui";
+import { createAdapter } from "@socket.io/redis-adapter";
 import { getEnv } from "@/utils/env";
+import { createRedis } from "@/lib/redis";
+import { registerSocketHandlers } from "@/socket";
 class SocketManager {
   private static instance: SocketManager;
   public io: SocketIOServer;
@@ -36,12 +39,18 @@ class SocketManager {
     this.initializeSocket();
   }
   private initializeSocket() {
-    this.io.on("connection", (socket) => {
-      console.log(`User connected (${socket.id})`);
-      socket.on("disconnect", () => {
-        console.log(`User disconnected (${socket.id})`);
-      });
-    });
+    // Multi-instance fan-out: when Redis is configured, broadcasts (presence,
+    // chat) propagate across every server instance. No-op without REDIS_URL.
+    const pubClient = createRedis();
+    const subClient = createRedis();
+    if (pubClient && subClient) {
+      this.io.adapter(createAdapter(pubClient, subClient));
+    }
+
+    // Auth middleware + presence/chat handlers. Must run before any socket
+    // connects so the handshake gate and `socket.data.userId` are in place.
+    registerSocketHandlers(this.io);
+
     instrument(this.io, {
       auth: false,
       mode: process.env.NODE_ENV === "production" ? "production" : "development",
