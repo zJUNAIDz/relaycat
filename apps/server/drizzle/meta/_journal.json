@@ -43,6 +43,13 @@
       "when": 1782231961681,
       "tag": "0005_dm_and_friends",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1782646957823,
+      "tag": "0006_pale_morph",
+      "breakpoints": true
     }
   ]
 }
