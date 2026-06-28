@@ -2,7 +2,7 @@
 
 import "client-only";
 import CreateChannelModal from "@/features/channel/components/modals/create-channel-modal";
-import DeleteChannelModal from "@/features/channel/components/modals/delete-channel-model";
+import DeleteChannelModal from "@/features/channel/components/modals/delete-channel-modal";
 import EditChannelModal from "@/features/channel/components/modals/edit-channel-modal";
 import DeleteMessageModal from "@/features/chat/components/delete-message-modal";
 import MessageFileModal from "@/features/chat/components/message-file-modal";

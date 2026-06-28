@@ -21,16 +21,13 @@ import {
 } from "@/shared/components/ui/dropdown-menu";
 import { ScrollArea } from "@/shared/components/ui/scroll-area";
 import { UserAvatar } from "@/shared/components/user-avatar";
+import { memberService } from "@/features/member/member-service";
 import { useModal } from "@/shared/hooks/use-modal-store";
-import axiosClient from "@/shared/lib/axios-client";
-import { CONFIG } from "@/shared/lib/config";
 import { MemberRole, ServerWithMembersAndUser } from "@/shared/types";
 import { capitalizeFirstLetter } from "@/shared/utils/misc";
 import { Check, Gavel, Loader2, MoreVertical, Shield } from "lucide-react";
 import { useRouter } from "next/navigation";
-import qs from "query-string";
 import React from "react";
-//TODO: fix User and Session imports
 
 const MembersModal = () => {
   const {
@@ -49,16 +46,9 @@ const MembersModal = () => {
   const onKick = async (memberId: string) => {
     try {
       setLoadingId(memberId)
-      const url = qs.stringifyUrl({
-        url: `/members/kick`,
-        query: {
-          serverId: server?.id,
-          memberId
-        }
-      })
-      const { data } = await axiosClient.delete(url)
+      const updatedServer = await memberService.kick(server.id, memberId)
       router.refresh()
-      onOpen("members", { server: data.server })
+      onOpen("members", { server: updatedServer })
     } catch (err) {
       console.error("[MEMBERS_MODAL:onKick] ", err)
     } finally {
@@ -69,17 +59,9 @@ const MembersModal = () => {
   const onRoleChange = async (memberId: string, role: MemberRole) => {
     try {
       setLoadingId(memberId)
-      const url = qs.stringifyUrl({
-        url: `/members/changeRole`,
-        query: {
-          serverId: server?.id,
-          memberId
-        }
-      })
-      const { data } = await axiosClient.patch<{ server: ServerWithMembersAndUser }>(url, { serverId: server.id, memberId, role })
-
+      const updatedServer = await memberService.changeRole(server.id, memberId, role)
       router.refresh()
-      onOpen("members", { server: data.server })
+      onOpen("members", { server: updatedServer })
     } catch (error) {
       console.error("[onRoleChange] ", error)
     } finally {
