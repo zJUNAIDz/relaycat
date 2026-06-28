@@ -28,6 +28,26 @@ services:
       - minio_data:/data 
       # This saves your mc config, access keys, and system settings permanently!
       - ./minio_config:/root/.minio
+  # One-shot: create the bucket + app service account, make media public-read.
+  minio-init:
+    image: minio/mc:latest
+    container_name: relaycat-minio-init
+    depends_on:
+      minio:
+        condition: service_started
+    restart: "no"
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        until mc alias set local http://minio:9000 relaycat relaycat; do
+          echo "waiting for minio..."; sleep 2;
+        done
+        mc mb --ignore-existing local/relaycat
+        mc admin user add local relaycat_app relaycat_app || true
+        mc admin policy attach local readwrite --user relaycat_app || true
+        mc anonymous set download local/relaycat || true
+        echo "minio init complete"
   loki:
     image: grafana/loki:latest
     container_name: relaycat-loki
