@@ -1,3 +1,4 @@
+import { PresenceProvider } from "@/features/presence/presence-provider";
 import NavigationSidebar from "@/features/server/navigation/navigation-sidebar";
 import { AuthGuard } from "@/shared/components/auth-guard";
 import { ModalProvider } from "@/shared/providers/modal-provider";
@@ -11,13 +12,15 @@ const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return <div className={`h-full ${ubuntuFont.className}`}>
     <AuthGuard>
       <SocketProvider >
-        <ModalProvider />
-        <aside className="hidden md:flex h-full w-0 md:w-18 z-30 flex-col fixed inset-y-0">
-          <NavigationSidebar />
-        </aside>
-        <main className="md:pl-18 h-full">
-          {children}
-        </main>
+        <PresenceProvider>
+          <ModalProvider />
+          <aside className="hidden md:flex h-full w-0 md:w-18 z-30 flex-col fixed inset-y-0">
+            <NavigationSidebar />
+          </aside>
+          <main className="md:pl-18 h-full">
+            {children}
+          </main>
+        </PresenceProvider>
       </SocketProvider>
     </AuthGuard>
   </div>
