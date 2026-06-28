@@ -15,13 +15,12 @@ import {
 } from "@/shared/components/ui/form";
 import { Input } from "@/shared/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/components/ui/select";
+import { useCreateChannelMutation } from "@/features/channel/hooks/channel-mutations";
 import { useModal } from "@/shared/hooks/use-modal-store";
-import axiosClient from "@/shared/lib/axios-client";
 import { ChannelType } from "@/shared/types";
 import { capitalizeFirstLetter } from "@/shared/utils/misc";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DialogTitle } from "@radix-ui/react-dialog";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
@@ -40,7 +39,7 @@ const CreateChannelModal = () => {
   const createChannelMutation = useCreateChannelMutation();
   const { isOpen, onClose, type, data: { channelType } } = useModal();
   const isModalOpen = isOpen && type == "createChannel";
-  const [isLoading, setIsLoading] = useState(false);
+  const isLoading = createChannelMutation.isPending;
   const [errorMessage, setErrorMessage] = useState("");
   const { serverId } = useParams<{ serverId: string }>()
   const router = useRouter();
@@ -68,8 +67,6 @@ const CreateChannelModal = () => {
       if (err instanceof z.ZodError)
         setErrorMessage(err.message)
       console.error("[Error][Create Channel: fn::onSubmit] ", err);
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -168,15 +165,4 @@ const CreateChannelModal = () => {
   );
 };
 
-function useCreateChannelMutation() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: (data: z.infer<typeof formSchema> & { serverId: string }) => {
-      return axiosClient.post("/channels", data);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["server"] });
-    }
-  })
-}
 export default CreateChannelModal;

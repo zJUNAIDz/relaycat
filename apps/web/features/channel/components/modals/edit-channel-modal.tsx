@@ -15,13 +15,12 @@ import {
 } from "@/shared/components/ui/form";
 import { Input } from "@/shared/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/components/ui/select";
+import { useEditChannelMutation } from "@/features/channel/hooks/channel-mutations";
 import { useModal } from "@/shared/hooks/use-modal-store";
-import axiosClient from "@/shared/lib/axios-client";
 import { ChannelType } from "@/shared/types";
 import { capitalizeFirstLetter } from "@/shared/utils/misc";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DialogTitle } from "@radix-ui/react-dialog";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import React from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import * as z from "zod/v4";
@@ -167,15 +166,4 @@ const EditChannelModal = () => {
   );
 };
 
-function useEditChannelMutation() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: ({ channelId, data }: { channelId: string, data: z.infer<typeof formSchema> }) => {
-      return axiosClient.patch(`/channels/${channelId}`, data);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["server"] });
-    }
-  })
-}
 export default EditChannelModal;
