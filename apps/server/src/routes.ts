@@ -8,6 +8,7 @@ import friendsRoute from "@/modules/friends/route";
 import serverRoutes from "@/modules/guilds/route";
 import membersRoutes from "@/modules/members/route";
 import notificationsRoute from "@/modules/notifications/route";
+import pushRoute from "@/modules/push/route";
 import profilesRoute from "@/routes/profiles.route";
 import { publicRoute } from "@/routes/public.route";
 import s3Routes from "@/routes/s3.route";
@@ -49,6 +50,7 @@ protectedApp.route("/channels", channelsRoute);
 protectedApp.route("/friends", friendsRoute);
 protectedApp.route("/dm", dmRoute);
 protectedApp.route("/notifications", notificationsRoute);
+protectedApp.route("/push", pushRoute);
 protectedApp.get("/", (c) => {
   return c.html(`<h1>禁止</h1>`);
 });
