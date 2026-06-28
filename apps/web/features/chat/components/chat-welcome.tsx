@@ -10,14 +10,14 @@ export const ChatWelcome = ({ name, type }: ChatWelcomeProps) => {
       {
         type === "channel" && (
           <div className="h-18.75 w-18.75 rounded-full bg-blend-darken flex items-center justify-center">
-            <Hash className="h-12 w-12 text-zinc-500 dark:text-zinc-400" />
+            <Hash className="h-12 w-12 text-muted-foreground" />
           </div>
         )
       }
       <p className="text-xl md:text-3xl font-bold">
         {type === "channel" ? "Welcome to #" : ""}{name}
       </p>
-      <p className="text-zinc-600 dark:text-zinc-400 text-sm">
+      <p className="text-muted-foreground text-sm">
         {
           type === "channel"
             ? `This is the start of the #${name} channel`

@@ -22,8 +22,8 @@ export const ServerMember: React.FC<ServerMemberProps> = ({ member, serverId }) 
     <button
       // onClick={onClick}
       className={cn(
-        "group px-2 py-2 rounded-md flex items-center gap-x-2 w-full  haver:bg-zinc-700/10 dark:hover:bg-zinc-700/50 transition mb-1",
-        params.memberId === member.id && "bg-zinc-70020 dark:bg-zinc-700",
+        "group px-2 py-1.5 rounded-md flex items-center gap-x-2 w-full hover:bg-accent transition mb-1",
+        params.memberId === member.id && "bg-accent",
         // member.user.id === profileId && "cursor-default"
       )}
     >
@@ -34,8 +34,8 @@ export const ServerMember: React.FC<ServerMemberProps> = ({ member, serverId }) 
       />
       <p
         className={cn(
-          "font-semibold text-sm text-zinc-500 group-hover:text-zinc-600 dark:text-zinc-400 dark:group-hover:text-zinc-300 transition",
-          params.memberId === member.id && "text-primary dark:text-zinc-200"
+          "font-semibold text-sm text-muted-foreground group-hover:text-foreground transition",
+          params.memberId === member.id && "text-foreground"
         )}
       >
         {member.user.name}

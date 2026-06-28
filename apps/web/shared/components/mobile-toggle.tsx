@@ -12,7 +12,7 @@ export const MobileToggle = () => {
     <Sheet>
       <SheetTrigger asChild>
         <Button variant="ghost" size="icon" className="flex md:hidden">
-          <Menu className="h-6 w-6 text-zinc-500 dark:text-zinc-400" />
+          <Menu className="h-6 w-6 text-muted-foreground" />
         </Button>
       </SheetTrigger>
       <SheetContent side="left" className="p-0 flex gap-0" aria-description="mobile sidebar">

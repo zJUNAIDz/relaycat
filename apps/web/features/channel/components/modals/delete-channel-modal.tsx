@@ -43,12 +43,12 @@ const DeleteChannelModal = () => {
           </DialogTitle>
         </DialogHeader>
         <DialogDescription className="text-center text-lg">
-          Are you sure want to Delete this Channel <span className="text-blue-500 font-semibold">#{channel?.name}</span>? <br />
-          <span className="text-blue-500"> #{channel?.name}</span> will be permanently deleted
+          Are you sure want to Delete this Channel <span className="text-brand font-semibold">#{channel?.name}</span>? <br />
+          <span className="text-brand"> #{channel?.name}</span> will be permanently deleted
         </DialogDescription>
         <div className="flex items-center justify-around w-full px-10">
           <Button onClick={onClose} variant="ghost" className="border border-white ">Cancel</Button>
-          <Button disabled={deleteChannelMutation.isPending} onClick={deleteChannel} className="bg-red-800 text-white hover:bg-red-600/85">Confirm</Button>
+          <Button disabled={deleteChannelMutation.isPending} onClick={deleteChannel} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Confirm</Button>
         </div>
       </DialogContent>
     </Dialog>

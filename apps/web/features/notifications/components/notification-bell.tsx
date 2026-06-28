@@ -33,7 +33,7 @@ export const NotificationBell = ({ className }: { className?: string }) => {
       >
         <Bell className="h-5 w-5" />
         {unread > 0 && (
-          <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-semibold text-white">
+          <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-semibold text-destructive-foreground">
             {unread > 99 ? "99+" : unread}
           </span>
         )}
@@ -148,7 +148,7 @@ function NotificationRow({
           </p>
         </div>
         {!read && (
-          <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-red-500" />
+          <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-destructive" />
         )}
       </button>
     </li>

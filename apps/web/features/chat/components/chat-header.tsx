@@ -11,7 +11,7 @@ interface ChatHeaderProps {
 }
 const ChatHeader: React.FC<ChatHeaderProps> = ({ type, label, imageUrl }) => {
   return (
-    <div className="text-md font-semibold px-3 text-foreground flex gap-x-4 items-center h-12 border-neutral-200  dark:border-neutral-800 border-b-2">
+    <div className="text-md font-semibold px-3 text-foreground flex gap-x-4 items-center h-12 border-border  border-b-2">
       <MobileToggle />
       {
         imageUrl && (
@@ -22,7 +22,7 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({ type, label, imageUrl }) => {
       }
       {
         type === "channel" && (
-          <Hash className="h-6 w-6 text-zinc-500 dark:text-zinc-400" />
+          <Hash className="h-6 w-6 text-muted-foreground" />
         )
       }
       <p className="text-lg">

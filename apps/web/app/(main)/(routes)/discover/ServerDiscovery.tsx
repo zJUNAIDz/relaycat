@@ -14,7 +14,7 @@ export default function ServerDiscovery() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <p className="text-gray-500 text-sm">Loading discoverable servers...</p>
+        <p className="text-muted-foreground text-sm">Loading discoverable servers...</p>
       </div>
     )
   }
@@ -22,7 +22,7 @@ export default function ServerDiscovery() {
   if (error) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <p className="text-red-500 text-sm">Failed to load servers. Please try again later.</p>
+        <p className="text-destructive text-sm">Failed to load servers. Please try again later.</p>
       </div>
     )
   }
@@ -36,7 +36,7 @@ export default function ServerDiscovery() {
       <main className="flex-1 flex flex-col min-w-0">
 
         {/* Header / Hero Search section */}
-        <section className="relative w-full h-75 md:h-90 bg-linear-to-br  flex flex-col items-center justify-center px-4 text-center select-none overflow-hidden">
+        <section className="relative w-full h-75 md:h-90 bg-linear-to-b from-muted/40 to-background flex flex-col items-center justify-center px-4 text-center select-none overflow-hidden">
           <div className="relative z-10 max-w-2xl w-full space-y-4">
             <h1 className="text-2xl md:text-4xl font-extrabold uppercase tracking-tight">
               Find your community on Relaycat
@@ -46,9 +46,8 @@ export default function ServerDiscovery() {
               <Input
                 type="text"
                 placeholder="Explore discoverable servers"
-                className="w-full h-12 pl-4 pr-12   border-none rounded-md focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-0 text-base"
+                className="w-full h-12 pl-4 pr-12 border-none rounded-md focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-0 text-base"
               />
-              {/* <Search className=" right-4 h-5 w-5 text-[#949ba4] pointer-events-none" /> */}
             </div>
           </div>
         </section>
@@ -65,7 +64,7 @@ export default function ServerDiscovery() {
                 className="bg-blend-darken  overflow-hidden flex flex-col h-full rounded-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200 group cursor-pointer"
               >
                 {/* Visual Header / Banner */}
-                <div className={`h-32 bg-linear-to-r bg-transparent relative shrink-0 p-3 flex items-end`}>
+                <div className="h-32 bg-muted relative shrink-0 p-3 flex items-end">
                   {/* Pseudo Icon placeholder positioning */}
                   <div className="absolute -bottom-6 left-3 h-12 w-12 flex items-center justify-center font-bold text-white group-hover:rounded-xl transition-all duration-200">
                     <ImageWithFallback
@@ -87,9 +86,9 @@ export default function ServerDiscovery() {
                   </CardTitle>
 
                   {/* Member Stats counts */}
-                  <div className="flex items-center gap-3 text-xs text-[#949ba4] font-medium pt-0.5">
+                  <div className="flex items-center gap-3 text-xs text-muted-foreground font-medium pt-0.5">
                     <span className="flex items-center gap-1">
-                      <span className="h-2 w-2 rounded-full bg-[#23a55a]" />
+                      <span className="h-2 w-2 rounded-full bg-success" />
                       100 Online
                     </span>
                     <span className="flex items-center gap-1">
@@ -100,7 +99,7 @@ export default function ServerDiscovery() {
                 </CardHeader>
 
                 {/* Card Description */}
-                <CardContent className="px-4 pb-4 text-sm text-[#b5bac1] flex-1 line-clamp-3">
+                <CardContent className="px-4 pb-4 text-sm text-muted-foreground flex-1 line-clamp-3">
                   {server.description}
                 </CardContent>
                 <CardFooter>

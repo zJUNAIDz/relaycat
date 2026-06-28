@@ -47,7 +47,7 @@ export const PendingRequests = () => {
                   disabled={accept.isPending}
                   onClick={() => accept.mutate(r.friendshipId)}
                 >
-                  <Check className="h-4 w-4 text-green-600" />
+                  <Check className="h-4 w-4 text-success" />
                 </Button>
                 <Button
                   size="icon-sm"

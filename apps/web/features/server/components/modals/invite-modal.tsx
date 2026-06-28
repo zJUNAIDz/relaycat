@@ -90,7 +90,7 @@ const InviteModal = () => {
           >
             Generate a New Invite Link
             {isLoading ? (
-              <RefreshCw className="w-4 h-4 ml-2 animate-spin dark:text-zinc-500 transition" />
+              <RefreshCw className="w-4 h-4 ml-2 animate-spin text-muted-foreground transition" />
             ) : (
               <RefreshCw className="w-4 h-4 ml-2 dark:text-black" />
             )}

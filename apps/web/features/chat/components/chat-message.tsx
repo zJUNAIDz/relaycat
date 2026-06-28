@@ -122,7 +122,7 @@ export const ChatMessage = ({
               <ActionTooltip label={member.role} side="top" className="text-xs">
                 <RoleIcon role={member.role} />
               </ActionTooltip>
-              <span className="text-xs text-zinc-500 dark:text-zinc-400">{timestamp}</span>
+              <span className="text-xs text-muted-foreground">{timestamp}</span>
             </div>
             {
               isImage && (
@@ -163,7 +163,7 @@ export const ChatMessage = ({
               )}>
                 {!deleted ? content : "This message has been deleted."}
                 {isUpdated && !deleted && (
-                  <span className="text-[0.7rem] italic text-zinc-500 dark:text-zinc-400">
+                  <span className="text-[0.7rem] italic text-muted-foreground">
                     (edited)
                   </span>
                 )}
@@ -186,7 +186,7 @@ export const ChatMessage = ({
                           <FormControl>
                             <div className="relative w-full">
                               <Input
-                                className="p-2 bg-zinc-200/90 dark:bg-zinc-700/75 border-none border-0 focus-visible:ring-0 focus-visible:ring-offset-0 text-zinc-600 dark:text-zinc-200"
+                                className="p-2 bg-muted border-none border-0 focus-visible:ring-0 focus-visible:ring-offset-0 text-foreground"
                                 placeholder="edited message..."
                                 disabled={isLoading}
                                 {...field}
@@ -197,21 +197,21 @@ export const ChatMessage = ({
                       )
                     }}
                   />
-                  <div className="flex mt-2 text-xs text-zinc-700 dark:text-zinc-400 gap-1">
+                  <div className="flex mt-2 text-xs text-muted-foreground gap-1">
                     <div aria-live="polite" className="sr-only" id="editingInstructions">
                       Editing mode enabled. Press Escape to cancel or Enter to save.
                     </div>
                     press escape to
                     <button
                       aria-label="cancel editing message"
-                      onClick={() => setIsEditing(false)} className="text-blue-600 dark:text-blue-400 hover:underline">
+                      onClick={() => setIsEditing(false)} className="text-brand hover:underline">
                       cancel
                     </button>
                     • enter to
                     <button
                       aria-label="save edited message"
                       type="submit"
-                      className="text-blue-600 dark:text-blue-400 hover:underline" role="button">
+                      className="text-brand hover:underline" role="button">
                       save
                     </button>
                   </div>
@@ -239,7 +239,7 @@ export const ChatMessage = ({
             <ActionTooltip label="Delete" side="top">
               <Trash
                 onClick={() => onOpen("deleteMessage", { apiUrl })}
-                className="cursor-pointer ml-auto w-4 h-4 text-accent-foreground hover:text-red-600 dark:hover:text-red-300" />
+                className="cursor-pointer ml-auto w-4 h-4 text-accent-foreground hover:text-destructive" />
             </ActionTooltip>
           </div>
         )

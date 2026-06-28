@@ -107,7 +107,7 @@ const MembersModal = () => {
                       <div className="ml-auto">
                         <DropdownMenu>
                           <DropdownMenuTrigger>
-                            <MoreVertical className="h-4 w-4 text-zinc-500" />
+                            <MoreVertical className="h-4 w-4 text-muted-foreground" />
                           </DropdownMenuTrigger>
                           <DropdownMenuContent side="left" className="">
                             <DropdownMenuSub>
@@ -157,7 +157,7 @@ const MembersModal = () => {
                   }
                   {
                     loadingId === member.id && (
-                      <Loader2 className="h-4 w-4 animate-spin text-zinc-400 ml-auto" />
+                      <Loader2 className="h-4 w-4 animate-spin text-muted-foreground ml-auto" />
                     )
                   }
                 </div>
