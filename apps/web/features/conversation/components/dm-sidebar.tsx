@@ -1,6 +1,7 @@
 "use client";
 
-import { UserAvatar } from "@/shared/components/user-avatar";
+import { PresenceAvatar } from "@/features/presence/components/presence-avatar";
+import { useWatchPresence } from "@/features/presence/presence-provider";
 import { cn } from "@/shared/utils/cn";
 import { Users } from "lucide-react";
 import Link from "next/link";
@@ -18,6 +19,8 @@ export const DmSidebar = () => {
   const activeId = params?.channelId as string | undefined;
   // Keep the DM/friends data fresh from server events.
   useFriendRealtime();
+  // Live presence for everyone we have an open DM with.
+  useWatchPresence((channels ?? []).map((c) => c.otherUser.userId));
 
   return (
     <div className="flex h-full w-full flex-col bg-muted/40">
@@ -46,7 +49,8 @@ export const DmSidebar = () => {
               activeId === c.id && "bg-muted",
             )}
           >
-            <UserAvatar
+            <PresenceAvatar
+              userId={c.otherUser.userId}
               src={c.otherUser.avatar ?? undefined}
               className="h-7 w-7"
             />
