@@ -14,8 +14,9 @@ import { ScrollArea } from "@/shared/components/ui/scroll-area";
 import type { Notification } from "@/shared/types";
 import { cn } from "@/shared/utils/cn";
 import { formatDistanceToNow } from "date-fns";
-import { Bell, CheckCheck } from "lucide-react";
+import { Bell, BellOff, BellRing, CheckCheck } from "lucide-react";
 import { useNotifications } from "../use-notifications";
+import { useWebPush } from "../push/use-web-push";
 
 /** Bell trigger + dropdown inbox. Drop it into a header/toolbar. */
 export const NotificationBell = ({ className }: { className?: string }) => {
@@ -70,10 +71,48 @@ export const NotificationBell = ({ className }: { className?: string }) => {
             </ul>
           )}
         </ScrollArea>
+
+        <PushToggle />
       </PopoverContent>
     </Popover>
   );
 };
+
+/** Footer control to opt this device in/out of OS-level push notifications. */
+function PushToggle() {
+  const { status, busy, enable, disable } = useWebPush();
+
+  if (status === "loading" || status === "unsupported") return null;
+
+  if (status === "denied") {
+    return (
+      <div className="flex items-center gap-2 border-t px-3 py-2 text-xs text-muted-foreground">
+        <BellOff className="h-3.5 w-3.5" />
+        Push blocked in browser settings
+      </div>
+    );
+  }
+
+  const on = status === "on";
+  return (
+    <button
+      type="button"
+      disabled={busy}
+      onClick={() => (on ? disable() : enable())}
+      className={cn(
+        "flex w-full items-center gap-2 border-t px-3 py-2 text-xs transition hover:bg-accent disabled:opacity-50",
+        on ? "text-foreground" : "text-muted-foreground",
+      )}
+    >
+      {on ? (
+        <BellRing className="h-3.5 w-3.5" />
+      ) : (
+        <Bell className="h-3.5 w-3.5" />
+      )}
+      {on ? "Push notifications on" : "Enable push notifications"}
+    </button>
+  );
+}
 
 function NotificationRow({
   notification,
