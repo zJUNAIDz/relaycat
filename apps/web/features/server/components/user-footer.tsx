@@ -7,6 +7,10 @@ import {
 } from "@/shared/components/ui/popover";
 import { UserAvatar } from "@/shared/components/user-avatar";
 import { useMyProfile } from "@/features/profile/hooks/profile-mutations";
+import { StatusPicker } from "@/features/presence/components/status-picker";
+import { useSelfPresence } from "@/features/presence/presence-store";
+import { SETTABLE_META } from "@/features/presence/status-meta";
+import { cn } from "@/shared/utils/cn";
 import { PAGE_ROUTES } from "@/shared/lib/routes";
 import { Link2, Pencil } from "lucide-react";
 import Link from "next/link";
@@ -25,6 +29,7 @@ export const UserFooter = ({ user }: UserFooterProps) => {
   // Pull the rich profile so the footer popover shows the custom avatar/banner
   // and flair, falling back to the auth identity while it loads.
   const { data: profile } = useMyProfile();
+  const self = useSelfPresence();
 
   const avatar = profile?.avatar || user?.image || undefined;
   const displayName = profile?.displayName || user.name || "User";
@@ -35,7 +40,16 @@ export const UserFooter = ({ user }: UserFooterProps) => {
       <Popover>
         <PopoverTrigger asChild>
           <div className="flex justify-center items-center gap-2 hover:bg-accent p-2 py-3 rounded-md cursor-pointer">
-            <UserAvatar src={avatar} />
+            <div className="relative shrink-0">
+              <UserAvatar src={avatar} />
+              <span
+                title={SETTABLE_META[self].label}
+                className={cn(
+                  "absolute -bottom-0.5 -right-0.5 block h-3 w-3 rounded-full ring-2 ring-background",
+                  SETTABLE_META[self].dot,
+                )}
+              />
+            </div>
             <div className="flex flex-col">
               <span className="text-sm font-semibold">{displayName}</span>
               <span className="text-xs text-gray-500 overflow-clip">
@@ -117,9 +131,13 @@ export const UserFooter = ({ user }: UserFooterProps) => {
               </div>
             )}
 
+            <div className="mt-4">
+              <StatusPicker />
+            </div>
+
             <Link
               href={PAGE_ROUTES.PROFILE_EDIT}
-              className="mt-4 flex items-center justify-center gap-2 rounded-md border py-2 text-sm font-medium transition hover:bg-accent"
+              className="mt-2 flex items-center justify-center gap-2 rounded-md border py-2 text-sm font-medium transition hover:bg-accent"
             >
               <Pencil className="h-4 w-4" /> Edit Profile
             </Link>
