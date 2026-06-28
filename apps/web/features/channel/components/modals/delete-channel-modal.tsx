@@ -1,5 +1,6 @@
 "use client";
 
+import { useDeleteChannelMutation } from "@/features/channel/hooks/channel-mutations";
 import { Button } from "@/shared/components/ui/button";
 import {
   Dialog,
@@ -9,41 +10,33 @@ import {
   DialogTitle
 } from "@/shared/components/ui/dialog";
 import { useModal } from "@/shared/hooks/use-modal-store";
-import axiosClient from "@/shared/lib/axios-client";
-import { CONFIG } from "@/shared/lib/config";
 import { useRouter } from "next/navigation";
-import qs from "query-string";
-import React from "react";
 
 const DeleteChannelModal = () => {
-
   const {
     isOpen,
     onClose,
     type,
-    data: { server, channel }
+    data: { channel }
   } = useModal();
-  const router = useRouter()
+  const router = useRouter();
+  const deleteChannelMutation = useDeleteChannelMutation();
   const isModalOpen = isOpen && type == "deleteChannel";
-  const [isLoading, setIsLoading] = React.useState(false);
-  const deleteChannel = async () => {
-    try {
-      setIsLoading(true)
-      await axiosClient.delete(`/channels/${channel?.id}`);
-      onClose()
-      router.refresh()
-      // router.push("/")
-    } catch (err) {
-      console.error("[DELETE_CHANNEL_MODAL] ", err)
-    } finally {
-      setIsLoading(false)
-    }
-  }
 
+  const deleteChannel = async () => {
+    if (!channel) return;
+    try {
+      await deleteChannelMutation.mutateAsync(channel.id);
+      onClose();
+      router.refresh();
+    } catch (err) {
+      console.error("[DELETE_CHANNEL_MODAL] ", err);
+    }
+  };
 
   return (
     <Dialog open={isModalOpen} onOpenChange={onClose}>
-      <DialogContent aria-description="Invite Link" className="overflow-hidden w-full gap-5 bg-background">
+      <DialogContent aria-description="Delete Channel" className="overflow-hidden w-full gap-5 bg-background">
         <DialogHeader>
           <DialogTitle className="text-center text-2xl font-bold">
             Delete Channel
@@ -55,7 +48,7 @@ const DeleteChannelModal = () => {
         </DialogDescription>
         <div className="flex items-center justify-around w-full px-10">
           <Button onClick={onClose} variant="ghost" className="border border-white ">Cancel</Button>
-          <Button disabled={isLoading} onClick={deleteChannel} className="bg-red-800 text-white hover:bg-red-600/85">Confirm</Button>
+          <Button disabled={deleteChannelMutation.isPending} onClick={deleteChannel} className="bg-red-800 text-white hover:bg-red-600/85">Confirm</Button>
         </div>
       </DialogContent>
     </Dialog>
