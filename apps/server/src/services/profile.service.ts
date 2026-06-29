@@ -9,7 +9,7 @@ import { s3Service } from "@/lib/s3";
 import { USER_PROFILE_POLICY } from "@/config/uploads";
 import { logger } from "@/lib/logger";
 import { toMediaPath } from "@/utils/media";
-import { eq } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 
 export type UpdateProfileInput = Partial<
   Pick<
@@ -25,6 +25,42 @@ export type UpdateProfileInput = Partial<
     | "links"
   >
 >;
+
+/**
+ * The slice of a profile needed to render someone's identity in lists (members,
+ * chat authors). `displayName`/`avatar` override the auth name/image; the rest
+ * are cosmetic extras. Image keys are unresolved here — resolve at the response
+ * boundary via `withResolvedMedia`.
+ */
+export type ProfileSummary = {
+  userId: string;
+  username: string | null;
+  displayName: string | null;
+  avatar: string | null;
+  status: string | null;
+  pronouns: string | null;
+  accentColor: string | null;
+};
+
+/** Minimal auth-user shape an overlay touches (id stays put; name/image swap). */
+type OverlayableUser = { id: string; name: string; image: string | null };
+
+/**
+ * Overlay a profile summary onto an auth user: the profile's `displayName` and
+ * `avatar` become the user's display identity, falling back to the auth values
+ * when unset. Non-destructive — returns a new object.
+ */
+export function applyProfileToUser<T extends OverlayableUser>(
+  authUser: T,
+  summary?: ProfileSummary,
+): T {
+  if (!summary) return authUser;
+  return {
+    ...authUser,
+    name: summary.displayName ?? authUser.name,
+    image: summary.avatar ?? authUser.image,
+  };
+}
 
 class ProfileService {
   /** Fetch a user's profile joined with their auth identity. */
@@ -42,6 +78,37 @@ class ProfileService {
       logger.error({ err, userId }, "[profileService/getProfileByUserId]");
       return null;
     }
+  }
+
+  /**
+   * Batch-fetch profile summaries for a set of users, keyed by userId. Used to
+   * overlay display identity onto member lists and chat authors in one query.
+   * Users without a profile row are simply absent from the map.
+   */
+  async getProfileSummaries(
+    userIds: string[],
+  ): Promise<Map<string, ProfileSummary>> {
+    const map = new Map<string, ProfileSummary>();
+    const ids = [...new Set(userIds)].filter(Boolean);
+    if (ids.length === 0) return map;
+    try {
+      const rows = await db
+        .select({
+          userId: profiles.userId,
+          username: profiles.username,
+          displayName: profiles.displayName,
+          avatar: profiles.avatar,
+          status: profiles.status,
+          pronouns: profiles.pronouns,
+          accentColor: profiles.accentColor,
+        })
+        .from(profiles)
+        .where(inArray(profiles.userId, ids));
+      for (const row of rows) map.set(row.userId, row);
+    } catch (err) {
+      logger.error({ err }, "[profileService/getProfileSummaries]");
+    }
+    return map;
   }
 
   /**

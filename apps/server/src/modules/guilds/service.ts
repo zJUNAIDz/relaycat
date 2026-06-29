@@ -9,6 +9,7 @@ import {
   type Server,
 } from "@/db/schema/server";
 import { toMediaPath } from "@/utils/media";
+import { applyProfileToUser, profileService } from "@/services/profile.service";
 import { and, eq, inArray, not, notExists } from "drizzle-orm";
 
 class ServersService {
@@ -111,11 +112,17 @@ class ServersService {
         .from(channels)
         .where(eq(channels.serverId, serverId));
 
+      // Overlay each member's profile display identity (displayName/avatar) over
+      // their auth name/image so the roster reflects the profiles table.
+      const summaries = await profileService.getProfileSummaries(
+        membersWithUser.map((row) => row.user.id),
+      );
+
       return {
         ...server,
         members: membersWithUser.map((row) => ({
           ...row.members,
-          user: row.user,
+          user: applyProfileToUser(row.user, summaries.get(row.user.id)),
         })),
         channels: channelsInServer,
       };
@@ -155,6 +162,10 @@ class ServersService {
         .from(channels)
         .where(inArray(channels.serverId, serverIds));
 
+      const summaries = await profileService.getProfileSummaries(
+        membersWithUser.map((row) => row.user.id),
+      );
+
       return serversInScope.map((server) => ({
         ...server,
         channels: channelsInScope.filter(
@@ -164,7 +175,7 @@ class ServersService {
           .filter((row) => row.members.serverId === server.id)
           .map((row) => ({
             ...row.members,
-            user: row.user,
+            user: applyProfileToUser(row.user, summaries.get(row.user.id)),
           })),
       }));
     } catch (err) {
