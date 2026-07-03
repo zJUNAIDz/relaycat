@@ -8,6 +8,7 @@ export type ModalType =
   | "deleteChannel"
   | "invite"
   | "members"
+  | "manageRoles"
   | "leaveServer"
   | "deleteServer"
   | "messageFile"

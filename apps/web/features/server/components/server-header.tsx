@@ -14,6 +14,7 @@ import {
   DoorOpen,
   PlusCircle,
   Settings,
+  Shield,
   Trash,
   UserPlus,
   Users,
@@ -29,6 +30,7 @@ const ServerHeader: React.FC<ServerHeaderProps> = ({ server }) => {
   const canManageServer = can(Permission.MANAGE_SERVER);
   const canManageMembers =
     can(Permission.KICK_MEMBERS) || can(Permission.MANAGE_ROLES);
+  const canManageRoles = can(Permission.MANAGE_ROLES);
   const canManageChannels = can(Permission.MANAGE_CHANNELS);
 
   const { onOpen } = useModal();
@@ -63,6 +65,14 @@ const ServerHeader: React.FC<ServerHeaderProps> = ({ server }) => {
               className="px-3 py-2 text-sm cursor-pointer"
             >
               Manage Members <Users className="h-4 w-4 ml-auto" />
+            </DropdownMenuItem>
+          )}
+          {canManageRoles && (
+            <DropdownMenuItem
+              onClick={() => onOpen("manageRoles", { server })}
+              className="px-3 py-2 text-sm cursor-pointer"
+            >
+              Manage Roles <Shield className="h-4 w-4 ml-auto" />
             </DropdownMenuItem>
           )}
           {canManageChannels && (
