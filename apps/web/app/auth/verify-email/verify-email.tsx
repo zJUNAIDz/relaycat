@@ -69,32 +69,32 @@ export default function ClientVerifyEmail({ searchParams }: { searchParams: Prom
   }, [token, router, refetch]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-neutral-50 dark:bg-neutral-900">
+    <div className="min-h-screen flex items-center justify-center bg-muted dark:bg-card">
       <div className="w-full max-w-md p-6">
-        <div className="bg-white dark:bg-neutral-800 rounded-2xl shadow-lg border border-neutral-200 dark:border-neutral-700 p-8">
+        <div className="bg-white dark:bg-card rounded-2xl shadow-lg border border-border p-8">
           <div className="text-center space-y-4">
             <h1 className={`${spaceGrotesk.className} text-3xl mb-2`}>
-              Relay<span className="text-sky-500">cat</span>
+              Relay<span className="text-brand">cat</span>
             </h1>
 
             <div className="space-y-2">
               {status === "verifying" && (
                 <div className="flex justify-center">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-sky-500"></div>
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand"></div>
                 </div>
               )}
 
               {status === "success" && (
-                <div className="text-green-500 text-5xl">✓</div>
+                <div className="text-success text-5xl">✓</div>
               )}
 
               {status === "error" && (
-                <div className="text-red-500 text-5xl">✗</div>
+                <div className="text-destructive text-5xl">✗</div>
               )}
 
-              <p className={`text-lg ${status === "success" ? "text-green-600 dark:text-green-400" :
-                status === "error" ? "text-red-600 dark:text-red-400" :
-                  "text-neutral-600 dark:text-neutral-400"
+              <p className={`text-lg ${status === "success" ? "text-success" :
+                status === "error" ? "text-destructive" :
+                  "text-muted-foreground"
                 }`}>
                 {message}
               </p>
@@ -103,7 +103,7 @@ export default function ClientVerifyEmail({ searchParams }: { searchParams: Prom
             {status === "error" && (
               <button
                 onClick={() => router.push(PAGE_ROUTES.AUTH)}
-                className="mt-4 px-6 py-2 bg-sky-500 hover:bg-sky-600 text-white rounded-lg transition-colors"
+                className="mt-4 px-6 py-2 bg-brand hover:bg-brand/90 text-brand-foreground rounded-lg transition-colors"
               >
                 Back to Login
               </button>

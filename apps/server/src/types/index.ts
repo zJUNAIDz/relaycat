@@ -1,4 +1,5 @@
 import { auth } from "@/lib/auth";
+import type { MemberContext } from "@/services/permission.service";
 import z from "zod/v4";
 
 type SessionUser = typeof auth.$Infer.Session.user;
@@ -18,6 +19,8 @@ export type ProtectedAppContext = {
     user: SessionUser;
     session: SessionData;
     logger: RequestLogger;
+    /** Set by the `requirePermission` middleware after authorizing a request. */
+    memberContext: MemberContext;
   };
 };
 

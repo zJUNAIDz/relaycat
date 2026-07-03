@@ -2,21 +2,22 @@
 import { ActionTooltip } from "@/shared/components/action-tooltip";
 import { useModal } from "@/shared/hooks/use-modal-store";
 import { cn } from "@/shared/utils/cn";
-import { Channel, ChannelType, MemberRole, Server } from "@/shared/types";
+import { Channel, ChannelType, Server } from "@/shared/types";
 import { Edit, Hash, Mic, Trash, Video } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 
 interface ServerChannelProps {
   channel: Channel;
   server: Server;
-  role?: MemberRole;
+  /** Whether the current user may edit/delete channels (MANAGE_CHANNELS). */
+  canManageChannels?: boolean;
 }
 const channelIconMap = {
   [ChannelType.TEXT]: Hash,
   [ChannelType.AUDIO]: Mic,
   [ChannelType.VIDEO]: Video,
 }
-export const ServerChannel: React.FC<ServerChannelProps> = ({ channel, server, role }) => {
+export const ServerChannel: React.FC<ServerChannelProps> = ({ channel, server, canManageChannels }) => {
   const router = useRouter();
   const params = useParams();
   const { onOpen } = useModal()
@@ -40,29 +41,29 @@ export const ServerChannel: React.FC<ServerChannelProps> = ({ channel, server, r
     <button
       onClick={onChannelClick}
       className={cn(
-        "group px-2 py-2 rounded-md flex items-center gap-x-2 w-full hover:bg-zinc-700/10 dark:hover:bg-zinc-700/50 transition mb-1",
-        params.channelId == channel.id && "bg-zinc-700/20 dark:bg-zinc-700"
+        "group px-2 py-1.5 rounded-md flex items-center gap-x-2 w-full hover:bg-accent transition mb-1",
+        params.channelId == channel.id && "bg-accent"
       )}
     >
-      <Icon className="shrink-0 w-5 h-5 text-zinc-500 dark:text-zinc-400" />
+      <Icon className="shrink-0 w-5 h-5 text-muted-foreground" />
       <p
         className={cn(
-          "line-clamp-1 font-semibold text-sm text-zinc-500 group-hover:text-zinc-600 dark:text-zinc-400 dark:group-hover:text-zinc-300 transition",
-          params.channelId == channel.id && "text-primary dark:text-zinc-200 dark:group-hover:text-white"
+          "line-clamp-1 font-semibold text-sm text-muted-foreground group-hover:text-foreground transition",
+          params.channelId == channel.id && "text-foreground"
         )}
       >
         {channel.name}
       </p>
       {
-        channel.name !== "general" && role !== MemberRole.GUEST && (
+        channel.name !== "general" && canManageChannels && (
           <div
             className="ml-auto flex items-center gap-x-2"
           >
             <ActionTooltip label="Edit channel" side="top" className="text-xs">
-              <Edit onClick={onEditChannel} className="hidden group-hover:block w-4 h-4 text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300" />
+              <Edit onClick={onEditChannel} className="hidden group-hover:block w-4 h-4 text-muted-foreground hover:text-foreground" />
             </ActionTooltip>
             <ActionTooltip label="Delete channel" side="top" className="text-xs">
-              <Trash onClick={onDeleteChannel} className="hidden group-hover:block w-4 h-4 text-zinc-500 hover:text-red-500 " />
+              <Trash onClick={onDeleteChannel} className="hidden group-hover:block w-4 h-4 text-muted-foreground hover:text-destructive" />
             </ActionTooltip>
           </div>
         )

@@ -24,7 +24,7 @@ export const TypingIndicator = ({ chatId, currentUserId }: TypingIndicatorProps)
   if (typers.length === 0) return null;
 
   return (
-    <div className="h-5 px-6 -mt-3 flex items-center gap-1 text-xs text-zinc-500 dark:text-zinc-400">
+    <div className="h-5 px-6 -mt-3 flex items-center gap-1 text-xs text-muted-foreground">
       <span className="flex gap-0.5">
         <span className="h-1 w-1 rounded-full bg-current animate-bounce [animation-delay:-0.3s]" />
         <span className="h-1 w-1 rounded-full bg-current animate-bounce [animation-delay:-0.15s]" />

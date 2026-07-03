@@ -7,6 +7,26 @@ export const profileKeys = {
   byUser: (userId: string) => ["profile", userId] as const,
 };
 
+/**
+ * Another user's full profile (banner, bio, pronouns, status, links, …).
+ * Fetched lazily — pass `enabled: false` until the card is actually opened so
+ * member rosters don't fire a request per row. Backfilled server-side, so it
+ * resolves for every member.
+ */
+export function useUserProfile(userId: string, enabled = true) {
+  return useQuery({
+    queryKey: profileKeys.byUser(userId),
+    queryFn: async () => {
+      const { data } = await axiosClient.get<ProfileWithUser>(
+        `/profiles/${userId}`,
+      );
+      return data;
+    },
+    enabled: !!userId && enabled,
+    staleTime: 5 * 60 * 1000,
+  });
+}
+
 /** Current user's profile (auto-created server-side on first fetch). */
 export function useMyProfile() {
   return useQuery({

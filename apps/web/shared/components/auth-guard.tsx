@@ -23,8 +23,8 @@ export const AuthGuard = ({ children }: { children: React.ReactNode }) => {
 
   if (isLoading || !user) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-neutral-50 dark:bg-neutral-900">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-sky-500" />
+      <div className="min-h-screen flex items-center justify-center bg-muted dark:bg-card">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand" />
       </div>
     );
   }

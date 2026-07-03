@@ -68,7 +68,7 @@ const Landing = () => {
   return (
     <div className={`${inter.className} relative min-h-screen overflow-hidden bg-background text-foreground selection:bg-primary/30`}>
       {/* Sleeker, modern background */}
-      <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,var(--tw-gradient-stops))] from-slate-200/40 via-background to-background dark:from-slate-800/40" />
+      <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,var(--tw-gradient-stops))] from-muted/50 via-background to-background" />
       <div className="absolute inset-0 -z-10 bg-[linear-gradient(rgba(148,163,184,0.08)_1px,transparent_1px),linear-gradient(90deg,rgba(148,163,184,0.08)_1px,transparent_1px)] bg-size-[32px_32px]" />
 
       <Navbar isLoading={isLoading} user={user} />
@@ -177,9 +177,9 @@ const HeroSection = () => {
         <Card className="overflow-hidden border-border/50 bg-background/50 shadow-2xl backdrop-blur-sm">
           <div className="border-b border-border/50 bg-muted/30 px-4 py-3">
             <div className="flex items-center gap-2">
-              <div className="h-3 w-3 rounded-full bg-red-500/80" />
-              <div className="h-3 w-3 rounded-full bg-yellow-500/80" />
-              <div className="h-3 w-3 rounded-full bg-green-500/80" />
+              <div className="h-3 w-3 rounded-full bg-destructive" />
+              <div className="h-3 w-3 rounded-full bg-warning" />
+              <div className="h-3 w-3 rounded-full bg-success" />
             </div>
           </div>
           <CardHeader className="space-y-1 pb-4">

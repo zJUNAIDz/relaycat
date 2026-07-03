@@ -52,7 +52,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ type, value, defaultValue, onCh
           <button
             type="button"
             title="Remove PDF"
-            className="bg-rose-500 text-white text-sm rounded-full absolute top-2 right-2"
+            className="bg-destructive text-destructive-foreground text-sm rounded-full absolute top-2 right-2"
             onClick={() => {
               setFile(null);
               onChange(defaultValue || "", null)
@@ -83,7 +83,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ type, value, defaultValue, onCh
           <button
             type="button"
             title="Remove Image"
-            className="bg-rose-500 text-white text-sm rounded-full absolute top-0 right-0"
+            className="bg-destructive text-destructive-foreground text-sm rounded-full absolute top-0 right-0"
             onClick={() => onChange(defaultValue || "", null)}
           >
             <X />

@@ -1,9 +1,16 @@
 @import "tailwindcss";
+@import "tw-animate-css";
 
-/* 1. Define Tailwind v4 Custom Theme mappings */
+/* Class-based dark mode: the theme is toggled by a `.dark` class on <html>
+   (next-themes `attribute="class"`). Without this, v4's `dark:` utilities
+   follow the OS `prefers-color-scheme` instead of the toggle. */
+@custom-variant dark (&:where(.dark, .dark *));
 
+/* 1. Map design tokens into Tailwind's color namespace.
+      Every token is an HSL triplet consumed as `hsl(var(--x))` so the whole
+      system stays uniform and themable from the variable blocks below. */
 @theme {
-  --color-background: var(--background);
+  --color-background: hsl(var(--background));
   --color-foreground: hsl(var(--foreground));
 
   --color-card: hsl(var(--card));
@@ -24,88 +31,131 @@
   --color-accent: hsl(var(--accent));
   --color-accent-foreground: hsl(var(--accent-foreground));
 
+  /* The single brand accent — links, active nav, selected states, focus rings,
+     and key CTAs. Swap `--brand` to re-skin the whole app. */
+  --color-brand: hsl(var(--brand));
+  --color-brand-foreground: hsl(var(--brand-foreground));
+
   --color-destructive: hsl(var(--destructive));
   --color-destructive-foreground: hsl(var(--destructive-foreground));
 
-  --border-color: hsl(var(--border));
-  --input-color: hsl(var(--input));
-  --ring-color: hsl(var(--ring));
+  --color-success: hsl(var(--success));
+  --color-success-foreground: hsl(var(--success-foreground));
+
+  --color-warning: hsl(var(--warning));
+  --color-warning-foreground: hsl(var(--warning-foreground));
+
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
 
   --radius-lg: var(--radius);
   --radius-md: calc(var(--radius) - 2px);
   --radius-sm: calc(var(--radius) - 4px);
 
-  /* Porting over your custom configuration gradients */
   --background-image-gradient-radial: radial-gradient(var(--tw-gradient-stops));
   --background-image-gradient-conic: conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops));
 }
 
-/* 2. Standard HSL Variables for Shadcn Light / Dark Themes */
+/* 2. Token values. Tuned dark-first (primary experience), then derived for light.
+      Neutral ramp is a single slightly-cool gray; one chromatic brand accent;
+      destructive/success/warning reserved for status meaning only. */
 @layer base {
   :root {
-    --background: #F2F3F5;
-    --foreground: 222.2 84% 4.9%;
+    --background: 240 20% 97%;
+    --foreground: 240 10% 12%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 240 10% 12%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 240 10% 12%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* Neutral high-contrast primary (monochrome buttons). */
+    --primary: 240 10% 12%;
+    --primary-foreground: 0 0% 98%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 240 5% 96%;
+    --secondary-foreground: 240 10% 12%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 240 5% 96%;
+    --muted-foreground: 240 4% 44%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    /* Neutral hover / active surface. */
+    --accent: 240 5% 94%;
+    --accent-foreground: 240 10% 12%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --brand: 245 70% 56%;
+    --brand-foreground: 0 0% 100%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --destructive: 0 72% 48%;
+    --destructive-foreground: 0 0% 98%;
+
+    --success: 142 65% 36%;
+    --success-foreground: 0 0% 100%;
+
+    --warning: 38 92% 45%;
+    --warning-foreground: 0 0% 100%;
+
+    --border: 240 6% 90%;
+    --input: 240 6% 90%;
+    --ring: 245 70% 56%;
 
     --radius: 0.5rem;
   }
 
   .dark {
-    --background: #191919;
-    --foreground: 210 40% 98%;
+    --background: 240 6% 10%;
+    --foreground: 240 10% 95%;
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --card: 240 5% 13%;
+    --card-foreground: 240 10% 95%;
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 240 5% 13%;
+    --popover-foreground: 240 10% 95%;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 240 6% 96%;
+    --primary-foreground: 240 6% 10%;
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 240 5% 16%;
+    --secondary-foreground: 240 10% 95%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 240 5% 16%;
+    --muted-foreground: 240 5% 64%;
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 240 5% 19%;
+    --accent-foreground: 240 10% 95%;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --brand: 245 75% 66%;
+    --brand-foreground: 240 10% 98%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 98%;
+
+    --success: 142 70% 45%;
+    --success-foreground: 240 10% 98%;
+
+    --warning: 38 92% 50%;
+    --warning-foreground: 240 6% 10%;
+
+    --border: 240 5% 22%;
+    --input: 240 5% 20%;
+    --ring: 245 75% 66%;
   }
 }
 
-/* 3. Global CSS Layout Utilities */
+/* 3. Global layout utilities. */
+@layer base {
+  * {
+    border-color: hsl(var(--border));
+  }
+
+  body {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+  }
+}
+
 @layer utilities {
   html,
   body {

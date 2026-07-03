@@ -1,5 +1,4 @@
 import axiosClient from "@/shared/lib/axios-client";
-import { MemberRole, ServerWithMembersAndUser } from "@/shared/types";
 import { Member } from "@repo/types";
 import queryString from "query-string";
 
@@ -32,35 +31,13 @@ class MemberService {
     return members;
   }
 
-  /** Remove a member from a server. Returns the updated server. */
-  async kick(
-    serverId: string,
-    memberId: string,
-  ): Promise<ServerWithMembersAndUser> {
+  /** Remove a member from a server. The roster is refetched by the caller. */
+  async kick(serverId: string, memberId: string): Promise<void> {
     const url = queryString.stringifyUrl({
       url: `/members/kick`,
       query: { serverId, memberId },
     });
-    const { data } = await axiosClient.delete<{
-      server: ServerWithMembersAndUser;
-    }>(url);
-    return data.server;
-  }
-
-  /** Change a member's role. Returns the updated server. */
-  async changeRole(
-    serverId: string,
-    memberId: string,
-    role: MemberRole,
-  ): Promise<ServerWithMembersAndUser> {
-    const url = queryString.stringifyUrl({
-      url: `/members/changeRole`,
-      query: { serverId, memberId },
-    });
-    const { data } = await axiosClient.patch<{
-      server: ServerWithMembersAndUser;
-    }>(url, { serverId, memberId, role });
-    return data.server;
+    await axiosClient.delete(url);
   }
 }
 export const memberService = new MemberService();

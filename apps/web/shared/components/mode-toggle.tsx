@@ -31,13 +31,13 @@ export function ModeToggle() {
       <Sun
         className={cn(
           "h-[1.2rem] w-[1.2rem] transition-all",
-          isDark ? "rotate-90 scale-0" : "rotate-0 scale-100 text-yellow-500"
+          isDark ? "rotate-90 scale-0" : "rotate-0 scale-100 text-warning"
         )}
       />
         <Moon
         className={cn(
           "absolute h-[1.2rem] w-[1.2rem] transition-all",
-          isDark ? "rotate-0 scale-100 text-gray-400" : "-rotate-90 scale-0 "
+          isDark ? "rotate-0 scale-100 text-muted-foreground" : "-rotate-90 scale-0 "
         )}
       />
       <span className="sr-only">Toggle theme</span>
