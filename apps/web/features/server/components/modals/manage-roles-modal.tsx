@@ -100,7 +100,7 @@ const RoleEditor = ({
       </div>
 
       <div className="rounded-md border border-border">
-        <ScrollArea className="max-h-64">
+        <ScrollArea className="h-64">
           <div className="divide-y divide-border">
             {PERMISSION_DETAILS.map((detail) => {
               const flag = Permission[detail.key];
