@@ -1,12 +1,10 @@
 import { db } from "@/db";
 import { user } from "@/db/schema/auth-schema";
-import {
-  Member,
-  MemberRole,
-  members,
-  MemberWithUser,
-} from "@/db/schema/member";
-import { and, asc, eq, ne, or } from "drizzle-orm";
+import { Member, members, MemberWithUser } from "@/db/schema/member";
+import { servers } from "@/db/schema/server";
+import { permissionService } from "@/services/permission.service";
+import { ForbiddenError, NotFoundError } from "@/utils/errors";
+import { and, asc, eq } from "drizzle-orm";
 
 class MembersService {
   /**
@@ -62,7 +60,7 @@ class MembersService {
         .from(members)
         .where(and(eq(members.serverId, serverId)))
         .leftJoin(user, eq(members.userId, user.id))
-        .orderBy(asc(members.role));
+        .orderBy(asc(members.createdAt));
 
       const grouped = membersList.reduce(
         (acc, curr) => {
@@ -72,6 +70,7 @@ class MembersService {
             acc[member.id] = {
               ...member,
               user,
+              roles: [],
             };
           }
           return acc;
@@ -82,6 +81,15 @@ class MembersService {
       if (membersListUnique.length === 0) {
         return null;
       }
+
+      // Attach each member's roles.
+      const rolesByMember = await permissionService.getRolesForMembers(
+        membersListUnique.map((m) => m.id),
+      );
+      for (const member of membersListUnique) {
+        member.roles = rolesByMember.get(member.id) ?? [];
+      }
+
       return membersListUnique;
     } catch (err) {
       return null;
@@ -89,143 +97,33 @@ class MembersService {
   }
 
   /**
-   * Deletes a member from a server based on the provided member ID.
-   * @param memberId  Id of the member to be deleted
-   * @param currentUserId  Id of the user making the deletion request
-   * @returns  True if deletion is successful, false otherwise
+   * Kicks a member from a server. Authorization (KICK_MEMBERS) is enforced by
+   * requirePermission at the route; here we only guard the invariants: you
+   * cannot kick yourself or the server owner.
+   * @param memberId  Id of the member to remove
+   * @param actingMemberId  The acting member's id (from memberContext)
+   * @returns True on success
    */
-  async deleteMemberById(memberId: Member["id"], currentUserId: string) {
-    try {
-      const success = await db.transaction(async (tx) => {
-        const currentUserMember = await tx
-          .select()
-          .from(members)
-          .where(
-            and(
-              eq(members.userId, currentUserId),
-              or(
-                eq(members.role, MemberRole.ADMIN),
-                eq(members.role, MemberRole.MODERATOR),
-              ),
-            ),
-          )
-          .limit(1);
-        if (currentUserMember.length === 0) {
-          // throw new Error("Member not found or unauthorized");
-          return false;
-        }
-        const deleteCount = await tx
-          .delete(members)
-          .where(
-            and(eq(members.id, memberId), ne(members.userId, currentUserId)),
-          );
-        if (deleteCount.rowCount === 0) {
-          return false;
-        }
-        return true;
-      });
-      if (!success) {
-        return false;
-      }
-      return true;
-    } catch (err) {
-      return false;
+  async kickMember(memberId: Member["id"], actingMemberId: Member["id"]) {
+    if (memberId === actingMemberId) {
+      throw new ForbiddenError("You cannot kick yourself");
     }
-  }
-  /**
-   * This method changes the role of a member in a server.
-   * @param memberId Id of the member whose role is to be changed
-   * @param userId  Id of the user making the change
-   * @param role  New role to be assigned to the member
-   * @returns Updated member object or null if operation fails
-   */
-  async changeMemberRole(
-    memberId: Member["id"],
-    userId: string,
-    role: Member["role"],
-  ) {
-    try {
-      const updatedMember = await db.transaction(async (tx) => {
-        const currentUserMember = await tx
-          .select()
-          .from(members)
-          .where(
-            and(eq(members.userId, userId), eq(members.role, MemberRole.ADMIN)),
-          )
-          .limit(1);
-        if (currentUserMember.length === 0) {
-          // throw new Error("Member not found or unauthorized");
-          return null;
-        }
-        const updatedMember = await tx
-          .update(members)
-          .set({ role })
-          .where(
-            and(
-              eq(members.id, memberId),
-              ne(members.userId, userId),
-              or(
-                eq(members.role, MemberRole.MODERATOR),
-                eq(members.role, MemberRole.MEMBER),
-              ),
-            ),
-          )
-          .returning();
-        return updatedMember[0];
-      });
-      return updatedMember;
-    } catch (err) {
-      return null;
+
+    const [target] = await db
+      .select({ member: members, ownerId: servers.ownerId })
+      .from(members)
+      .innerJoin(servers, eq(servers.id, members.serverId))
+      .where(eq(members.id, memberId))
+      .limit(1);
+    if (!target) {
+      throw new NotFoundError("Member not found");
     }
-  }
-  /**
-   * Transfers ownership of a server from the current owner to a new owner.
-   * @param currentOwnerMemberId Id of the current owner member
-   * @param currentUserId Id of the user making the transfer
-   * @param newOwnerMemberId Id of the new owner member
-   * @returns Updated member object or null if operation fails
-   */
-  async ownershipTransfer(
-    currentOwnerMemberId: Member["id"],
-    currentUserId: string,
-    newOwnerMemberId: string,
-  ) {
-    try {
-      const transferredMember = await db.transaction(async (tx) => {
-        const currentUserMember = await tx
-          .select()
-          .from(members)
-          .where(
-            and(
-              eq(members.userId, currentUserId),
-              eq(members.role, MemberRole.ADMIN),
-            ),
-          )
-          .limit(1);
-        if (currentUserMember.length === 0) {
-          // throw new Error("Member not found or unauthorized");
-          return null;
-        }
-        await tx
-          .update(members)
-          .set({ role: MemberRole.MEMBER })
-          .where(eq(members.id, currentOwnerMemberId));
-        const [updatedNewOwnerMember] = await tx
-          .update(members)
-          .set({ role: MemberRole.ADMIN })
-          .where(
-            and(
-              eq(members.id, newOwnerMemberId),
-              ne(members.userId, currentUserId),
-            ),
-          )
-          .returning();
-        return updatedNewOwnerMember;
-      });
-      return transferredMember;
-    } catch (err) {
-      return null;
+    if (target.member.userId === target.ownerId) {
+      throw new ForbiddenError("The server owner cannot be kicked");
     }
+
+    const deleted = await db.delete(members).where(eq(members.id, memberId));
+    return (deleted.rowCount ?? 0) > 0;
   }
 }
 export const membersService = new MembersService();

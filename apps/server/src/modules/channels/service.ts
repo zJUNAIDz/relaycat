@@ -104,87 +104,45 @@ class ChannelService {
     }
   }
 
+  /** The server a channel belongs to — used to scope permission checks. */
+  async getServerIdForChannel(
+    channelId: Channel["id"] | undefined,
+  ): Promise<string | undefined> {
+    if (!channelId) return undefined;
+    const [channel] = await db
+      .select({ serverId: channels.serverId })
+      .from(channels)
+      .where(eq(channels.id, channelId))
+      .limit(1);
+    return channel?.serverId;
+  }
+
+  // Authorization (MANAGE_CHANNELS) is enforced by requirePermission at the route.
   async editChannel(
     newData: { name: string },
     channelId: Channel["id"],
-    userId: string,
   ): Promise<Channel | null> {
     try {
-      const updatedChannel = await db.transaction(async (tx) => {
-        const [channel] = await tx
-          .select()
-          .from(channels)
-          .where(eq(channels.id, channelId))
-          .limit(1);
-        if (!channel) {
-          return null;
-        }
-        const [server] = await tx
-          .select()
-          .from(servers)
-          .where(eq(servers.id, channel.serverId));
-        const [member] = await tx
-          .select()
-          .from(members)
-          .where(
-            and(eq(members.serverId, server.id), eq(members.userId, userId)),
-          )
-          .limit(1);
-        if (
-          !member ||
-          (member.role !== "ADMIN" && member.role !== "MODERATOR")
-        ) {
-          return null;
-        }
-        const [updatedChannel] = await tx
-          .update(channels)
-          .set(newData)
-          .where(eq(channels.id, channelId))
-          .returning();
-        return updatedChannel;
-      });
-      return updatedChannel;
+      const [updatedChannel] = await db
+        .update(channels)
+        .set(newData)
+        .where(eq(channels.id, channelId))
+        .returning();
+      return updatedChannel ?? null;
     } catch (err) {
       console.error("[channelEdit] ", err);
       return null;
     }
   }
 
-  async deleteChannel(channelId: Channel["id"], userId: string) {
+  // Authorization (MANAGE_CHANNELS) is enforced by requirePermission at the route.
+  async deleteChannel(channelId: Channel["id"]) {
     try {
-      const deletedChannel = await db.transaction(async (tx) => {
-        const [channel] = await tx
-          .select()
-          .from(channels)
-          .where(eq(channels.id, channelId))
-          .limit(1);
-        if (!channel) {
-          return null;
-        }
-        const [server] = await tx
-          .select()
-          .from(servers)
-          .where(eq(servers.id, channel.serverId));
-        const [member] = await tx
-          .select()
-          .from(members)
-          .where(
-            and(eq(members.serverId, server.id), eq(members.userId, userId)),
-          )
-          .limit(1);
-        if (
-          !member ||
-          (member.role !== "ADMIN" && member.role !== "MODERATOR")
-        ) {
-          return null;
-        }
-        const [deletedChannel] = await tx
-          .delete(channels)
-          .where(eq(channels.id, channelId))
-          .returning();
-        return deletedChannel;
-      });
-      return deletedChannel;
+      const [deletedChannel] = await db
+        .delete(channels)
+        .where(eq(channels.id, channelId))
+        .returning();
+      return deletedChannel ?? null;
     } catch (err) {
       console.error("[channelDelete] ", err);
       return null;

@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+export * from "./permissions";
+
 export type User = {
   id: string;
   name: string;
@@ -30,13 +32,22 @@ export type Profile = {
 
 export type ProfileWithUser = Profile & { user: User };
 
-export const MemberRole = {
-  ADMIN: "ADMIN",
-  MODERATOR: "MODERATOR",
-  GUEST: "GUEST",
-} as const;
-
-export type MemberRole = keyof typeof MemberRole;
+/**
+ * A server role. Permissions are carried as a decimal `bigint` string (see
+ * permissions.ts). `position` orders roles for the hierarchy — higher position
+ * outranks lower; the default (@everyone) role sits at position 0.
+ */
+export type Role = {
+  id: string;
+  serverId: string;
+  name: string;
+  color: string | null;
+  permissions: string;
+  position: number;
+  isDefault: boolean;
+  createdAt: Date;
+  updatedAt: Date | null;
+};
 
 export const ChannelType = {
   TEXT: "TEXT",
@@ -50,6 +61,8 @@ export type Server = {
   id: string;
   name: string;
   image: string | null;
+  /** The single super-user of the server (implicitly has every permission). */
+  ownerId: string;
   inviteCode: string;
   banner: string | null;
   description: string | null;
@@ -61,9 +74,10 @@ export type Server = {
 
 export type Member = {
   id: string;
-  role: MemberRole;
   userId: string;
   serverId: string;
+  /** Roles assigned to this member (includes the default @everyone role). */
+  roles: Role[];
   createdAt: Date;
   updatedAt: Date | null;
   user: User;
@@ -186,12 +200,41 @@ export const EditChannelDTO = z.object({
 });
 export type EditChannelInput = z.infer<typeof EditChannelDTO>;
 
-// Member Module DTOs
-export const ChangeMemberRoleDTO = z.object({
-  role: z.enum(["ADMIN", "MODERATOR", "MEMBER"]),
-  memberId: z.string(),
+// Roles Module DTOs
+const HEX_COLOR_ROLE = /^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/;
+// Permissions cross the wire as a decimal bigint string.
+const permissionsString = z
+  .string()
+  .regex(/^\d+$/, "Permissions must be a decimal bigint string");
+
+export const CreateRoleDTO = z.object({
+  name: z.string().min(1, "Role name is required").max(50),
+  color: z
+    .string()
+    .regex(HEX_COLOR_ROLE, "Must be a hex color")
+    .nullable()
+    .optional(),
+  permissions: permissionsString.default("0"),
 });
-export type ChangeMemberRoleInput = z.infer<typeof ChangeMemberRoleDTO>;
+export type CreateRoleInput = z.infer<typeof CreateRoleDTO>;
+
+export const UpdateRoleDTO = z.object({
+  name: z.string().min(1).max(50).optional(),
+  color: z
+    .string()
+    .regex(HEX_COLOR_ROLE, "Must be a hex color")
+    .nullable()
+    .optional(),
+  permissions: permissionsString.optional(),
+  position: z.number().int().min(1).optional(),
+});
+export type UpdateRoleInput = z.infer<typeof UpdateRoleDTO>;
+
+export const AssignRoleDTO = z.object({
+  memberId: z.string().uuid(),
+  roleId: z.string().uuid(),
+});
+export type AssignRoleInput = z.infer<typeof AssignRoleDTO>;
 
 // Message Module DTOs
 export const CreateMessageDTO = z

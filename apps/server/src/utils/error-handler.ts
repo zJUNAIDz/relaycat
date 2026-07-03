@@ -1,9 +1,18 @@
 import { logger } from "@/lib/logger";
+import { AppError } from "@/utils/errors";
 import { Context } from "hono";
+import type { ContentfulStatusCode } from "hono/utils/http-status";
 
 export const errorhandler = (err: Error, c: Context) => {
-  console.error("[error handler]: ", err);
   const log = c.get("logger") ?? logger;
+
+  // Typed application errors carry their own HTTP status and a safe message.
+  if (err instanceof AppError) {
+    log.warn({ err }, "[ROUTE_ERROR_HANDLER]");
+    return c.json({ error: err.message }, err.status as ContentfulStatusCode);
+  }
+
+  console.error("[error handler]: ", err);
   log.error({ err }, "[ROUTE_ERROR_HANDLER]");
   return c.json(
     {
