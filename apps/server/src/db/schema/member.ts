@@ -1,4 +1,4 @@
-import { index, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import { index, text, timestamp, unique, uuid } from "drizzle-orm/pg-core";
 import { pgTable } from "drizzle-orm/pg-core/table";
 import { v7 as uuidv7 } from "uuid";
 import type { Role as WireRole } from "@repo/types";
@@ -24,6 +24,7 @@ export const members = pgTable(
   (table) => [
     index("members_user_id_idx").on(table.userId),
     index("members_server_id_idx").on(table.serverId),
+    unique("members_server_user_uq").on(table.userId, table.serverId)
   ],
 );
 export type Member = typeof members.$inferSelect;
