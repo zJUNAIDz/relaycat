@@ -7,7 +7,6 @@ import {
   primaryKey,
   text,
   timestamp,
-  unique,
   uuid,
 } from "drizzle-orm/pg-core";
 import { pgTable } from "drizzle-orm/pg-core/table";
@@ -56,8 +55,8 @@ export const memberRoles = pgTable(
       .notNull(),
   },
   (table) => [
+    // Composite PK already guarantees a member holds each role at most once.
     primaryKey({ columns: [table.memberId, table.roleId] }),
-    unique("member_roles_member_role_uq").on(table.memberId, table.roleId),
     index("member_roles_role_id_idx").on(table.roleId),
   ],
 );

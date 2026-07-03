@@ -1,5 +1,5 @@
 {
-  "id": "880cad95-266e-4b88-afdb-c6db8511ead2",
+  "id": "c4179413-0bf2-4f8d-89e7-8705ef832f0c",
   "prevId": "85681342-0100-45f9-838d-0506ccbdbf88",
   "version": "7",
   "dialect": "postgresql",
@@ -1512,16 +1512,7 @@
           ]
         }
       },
-      "uniqueConstraints": {
-        "member_roles_member_role_uq": {
-          "name": "member_roles_member_role_uq",
-          "nullsNotDistinct": false,
-          "columns": [
-            "member_id",
-            "role_id"
-          ]
-        }
-      },
+      "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false

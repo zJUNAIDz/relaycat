@@ -1,8 +1,7 @@
 CREATE TABLE "member_roles" (
 	"member_id" uuid NOT NULL,
 	"role_id" uuid NOT NULL,
-	CONSTRAINT "member_roles_member_id_role_id_pk" PRIMARY KEY("member_id","role_id"),
-	CONSTRAINT "member_roles_member_role_uq" UNIQUE("member_id","role_id")
+	CONSTRAINT "member_roles_member_id_role_id_pk" PRIMARY KEY("member_id","role_id")
 );
 --> statement-breakpoint
 CREATE TABLE "roles" (
