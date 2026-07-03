@@ -1,14 +1,16 @@
 "use client"
 import { ServerChannel } from "@/features/server/components/server-channel";
 import { ServerSection } from "@/features/server/components/server-section";
-import { Channel, ChannelType, MemberRole, ServerWithMembersAndUser } from "@/shared/types";
+import { Permission, usePermissions } from "@/shared/lib/permissions";
+import { Channel, ChannelType, ServerWithMembersAndUser } from "@/shared/types";
 interface ChannelListProps {
   channelsGroupedByType: Channel[][];
-  role: MemberRole;
   server: ServerWithMembersAndUser;
 }
 
-export const ChannelList: React.FC<ChannelListProps> = ({ channelsGroupedByType, role, server }) => {
+export const ChannelList: React.FC<ChannelListProps> = ({ channelsGroupedByType, server }) => {
+  const { can } = usePermissions(server);
+  const canManageChannels = can(Permission.MANAGE_CHANNELS);
   return (
     <>
       {
@@ -18,7 +20,7 @@ export const ChannelList: React.FC<ChannelListProps> = ({ channelsGroupedByType,
               <ServerSection
                 label={`${channelList[0].type.toString()} Channels`}
                 sectionType="channels"
-                role={role}
+                canManageChannels={canManageChannels}
                 channelType={ChannelType.TEXT}
                 server={server}
               />
@@ -27,7 +29,7 @@ export const ChannelList: React.FC<ChannelListProps> = ({ channelsGroupedByType,
                   <ServerChannel
                     key={channel.id}
                     channel={channel}
-                    role={role}
+                    canManageChannels={canManageChannels}
                     server={server}
                   />
                 ))

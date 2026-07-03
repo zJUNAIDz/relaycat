@@ -2,21 +2,22 @@
 import { ActionTooltip } from "@/shared/components/action-tooltip";
 import { useModal } from "@/shared/hooks/use-modal-store";
 import { cn } from "@/shared/utils/cn";
-import { Channel, ChannelType, MemberRole, Server } from "@/shared/types";
+import { Channel, ChannelType, Server } from "@/shared/types";
 import { Edit, Hash, Mic, Trash, Video } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 
 interface ServerChannelProps {
   channel: Channel;
   server: Server;
-  role?: MemberRole;
+  /** Whether the current user may edit/delete channels (MANAGE_CHANNELS). */
+  canManageChannels?: boolean;
 }
 const channelIconMap = {
   [ChannelType.TEXT]: Hash,
   [ChannelType.AUDIO]: Mic,
   [ChannelType.VIDEO]: Video,
 }
-export const ServerChannel: React.FC<ServerChannelProps> = ({ channel, server, role }) => {
+export const ServerChannel: React.FC<ServerChannelProps> = ({ channel, server, canManageChannels }) => {
   const router = useRouter();
   const params = useParams();
   const { onOpen } = useModal()
@@ -54,7 +55,7 @@ export const ServerChannel: React.FC<ServerChannelProps> = ({ channel, server, r
         {channel.name}
       </p>
       {
-        channel.name !== "general" && role !== MemberRole.GUEST && (
+        channel.name !== "general" && canManageChannels && (
           <div
             className="ml-auto flex items-center gap-x-2"
           >

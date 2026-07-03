@@ -3,12 +3,11 @@ import { PresenceAvatar } from "@/features/presence/components/presence-avatar";
 import { useWatchPresence } from "@/features/presence/presence-provider";
 import { UserProfilePopover } from "@/features/profile/components/user-profile-popover";
 import { ActionTooltip } from "@/shared/components/action-tooltip";
-import { RoleIcon } from "@/shared/components/icons";
+import { RoleBadge } from "@/shared/components/role-badge";
 import { Input } from "@/shared/components/ui/input";
 import { ScrollArea } from "@/shared/components/ui/scroll-area";
 import { useModal } from "@/shared/hooks/use-modal-store";
-import { useAuth } from "@/shared/providers/auth-provider";
-import { MemberRole } from "@/shared/types";
+import { Permission, usePermissions } from "@/shared/lib/permissions";
 import { useQuery } from "@tanstack/react-query";
 import { Search, Settings } from "lucide-react";
 import { useMemo, useState } from "react";
@@ -22,7 +21,6 @@ import { useMembersSidebar } from "../hooks/use-members-sidebar";
  */
 export const ServerMembersSidebar = ({ serverId }: { serverId: string }) => {
   const { isOpen } = useMembersSidebar();
-  const { user } = useAuth();
   const { onOpen } = useModal();
   const [query, setQuery] = useState("");
 
@@ -43,7 +41,9 @@ export const ServerMembersSidebar = ({ serverId }: { serverId: string }) => {
     return members.filter((m) => m.user.name?.toLowerCase().includes(q));
   }, [members, query]);
 
-  const role = members.find((m) => m.userId === user?.id)?.role;
+  const { can } = usePermissions(server);
+  const canManageMembers =
+    can(Permission.KICK_MEMBERS) || can(Permission.MANAGE_ROLES);
 
   if (!isOpen) return null;
 
@@ -53,7 +53,7 @@ export const ServerMembersSidebar = ({ serverId }: { serverId: string }) => {
         <p className="text-xs uppercase font-semibold text-muted-foreground">
           Members — {members.length}
         </p>
-        {role === MemberRole.ADMIN && server && (
+        {canManageMembers && server && (
           <ActionTooltip side="bottom" label="Manage Members" className="text-xs">
             <button
               onClick={() => onOpen("members", { server })}
@@ -95,7 +95,7 @@ export const ServerMembersSidebar = ({ serverId }: { serverId: string }) => {
                 <span className="font-semibold text-sm text-muted-foreground group-hover:text-foreground transition truncate">
                   {member.user.name}
                 </span>
-                <RoleIcon className="ml-auto shrink-0" role={member.role} />
+                <RoleBadge className="ml-auto shrink-0" roles={member.roles} />
               </button>
             </UserProfilePopover>
           ))}

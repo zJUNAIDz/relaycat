@@ -1,19 +1,27 @@
 "use client";
 import { ActionTooltip } from "@/shared/components/action-tooltip";
 import { useModal } from "@/shared/hooks/use-modal-store";
-import { ChannelType, MemberRole, Server } from "@/shared/types";
+import { ChannelType, Server } from "@/shared/types";
 import { Plus, Settings } from "lucide-react";
 
 interface ServerSectionProps {
   server?: Server;
   label: string;
-  role?: MemberRole;
+  /** MANAGE_CHANNELS — gates the "create channel" affordance. */
+  canManageChannels?: boolean;
+  /** KICK_MEMBERS/MANAGE_ROLES — gates the "manage members" affordance. */
+  canManageMembers?: boolean;
   sectionType: "channels" | "members";
   channelType?: ChannelType;
 }
 
-export const ServerSection: React.FC<ServerSectionProps> = ({ label, server, role, sectionType, channelType }) => {
-
+export const ServerSection: React.FC<ServerSectionProps> = ({
+  label,
+  canManageChannels,
+  canManageMembers,
+  sectionType,
+  channelType,
+}) => {
   const { onOpen } = useModal();
 
   return (
@@ -21,12 +29,8 @@ export const ServerSection: React.FC<ServerSectionProps> = ({ label, server, rol
       <p className="text-xs uppercase font-semibold text-muted-foreground">
         {label}
       </p>
-      {role !== MemberRole.GUEST && sectionType === "channels" && (
-        <ActionTooltip
-          label="Create Channel"
-          side="top"
-          className="text-xs"
-        >
+      {canManageChannels && sectionType === "channels" && (
+        <ActionTooltip label="Create Channel" side="top" className="text-xs">
           <button
             onClick={() => onOpen("createChannel", { channelType })}
             className="text-muted-foreground hover:text-foreground  transition"
@@ -35,22 +39,16 @@ export const ServerSection: React.FC<ServerSectionProps> = ({ label, server, rol
           </button>
         </ActionTooltip>
       )}
-      {
-        role === MemberRole.ADMIN && sectionType === "members" && (
-          <ActionTooltip
-            label="Manage Members"
-            side="top"
-            className="text-xs"
+      {canManageMembers && sectionType === "members" && (
+        <ActionTooltip label="Manage Members" side="top" className="text-xs">
+          <button
+            onClick={() => onOpen("members")}
+            className="text-muted-foreground hover:text-foreground  transition"
           >
-            <button
-              onClick={() => onOpen("members")}
-              className="text-muted-foreground hover:text-foreground  transition"
-            >
-              <Settings className="h-4 w-4" />
-            </button>
-          </ActionTooltip>
-        )
-      }
+            <Settings className="h-4 w-4" />
+          </button>
+        </ActionTooltip>
+      )}
     </div>
-  )
-}
+  );
+};

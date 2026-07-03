@@ -7,7 +7,7 @@ import {
   DropdownMenuTrigger,
 } from "@/shared/components/ui/dropdown-menu";
 import { useModal } from "@/shared/hooks/use-modal-store";
-import { MemberRole } from "@/shared/types";
+import { Permission, usePermissions } from "@/shared/lib/permissions";
 import { ServerWithMembersAndUser } from "@/shared/types";
 import {
   ChevronDown,
@@ -22,12 +22,14 @@ import React from "react";
 
 interface ServerHeaderProps {
   server: ServerWithMembersAndUser;
-  role?: MemberRole;
 }
 //TODO: Replace icons with discord icons or more unique ones
-const ServerHeader: React.FC<ServerHeaderProps> = ({ server, role }) => {
-  const isAdmin = role === MemberRole.ADMIN;
-  const isModerator = role === MemberRole.MODERATOR;
+const ServerHeader: React.FC<ServerHeaderProps> = ({ server }) => {
+  const { can, isOwner } = usePermissions(server);
+  const canManageServer = can(Permission.MANAGE_SERVER);
+  const canManageMembers =
+    can(Permission.KICK_MEMBERS) || can(Permission.MANAGE_ROLES);
+  const canManageChannels = can(Permission.MANAGE_CHANNELS);
 
   const { onOpen } = useModal();
 
@@ -47,60 +49,49 @@ const ServerHeader: React.FC<ServerHeaderProps> = ({ server, role }) => {
           >
             Invite People <UserPlus className="h-4 w-4 ml-auto" />
           </DropdownMenuItem>
-          {
-            (isAdmin || isModerator) && (
-              <DropdownMenuItem
-                onClick={() => onOpen("editServer", { server })}
-                className="px-3 py-2 text-sm cursor-pointer"
-              >
-                Server Settings <Settings className="h-4 w-4 ml-auto" />
-              </DropdownMenuItem>
-            )
-          }
-          {
-            (isAdmin || isModerator) && (
-              <DropdownMenuItem
-                onClick={() => onOpen("members", { server })}
-                className="px-3 py-2 text-sm cursor-pointer"
-              >
-                Manage Members <Users className="h-4 w-4 ml-auto" />
-              </DropdownMenuItem>
-            )
-          }
-          {
-            (isAdmin || isModerator) && (
-              <DropdownMenuItem
-                onClick={() => onOpen("createChannel")}
-                className="px-3 py-2 text-sm cursor-pointer"
-              >
-                Create Channel <PlusCircle className="h-4 w-4 ml-auto" />
-              </DropdownMenuItem>
-            )
-          }
-          {
-            (isAdmin || isModerator) && (
-              <DropdownMenuSeparator className="h-1" />
-            )
-          }
-          {!isAdmin && (
+          {canManageServer && (
+            <DropdownMenuItem
+              onClick={() => onOpen("editServer", { server })}
+              className="px-3 py-2 text-sm cursor-pointer"
+            >
+              Server Settings <Settings className="h-4 w-4 ml-auto" />
+            </DropdownMenuItem>
+          )}
+          {canManageMembers && (
+            <DropdownMenuItem
+              onClick={() => onOpen("members", { server })}
+              className="px-3 py-2 text-sm cursor-pointer"
+            >
+              Manage Members <Users className="h-4 w-4 ml-auto" />
+            </DropdownMenuItem>
+          )}
+          {canManageChannels && (
+            <DropdownMenuItem
+              onClick={() => onOpen("createChannel")}
+              className="px-3 py-2 text-sm cursor-pointer"
+            >
+              Create Channel <PlusCircle className="h-4 w-4 ml-auto" />
+            </DropdownMenuItem>
+          )}
+          {(canManageServer || canManageMembers || canManageChannels) && (
+            <DropdownMenuSeparator className="h-1" />
+          )}
+          {!isOwner && (
             <DropdownMenuItem
               className="text-destructive px-3 py-2 text-sm cursor-pointer"
               onClick={() => onOpen("leaveServer", { server })}
             >
               Leave Server <DoorOpen className="h-4 w-4 ml-auto" />
             </DropdownMenuItem>
-          )
-          }
-          {
-            isAdmin && (
-              <DropdownMenuItem
-                className="text-destructive px-3 py-2 text-sm cursor-pointer"
-                onClick={() => onOpen("deleteServer", { server })}
-              >
-                Delete Server <Trash className="h-4 w-4 ml-auto" />
-              </DropdownMenuItem>
-            )
-          }
+          )}
+          {isOwner && (
+            <DropdownMenuItem
+              className="text-destructive px-3 py-2 text-sm cursor-pointer"
+              onClick={() => onOpen("deleteServer", { server })}
+            >
+              Delete Server <Trash className="h-4 w-4 ml-auto" />
+            </DropdownMenuItem>
+          )}
         </DropdownMenuContent>
       </DropdownMenu>
     </div>

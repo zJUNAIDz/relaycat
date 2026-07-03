@@ -1,13 +1,14 @@
 import { ActionTooltip } from "@/shared/components/action-tooltip";
-import { RoleIcon } from "@/shared/components/icons";
+import { RoleBadge } from "@/shared/components/role-badge";
 import { Form, FormControl, FormField, FormItem } from "@/shared/components/ui/form";
 import { Input } from "@/shared/components/ui/input";
 import { UserAvatar } from "@/shared/components/user-avatar";
 import { UserProfilePopover } from "@/features/profile/components/user-profile-popover";
 import { chatService } from "@/features/chat/chat-service";
 import { useModal } from "@/shared/hooks/use-modal-store";
+import { computePermissions, Permission } from "@/shared/lib/permissions";
 import { useAuth } from "@/shared/providers/auth-provider";
-import { Member, MemberRole, Message, User } from "@/shared/types";
+import { hasPermission, Member, Message, User } from "@/shared/types";
 import { cn } from "@/shared/utils/cn";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Edit, Trash } from "lucide-react";
@@ -93,11 +94,15 @@ export const ChatMessage = ({
       content: content || "",
     })
   }, [content, form]);
-  const isAdmin = member.role === MemberRole.ADMIN;
-  const isModerator = member.role === MemberRole.MODERATOR;
-  const isOwner = member.id === currentMember.id; //composer of the message
-  const canDeleteMessage = !deleted && (isAdmin || isModerator || isOwner);
-  const canEditMessage = !deleted && isOwner && !fileUrl;
+  const isAuthor = member.id === currentMember.id; //composer of the message
+  // The viewer's effective permissions (UI gate only; server is the authority).
+  const viewerPerms = computePermissions(currentMember.roles, false);
+  const canManageMessages = hasPermission(
+    viewerPerms,
+    Permission.MANAGE_MESSAGES,
+  );
+  const canDeleteMessage = !deleted && (isAuthor || canManageMessages);
+  const canEditMessage = !deleted && isAuthor && !fileUrl;
   const fileType = fileUrl?.split(".").pop();
   const isPDF = fileUrl && fileType === "pdf";
   const isImage = !isPDF && fileUrl;
@@ -119,9 +124,7 @@ export const ChatMessage = ({
                   {user.name}
                 </p>
               </UserProfilePopover>
-              <ActionTooltip label={member.role} side="top" className="text-xs">
-                <RoleIcon role={member.role} />
-              </ActionTooltip>
+              <RoleBadge roles={member.roles} />
               <span className="text-xs text-muted-foreground">{timestamp}</span>
             </div>
             {

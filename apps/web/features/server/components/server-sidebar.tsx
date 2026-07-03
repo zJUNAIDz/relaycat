@@ -1,13 +1,13 @@
 "use client";
 import { ChannelList } from "@/features/channel/components/channels-list";
 import { ServerSearch } from "@/features/server/navigation/server-search";
-import { RoleIcon } from "@/shared/components/icons";
+import { RoleBadge } from "@/shared/components/role-badge";
 import { ScrollArea } from "@/shared/components/ui/scroll-area";
 import { Separator } from "@/shared/components/ui/separator";
 import { Skeleton } from "@/shared/components/ui/skeleton";
 import { PAGE_ROUTES } from "@/shared/lib/routes";
 import { useAuth } from "@/shared/providers/auth-provider";
-import { ChannelType, MemberRole } from "@/shared/types";
+import { ChannelType } from "@/shared/types";
 import { useQuery } from "@tanstack/react-query";
 import { Hash, Mic, Video } from "lucide-react";
 import { redirect } from "next/navigation";
@@ -21,12 +21,6 @@ const channelIconMap = {
   [ChannelType.AUDIO]: <Mic className="mr-2 h-4 w-4" />,
   [ChannelType.VIDEO]: <Video className="mr-2 h-4 w-4" />,
 };
-
-const roleIconMap = {
-  [MemberRole.ADMIN]: <RoleIcon role={MemberRole.ADMIN} />,
-  [MemberRole.MODERATOR]: <RoleIcon role={MemberRole.MODERATOR} />,
-  [MemberRole.GUEST]: <RoleIcon role={MemberRole.GUEST} />,
-}
 
 const ServerSidebar = ({ serverId, channelId }: { serverId: string; channelId: string }) => {
   const { user, isLoading: isUserLoading, error: userError } = useAuth();
@@ -61,13 +55,11 @@ const ServerSidebar = ({ serverId, channelId }: { serverId: string; channelId: s
     (channel) => channel.type === ChannelType.VIDEO
   );
   const members = server?.members;
-  const role = server.members.find(
-    (member) => member.userId === user.id
-  )?.role;
-  if (!role) return redirect(PAGE_ROUTES.AUTH);
+  const isMember = server.members.some((member) => member.userId === user.id);
+  if (!isMember) return redirect(PAGE_ROUTES.AUTH);
   return (
     <WrapperDiv>
-      <ServerHeader server={server} role={role} />
+      <ServerHeader server={server} />
       <ScrollArea className="flex-1 px-3">
         <ServerSearch
           data={[
@@ -102,7 +94,7 @@ const ServerSidebar = ({ serverId, channelId }: { serverId: string; channelId: s
               label: "Members",
               type: "member",
               data: members?.map(member => ({
-                icon: roleIconMap[member.role],
+                icon: <RoleBadge roles={member.roles} dotOnly />,
                 name: member.user?.name || "",
                 id: member.userId
               }))
@@ -116,7 +108,6 @@ const ServerSidebar = ({ serverId, channelId }: { serverId: string; channelId: s
             audioChannels,
             videoChannels,
           ]}
-          role={role}
           server={server}
         />
       </ScrollArea>
