@@ -4,6 +4,7 @@ import { ChatInput } from "@/features/chat/components/chat-input";
 import { ChatMessages } from "@/features/chat/components/chat-messages";
 import { TypingIndicator } from "@/features/typing/components/typing-indicator";
 import { memberService } from "@/features/member/member-service";
+import { VisualViewportLock } from "@/shared/components/visual-viewport-lock";
 import { CONFIG } from "@/shared/lib/config";
 import { PAGE_ROUTES } from "@/shared/lib/routes";
 import { ChannelType } from "@/shared/types";
@@ -33,7 +34,8 @@ const ChannelIdPage = async ({ params }: ChannelIdPageProps) => {
   }
 
   return (
-    <div className="h-screen flex flex-col">
+    <div className="h-(--app-height,100dvh) flex flex-col overflow-hidden overscroll-none">
+      <VisualViewportLock />
       <ChatHeader type="channel" label={channel.name} />
       {
         channel.type === ChannelType.TEXT && (

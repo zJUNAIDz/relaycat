@@ -43,16 +43,16 @@ export const ChatInput = ({ apiUrl, query, name, type, chatId, selfName }: ChatI
     form.setFocus("content")
   }, [form])
 
-  const isLoading = form.formState.isSubmitting;
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    // Clear synchronously so the input stays mounted, enabled and focused:
+    // disabling it (or awaiting before reset) blurs it and drops the mobile keyboard.
+    form.reset();
     try {
       await chatService.sendMessage(apiUrl, values.content);
       router.refresh();
-      form.reset();
     } catch (error) {
       console.error("[ChatInput:onSubmit] ", error);
-    } finally {
-      form.setFocus("content");
+      form.setValue("content", values.content);
     }
   }
   return (
@@ -74,7 +74,6 @@ export const ChatInput = ({ apiUrl, query, name, type, chatId, selfName }: ChatI
                       <Plus className="text-foreground" />
                     </button>
                     <Input
-                      disabled={isLoading}
                       placeholder={`Message ${type === "conversation" ? name : "#" + name}`}
                       className="px-14 py-6 bg-blend-lighten border-none border-0 focus-visible:ring-0 focus-visible:ring-offset-0 "
                       {...field}

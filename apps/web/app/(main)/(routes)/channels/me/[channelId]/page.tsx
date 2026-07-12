@@ -3,6 +3,7 @@ import ChatHeader from "@/features/chat/components/chat-header";
 import { ChatInput } from "@/features/chat/components/chat-input";
 import { ChatMessages } from "@/features/chat/components/chat-messages";
 import { TypingIndicator } from "@/features/typing/components/typing-indicator";
+import { VisualViewportLock } from "@/shared/components/visual-viewport-lock";
 import { CONFIG } from "@/shared/lib/config";
 import type { Member } from "@/shared/types";
 import { getCurrentUser } from "@/shared/utils/server";
@@ -39,7 +40,8 @@ const DmChannelPage = async ({ params }: DmPageProps) => {
   } as unknown as Member;
 
   return (
-    <div className="h-screen flex flex-col">
+    <div className="h-(--app-height,100dvh) flex flex-col overflow-hidden overscroll-none">
+      <VisualViewportLock />
       <ChatHeader
         type="conversation"
         label={name}

@@ -109,7 +109,9 @@
 @layer utilities {
   html,
   body {
-    height: 100%;
+    /* --app-height tracks the visual viewport (see shared/lib/visual-viewport.ts) so the
+       document never outgrows the area left visible by the soft keyboard. */
+    height: var(--app-height, 100%);
     width: 100%;
   }
 

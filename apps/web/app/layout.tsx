@@ -4,7 +4,7 @@ import { AuthProvider } from "@/shared/providers/auth-provider";
 import { QueryProvider } from "@/shared/providers/query-provider";
 import { cn } from "@/shared/utils/cn";
 import { ThemeProvider } from "@wrksz/themes";
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 
@@ -15,6 +15,14 @@ export const metadata: Metadata = {
   title: "RelayCat",
   description: "A Fast & Secure Communication Platform",
 
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  // Shrink the layout viewport when the soft keyboard opens instead of overlaying it,
+  // so a full-height chat view keeps its composer above the keyboard.
+  interactiveWidget: "resizes-content",
 };
 export default async function RootLayout({
   children,
