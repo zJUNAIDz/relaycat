@@ -211,7 +211,7 @@ class ServersService {
                   .from(members)
                   .where(
                     and(
-                      eq(members.id, userId),
+                      eq(members.userId, userId),
                       eq(servers.id, members.serverId),
                     ),
                   ),
