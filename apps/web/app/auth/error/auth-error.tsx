@@ -8,15 +8,15 @@ import { HiArrowLeft, HiExclamation } from "react-icons/hi"
 
 const AuthErrorComponent = ({ getErrorMessage }: { getErrorMessage: () => string }) => {
   return (
-    <div className="min-h-screen bg-linear-to-br from-gray-50 to-blue-50 dark:from-gray-900 dark:via-blue-900 dark:to-gray-800 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-linear-to-br from-background to-muted flex items-center justify-center p-4">
       <motion.div
-        className="w-full max-w-md bg-white dark:bg-gray-800/50 backdrop-blur-xl rounded-2xl border border-black/10 dark:border-white/10 shadow-xl p-8"
+        className="w-full max-w-md bg-white dark:bg-card backdrop-blur-xl rounded-2xl border border-black/10 dark:border-white/10 shadow-xl p-8"
         initial={{ scale: 0.95, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ duration: 0.3 }}
       >
         <div className="flex justify-between items-start mb-6">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Authentication Error</h1>
+          <h1 className="text-2xl font-bold text-foreground">Authentication Error</h1>
           <ModeToggle />
         </div>
 
@@ -27,25 +27,25 @@ const AuthErrorComponent = ({ getErrorMessage }: { getErrorMessage: () => string
           transition={{ delay: 0.2 }}
         >
           <motion.div
-            className="p-4 bg-yellow-100/50 dark:bg-yellow-900/20 rounded-full"
+            className="p-4 bg-warning/10 rounded-full"
             animate={{ rotate: [0, 10, -10, 0] }}
             transition={{ repeat: Infinity, duration: 2 }}
           >
-            <HiExclamation className="w-12 h-12 text-yellow-600 dark:text-yellow-400" />
+            <HiExclamation className="w-12 h-12 text-warning" />
           </motion.div>
 
           <div className="text-center space-y-2">
-            <p className="text-xl font-medium text-gray-900 dark:text-white">
+            <p className="text-xl font-medium text-foreground">
               Oops! Something went wrong
             </p>
-            <p className="text-gray-600 dark:text-gray-300">{getErrorMessage()}</p>
+            <p className="text-muted-foreground">{getErrorMessage()}</p>
           </div>
 
           <Link href={PAGE_ROUTES.AUTH} className="w-full">
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              className="w-full bg-sky-500 hover:bg-sky-600 text-white py-3 rounded-lg font-medium flex items-center justify-center gap-2 transition-colors"
+              className="w-full bg-brand hover:bg-brand/90 text-brand-foreground py-3 rounded-lg font-medium flex items-center justify-center gap-2 transition-colors"
             >
               <HiArrowLeft className="w-5 h-5" />
               Return to Login

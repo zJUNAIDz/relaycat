@@ -49,7 +49,7 @@ const DeleteMessageModal = () => {
         </DialogDescription>
         <div className="flex items-center justify-around mt-3 w-full">
           <Button onClick={onClose} variant="ghost" className="border border-white">Cancel</Button>
-          <Button disabled={isLoading} onClick={deleteMessage} className="bg-red-800 text-white hover:bg-red-600/85">Delete</Button>
+          <Button disabled={isLoading} onClick={deleteMessage} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Delete</Button>
         </div>
       </DialogContent>
     </Dialog>

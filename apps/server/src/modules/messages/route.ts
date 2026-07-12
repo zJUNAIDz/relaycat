@@ -2,6 +2,7 @@ import { CreateMessageDTO, EditMessageDTO } from "@repo/types";
 import { notify } from "@/lib/notifier";
 import { socketManager } from "@/lib/socket-manager";
 import { messageService } from "@/modules/messages/service";
+import { withResolvedMedia } from "@/utils/media";
 import { ProtectedAppContext, cursorSchema } from "@/types";
 import { Hono } from "hono";
 import z from "zod/v4";
@@ -28,7 +29,7 @@ messageRoute.get("/", async (c) => {
     return c.json({ error: res.error }, 400);
   }
 
-  return c.json(res.data);
+  return c.json(withResolvedMedia(res.data));
 });
 
 messageRoute.post("/", zValidator("json", CreateMessageDTO), async (c) => {
@@ -50,7 +51,10 @@ messageRoute.post("/", zValidator("json", CreateMessageDTO), async (c) => {
     return c.json({ error: res.error }, 400);
   }
 
-  socketManager.io.emit(`chat:${channelId.data}:messages`, res.data);
+  // Resolve media (overlaid profile avatar key → URL) once for both the live
+  // broadcast and the HTTP response so history and realtime stay identical.
+  const payload = withResolvedMedia(res.data);
+  socketManager.io.emit(`chat:${channelId.data}:messages`, payload);
 
   // Notify @-mentioned users (notifier drops the author if self-mentioned).
   const mentions = res.data.message.mentions ?? [];
@@ -72,7 +76,7 @@ messageRoute.post("/", zValidator("json", CreateMessageDTO), async (c) => {
     ).catch(() => {});
   }
 
-  return c.json(res.data);
+  return c.json(payload);
 });
 
 messageRoute.patch("/:messageId", zValidator("json", EditMessageDTO), async (c) => {

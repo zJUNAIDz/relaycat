@@ -11,8 +11,8 @@ import {
 
 const ChannelNotFound = () => {
 	return (
-		<div className="relative isolate min-h-screen overflow-hidden bg-slate-50 dark:bg-slate-950">
-			<div className="absolute inset-0 -z-10 bg-[linear-gradient(rgba(148,163,184,0.22)_1px,transparent_1px),linear-gradient(90deg,rgba(148,163,184,0.22)_1px,transparent_1px)] bg-size-[48px_48px] opacity-60 dark:bg-[linear-gradient(rgba(71,85,105,0.22)_1px,transparent_1px),linear-gradient(90deg,rgba(71,85,105,0.22)_1px,transparent_1px)]" />
+		<div className="relative isolate min-h-screen overflow-hidden bg-muted dark:bg-card">
+			<div className="absolute inset-0 -z-10 bg-[linear-gradient(rgba(148,163,184,0.22)_1px,transparent_1px),linear-gradient(90deg,rgba(148,163,184,0.22)_1px,transparent_1px)] bg-size-[48px_48px] opacity-60(rgba(71,85,105,0.22)_1px,transparent_1px),linear-gradient(90deg,rgba(71,85,105,0.22)_1px,transparent_1px)]" />
 
 			<div className="flex min-h-screen items-center justify-center px-6 py-16">
 				<Card className="w-full max-w-xl border-border/70 bg-background/95 shadow-sm backdrop-blur">

@@ -1,15 +1,27 @@
 "use client";
 
+import { useSyncExternalStore } from "react";
 import {
   loadMoreNotifications,
   markAllNotificationsReadAction,
   markNotificationReadAction,
 } from "./notification-actions";
+import { notificationSound } from "./notification-sound";
 import { useNotificationStore } from "./notification-store";
 
 /** The unread badge count (re-renders only when the number changes). */
 export function useUnreadCount(): number {
   return useNotificationStore((s) => s.unread);
+}
+
+/** The mute preference for the in-app notification chime, plus a toggle. */
+export function useNotificationSoundPref() {
+  const muted = useSyncExternalStore(
+    notificationSound.subscribe,
+    notificationSound.getSnapshot,
+    notificationSound.getServerSnapshot,
+  );
+  return { muted, toggleMuted: notificationSound.toggleMuted };
 }
 
 /**

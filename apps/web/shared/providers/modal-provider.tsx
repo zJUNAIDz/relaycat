@@ -11,6 +11,7 @@ import DeleteServerModal from "@/features/server/components/modals/delete-server
 import EditServerModal from "@/features/server/components/modals/edit-server-modal";
 import InviteModal from "@/features/server/components/modals/invite-modal";
 import LeaveServerModal from "@/features/server/components/modals/leave-server-modal";
+import ManageRolesModal from "@/features/server/components/modals/manage-roles-modal";
 import MembersModal from "@/features/server/components/modals/members-modal";
 
 export const ModalProvider = () => {
@@ -23,6 +24,7 @@ export const ModalProvider = () => {
       <InviteModal />
       <EditServerModal />
       <MembersModal />
+      <ManageRolesModal />
       <CreateChannelModal />
       <LeaveServerModal />
       <DeleteServerModal />

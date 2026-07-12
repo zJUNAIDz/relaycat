@@ -1,5 +1,6 @@
 import type { NotificationEvent } from "@/shared/types";
 import { notificationService } from "./notification-service";
+import { notificationSound } from "./notification-sound";
 import { useNotificationStore } from "./notification-store";
 
 /**
@@ -26,6 +27,7 @@ export function handleIncomingNotification({
   unread,
 }: NotificationEvent): void {
   store.getState().prepend(notification, unread);
+  notificationSound.play();
 }
 
 /** Optimistically mark one read, then reconcile unread with the server. */

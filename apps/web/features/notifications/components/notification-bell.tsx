@@ -14,8 +14,15 @@ import { ScrollArea } from "@/shared/components/ui/scroll-area";
 import type { Notification } from "@/shared/types";
 import { cn } from "@/shared/utils/cn";
 import { formatDistanceToNow } from "date-fns";
-import { Bell, BellOff, BellRing, CheckCheck } from "lucide-react";
-import { useNotifications } from "../use-notifications";
+import {
+  Bell,
+  BellOff,
+  BellRing,
+  CheckCheck,
+  Volume2,
+  VolumeX,
+} from "lucide-react";
+import { useNotifications, useNotificationSoundPref } from "../use-notifications";
 import { useWebPush } from "../push/use-web-push";
 
 /** Bell trigger + dropdown inbox. Drop it into a header/toolbar. */
@@ -33,7 +40,7 @@ export const NotificationBell = ({ className }: { className?: string }) => {
       >
         <Bell className="h-5 w-5" />
         {unread > 0 && (
-          <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-semibold text-white">
+          <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-semibold text-destructive-foreground">
             {unread > 99 ? "99+" : unread}
           </span>
         )}
@@ -42,16 +49,19 @@ export const NotificationBell = ({ className }: { className?: string }) => {
       <PopoverContent align="end" className="w-80 p-0">
         <div className="flex items-center justify-between border-b px-3 py-2">
           <span className="text-sm font-semibold">Notifications</span>
-          {unread > 0 && (
-            <button
-              type="button"
-              onClick={() => markAllRead()}
-              className="flex items-center gap-1 text-xs text-muted-foreground transition hover:text-foreground"
-            >
-              <CheckCheck className="h-3.5 w-3.5" />
-              Mark all read
-            </button>
-          )}
+          <div className="flex items-center gap-2">
+            {unread > 0 && (
+              <button
+                type="button"
+                onClick={() => markAllRead()}
+                className="flex items-center gap-1 text-xs text-muted-foreground transition hover:text-foreground"
+              >
+                <CheckCheck className="h-3.5 w-3.5" />
+                Mark all read
+              </button>
+            )}
+            <SoundToggle />
+          </div>
         </div>
 
         <ScrollArea className="max-h-96">
@@ -77,6 +87,26 @@ export const NotificationBell = ({ className }: { className?: string }) => {
     </Popover>
   );
 };
+
+/** Mute/unmute the in-app notification chime. */
+function SoundToggle() {
+  const { muted, toggleMuted } = useNotificationSoundPref();
+  return (
+    <button
+      type="button"
+      onClick={() => toggleMuted()}
+      aria-label={muted ? "Unmute notification sound" : "Mute notification sound"}
+      title={muted ? "Sound off" : "Sound on"}
+      className="text-muted-foreground transition hover:text-foreground"
+    >
+      {muted ? (
+        <VolumeX className="h-3.5 w-3.5" />
+      ) : (
+        <Volume2 className="h-3.5 w-3.5" />
+      )}
+    </button>
+  );
+}
 
 /** Footer control to opt this device in/out of OS-level push notifications. */
 function PushToggle() {
@@ -148,7 +178,7 @@ function NotificationRow({
           </p>
         </div>
         {!read && (
-          <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-red-500" />
+          <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-destructive" />
         )}
       </button>
     </li>

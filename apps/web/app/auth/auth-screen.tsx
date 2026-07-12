@@ -73,8 +73,8 @@ const AuthScreen = ({ isLoginParam }: { isLoginParam: boolean }) => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-neutral-50 dark:bg-neutral-900">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-sky-500"></div>
+      <div className="min-h-screen flex items-center justify-center bg-muted dark:bg-card">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand"></div>
       </div>
     );
   }
@@ -85,31 +85,31 @@ const AuthScreen = ({ isLoginParam }: { isLoginParam: boolean }) => {
 
   if (mode === "verification-sent") {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-neutral-50 dark:bg-neutral-900 px-4">
+      <div className="min-h-screen flex items-center justify-center bg-muted dark:bg-card px-4">
         <div className="w-full max-w-md">
-          <div className="bg-white dark:bg-neutral-800 rounded-2xl shadow-lg border border-neutral-200 dark:border-neutral-700 p-8">
+          <div className="bg-white dark:bg-card rounded-2xl shadow-lg border border-border p-8">
             <div className="text-center space-y-4">
               <h1 className={`${spaceGrotesk.className} text-3xl mb-2`}>
-                Relay<span className="text-sky-500">cat</span>
+                Relay<span className="text-brand">cat</span>
               </h1>
 
-              <div className="text-green-500 text-5xl mb-4">✓</div>
+              <div className="text-success text-5xl mb-4">✓</div>
 
-              <h2 className="text-2xl font-semibold text-neutral-900 dark:text-white">
+              <h2 className="text-2xl font-semibold text-foreground">
                 Check your email
               </h2>
 
-              <p className="text-neutral-600 dark:text-neutral-400">
+              <p className="text-muted-foreground">
                 We&apos;ve sent a verification link to <strong>{email}</strong>
               </p>
 
-              <p className="text-sm text-neutral-500 dark:text-neutral-500">
+              <p className="text-sm text-muted-foreground">
                 Click the link in the email to verify your account and complete signup.
               </p>
 
               <button
                 onClick={() => setMode("login")}
-                className="mt-6 text-sky-500 hover:text-sky-600 transition-colors"
+                className="mt-6 text-brand hover:text-brand transition-colors"
               >
                 Back to login
               </button>
@@ -121,14 +121,14 @@ const AuthScreen = ({ isLoginParam }: { isLoginParam: boolean }) => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-neutral-50 dark:bg-neutral-900 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-muted dark:bg-card px-4">
       <div className="w-full max-w-md">
-        <div className="bg-white dark:bg-neutral-800 rounded-2xl shadow-lg border border-neutral-200 dark:border-neutral-700 p-8">
+        <div className="bg-white dark:bg-card rounded-2xl shadow-lg border border-border p-8">
           <div className="text-center mb-8">
             <h1 className={`${spaceGrotesk.className} text-4xl mb-2`}>
-              Relay<span className="text-sky-500">cat</span>
+              Relay<span className="text-brand">cat</span>
             </h1>
-            <p className="text-neutral-600 dark:text-neutral-400">
+            <p className="text-muted-foreground">
               {mode === "login" ? "Welcome back" : "Create your account"}
             </p>
           </div>
@@ -136,7 +136,7 @@ const AuthScreen = ({ isLoginParam }: { isLoginParam: boolean }) => {
           <form onSubmit={handleEmailAuth} className="space-y-4">
             {mode === "signup" && (
               <div>
-                <label htmlFor="name" className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
+                <label htmlFor="name" className="block text-sm font-medium text-foreground mb-1">
                   Name
                 </label>
                 <Input
@@ -146,13 +146,13 @@ const AuthScreen = ({ isLoginParam }: { isLoginParam: boolean }) => {
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Enter your name"
                   required
-                  className="w-full px-4 py-3 bg-neutral-50 dark:bg-neutral-700/50 rounded-lg border border-neutral-200 dark:border-neutral-600 focus:ring-2 focus:ring-sky-500 focus:border-transparent outline-none transition-all"
+                  className="w-full px-4 py-3 bg-muted rounded-lg border border-border focus:ring-2 focus:ring-brand focus:border-transparent outline-none transition-all"
                 />
               </div>
             )}
 
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
+              <label htmlFor="email" className="block text-sm font-medium text-foreground mb-1">
                 Email
               </label>
               <Input
@@ -162,12 +162,12 @@ const AuthScreen = ({ isLoginParam }: { isLoginParam: boolean }) => {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Enter your email"
                 required
-                className="w-full px-4 py-3 bg-neutral-50 dark:bg-neutral-700/50 rounded-lg border border-neutral-200 dark:border-neutral-600 focus:ring-2 focus:ring-sky-500 focus:border-transparent outline-none transition-all"
+                className="w-full px-4 py-3 bg-muted rounded-lg border border-border focus:ring-2 focus:ring-brand focus:border-transparent outline-none transition-all"
               />
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
+              <label htmlFor="password" className="block text-sm font-medium text-foreground mb-1">
                 Password
               </label>
               <Input
@@ -178,25 +178,25 @@ const AuthScreen = ({ isLoginParam }: { isLoginParam: boolean }) => {
                 placeholder={mode === "login" ? "Enter your password" : "Create a password"}
                 required
                 minLength={8}
-                className="w-full px-4 py-3 bg-neutral-50 dark:bg-neutral-700/50 rounded-lg border border-neutral-200 dark:border-neutral-600 focus:ring-2 focus:ring-sky-500 focus:border-transparent outline-none transition-all"
+                className="w-full px-4 py-3 bg-muted rounded-lg border border-border focus:ring-2 focus:ring-brand focus:border-transparent outline-none transition-all"
               />
               {mode === "signup" && (
-                <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">
+                <p className="text-xs text-muted-foreground mt-1">
                   Must be at least 8 characters
                 </p>
               )}
             </div>
 
             {error && (
-              <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-                <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+              <div className="p-3 bg-destructive/10 border border-destructive/30 rounded-lg">
+                <p className="text-sm text-destructive">{error}</p>
               </div>
             )}
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-sky-500 hover:bg-sky-600 disabled:bg-sky-400 disabled:cursor-not-allowed text-white py-3 rounded-lg font-medium transition-colors"
+              className="w-full bg-brand hover:bg-brand/90 disabled:bg-brand disabled:cursor-not-allowed text-brand-foreground py-3 rounded-lg font-medium transition-colors"
             >
               {loading ? (
                 <span className="flex items-center justify-center gap-2">
@@ -215,7 +215,7 @@ const AuthScreen = ({ isLoginParam }: { isLoginParam: boolean }) => {
                 setMode(mode === "login" ? "signup" : "login");
                 setError("");
               }}
-              className="text-neutral-600 dark:text-neutral-400 hover:text-sky-500 dark:hover:text-sky-400 transition-colors text-sm"
+              className="text-muted-foreground hover:text-brand transition-colors text-sm"
             >
               {mode === "login"
                 ? "Don't have an account? Sign Up"
@@ -225,10 +225,10 @@ const AuthScreen = ({ isLoginParam }: { isLoginParam: boolean }) => {
 
           <div className="relative my-6">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-neutral-200 dark:border-neutral-700" />
+              <div className="w-full border-t border-border" />
             </div>
             <div className="relative flex justify-center">
-              <span className="px-4 bg-white dark:bg-neutral-800 text-sm text-neutral-500 dark:text-neutral-400">
+              <span className="px-4 bg-white dark:bg-card text-sm text-muted-foreground">
                 Or continue with
               </span>
             </div>
@@ -237,20 +237,20 @@ const AuthScreen = ({ isLoginParam }: { isLoginParam: boolean }) => {
           <div className="grid grid-cols-2 gap-3">
             <button
               onClick={() => handleSocialSignIn("google")}
-              className="flex items-center justify-center gap-2 py-3 bg-neutral-50 dark:bg-neutral-700/50 rounded-lg border border-neutral-200 dark:border-neutral-600 hover:border-sky-500 dark:hover:border-sky-500 hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-all"
+              className="flex items-center justify-center gap-2 py-3 bg-muted rounded-lg border border-border hover:border-brand hover:bg-accent transition-all"
               type="button"
             >
-              <FaGoogle className="text-red-500" />
-              <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">Google</span>
+              <FaGoogle className="text-destructive" />
+              <span className="text-sm font-medium text-foreground">Google</span>
             </button>
 
             <button
               onClick={() => handleSocialSignIn("github")}
-              className="flex items-center justify-center gap-2 py-3 bg-neutral-50 dark:bg-neutral-700/50 rounded-lg border border-neutral-200 dark:border-neutral-600 hover:border-sky-500 dark:hover:border-sky-500 hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-all"
+              className="flex items-center justify-center gap-2 py-3 bg-muted rounded-lg border border-border hover:border-brand hover:bg-accent transition-all"
               type="button"
             >
-              <FaGithub className="text-neutral-800 dark:text-white" />
-              <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">GitHub</span>
+              <FaGithub className="text-foreground" />
+              <span className="text-sm font-medium text-foreground">GitHub</span>
             </button>
           </div>
         </div>

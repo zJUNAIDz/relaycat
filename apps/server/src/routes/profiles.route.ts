@@ -36,9 +36,11 @@ profilesRoute.patch("/me", zValidator("json", UpdateProfileDTO), async (c) => {
   return c.json(withResolvedMedia(profile));
 });
 
-// Read any user's profile (still behind auth).
+// Read any user's profile (still behind auth). Backfills a row for legacy users
+// who never had one so member/chat profile cards always resolve.
 profilesRoute.get("/:userId", async (c) => {
   const userId = c.req.param("userId");
+  await profileService.ensureProfile(userId);
   const profile = await profileService.getProfileByUserId(userId);
   if (!profile) {
     return c.json({ error: "Profile not found" }, 404);

@@ -1,3 +1,4 @@
+import { MembersToggle } from "@/features/server/components/members-toggle";
 import { SocketIndicator } from "@/features/socket/components/socket-indicator";
 import { MobileToggle } from "@/shared/components/mobile-toggle";
 import { UserAvatar } from "@/shared/components/user-avatar";
@@ -11,7 +12,7 @@ interface ChatHeaderProps {
 }
 const ChatHeader: React.FC<ChatHeaderProps> = ({ type, label, imageUrl }) => {
   return (
-    <div className="text-md font-semibold px-3 text-foreground flex gap-x-4 items-center h-12 border-neutral-200  dark:border-neutral-800 border-b-2">
+    <div className="text-md font-semibold px-3 text-foreground flex gap-x-4 items-center h-12 border-border  border-b-2">
       <MobileToggle />
       {
         imageUrl && (
@@ -22,12 +23,17 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({ type, label, imageUrl }) => {
       }
       {
         type === "channel" && (
-          <Hash className="h-6 w-6 text-zinc-500 dark:text-zinc-400" />
+          <Hash className="h-6 w-6 text-muted-foreground" />
         )
       }
       <p className="text-lg">
         {`${label}`}
       </p>
+      {type === "channel" && (
+        <div className="ml-auto flex items-center">
+          <MembersToggle />
+        </div>
+      )}
     </div>
   )
 }

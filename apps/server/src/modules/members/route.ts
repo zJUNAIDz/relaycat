@@ -1,10 +1,18 @@
-import { ChangeMemberRoleDTO } from "@repo/types";
+import { Permission } from "@repo/types";
+import { requirePermission, ServerIdResolver } from "@/middlewares/permission";
 import { membersService } from "@/modules/members/service";
 import { ProtectedAppContext } from "@/types";
 import { Hono } from "hono";
-import { zValidator } from "@hono/zod-validator";
 
 const membersRoutes = new Hono<ProtectedAppContext>();
+
+// Resolve the server from the ?memberId= query param (the member being kicked).
+const serverIdFromMemberQuery: ServerIdResolver = async (c) => {
+  const memberId = c.req.query("memberId");
+  if (!memberId) return undefined;
+  const member = await membersService.getMemberById(memberId);
+  return member?.serverId;
+};
 
 membersRoutes.get("/:memberId", async (c) => {
   const memberId = c.req.param("memberId");
@@ -29,33 +37,22 @@ membersRoutes.get("/server/:serverId", async (c) => {
   return c.json({ members });
 });
 
-membersRoutes.patch("/changeRole", zValidator("json", ChangeMemberRoleDTO), async (c) => {
-  const { role, memberId } = c.req.valid("json");
-  const member = await membersService.changeMemberRole(
-    memberId,
-    c.get("user").id,
-    role,
-  );
-  if (!member) {
-    return c.json({ error: "Unable to change member role" }, 403);
-  }
-  return c.json(member);
-});
-
-membersRoutes.delete("/kick", async (c) => {
-  const memberId = c.req.query("memberId");
-  if (!memberId) {
-    return c.json({ error: "Member ID is required" }, 400);
-  }
-  const currentUserId = c.get("user").id;
-  const success = await membersService.deleteMemberById(
-    memberId,
-    currentUserId,
-  );
-  if (!success) {
-    return c.json({ error: "Unable to kick member" }, 403);
-  }
-  return c.status(204);
-});
+// Kick a member — requires KICK_MEMBERS in the target member's server.
+membersRoutes.delete(
+  "/kick",
+  requirePermission(Permission.KICK_MEMBERS, serverIdFromMemberQuery),
+  async (c) => {
+    const memberId = c.req.query("memberId");
+    if (!memberId) {
+      return c.json({ error: "Member ID is required" }, 400);
+    }
+    const { memberId: actingMemberId } = c.get("memberContext");
+    const success = await membersService.kickMember(memberId, actingMemberId);
+    if (!success) {
+      return c.json({ error: "Unable to kick member" }, 400);
+    }
+    return c.body(null, 204);
+  },
+);
 
 export default membersRoutes;

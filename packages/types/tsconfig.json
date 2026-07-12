@@ -14,7 +14,8 @@
     "tsBuildInfoFile": "./dist/tsconfig.tsbuildinfo"
   },
   "include": [
-    "index.ts"
+    "index.ts",
+    "permissions.ts"
   ],
   "exclude": [
     "node_modules"

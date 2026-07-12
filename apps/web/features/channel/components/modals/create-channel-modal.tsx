@@ -150,7 +150,7 @@ const CreateChannelModal = () => {
             </div>
             <DialogFooter className="px-6 py-2">
               {errorMessage && (
-                <div className="text-red-500  text-center mb-4">
+                <div className="text-destructive  text-center mb-4">
                   {errorMessage}
                 </div>
               )}

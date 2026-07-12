@@ -9,13 +9,13 @@ export const SocketIndicator = () => {
 
   return (!isConnected)
     ? (
-      <Badge variant="destructive" className="bg-yellow-600 text-white border-none">
+      <Badge variant="destructive" className="bg-warning text-warning-foreground border-none">
         Offline
       </Badge>
     )
     :
     (
-      <Badge variant="default" className="bg-green-600 text-white border-none">
+      <Badge variant="default" className="bg-success text-success-foreground border-none">
         Online
         <div></div>
       </Badge>

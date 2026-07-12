@@ -168,7 +168,7 @@ const CreateServerModal = () => {
                     <FormControl>
                       <Input
                         disabled={isLoading}
-                        className="border border-gray-300 focus-visible:ring-1  focus-visible:ring-offset-1"
+                        className="border border-border focus-visible:ring-1  focus-visible:ring-offset-1"
                         placeholder="Enter Server Name"
                         {...field}
                       />
@@ -189,7 +189,7 @@ const CreateServerModal = () => {
                     <FormControl>
                       <Textarea
                         disabled={isLoading}
-                        className="border border-gray-300 resize-none focus-visible:ring-1 focus-visible:ring-offset-1"
+                        className="border border-border resize-none focus-visible:ring-1 focus-visible:ring-offset-1"
                         placeholder="What is your server about?"
                         {...field}
                       />
@@ -213,7 +213,7 @@ const CreateServerModal = () => {
                       onValueChange={(value) => field.onChange(value === "public")}
                     >
                       <FormControl>
-                        <SelectTrigger className="border border-gray-300">
+                        <SelectTrigger className="border border-border">
                           <SelectValue />
                         </SelectTrigger>
                       </FormControl>
@@ -233,7 +233,7 @@ const CreateServerModal = () => {
             </div>
             <DialogFooter className="px-6 py-4 bg-accent">
               {errorMessage && (
-                <div className="text-red-500  text-center mb-4">
+                <div className="text-destructive  text-center mb-4">
                   {errorMessage}
                 </div>
               )}

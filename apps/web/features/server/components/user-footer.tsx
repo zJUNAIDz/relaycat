@@ -36,7 +36,7 @@ export const UserFooter = ({ user }: UserFooterProps) => {
   const accent = profile?.accentColor || FALLBACK_ACCENT;
 
   return (
-    <div className="w-full flex p-1 h-14 bg-background/50 dark:bg-background/10 border-t border-neutral-200 dark:border-neutral-800">
+    <div className="w-full flex p-1 h-14 bg-background/50 dark:bg-background/10 border-t border-border">
       <Popover>
         <PopoverTrigger asChild>
           <div className="flex justify-center items-center gap-2 hover:bg-accent p-2 py-3 rounded-md cursor-pointer">
@@ -52,7 +52,7 @@ export const UserFooter = ({ user }: UserFooterProps) => {
             </div>
             <div className="flex flex-col">
               <span className="text-sm font-semibold">{displayName}</span>
-              <span className="text-xs text-gray-500 overflow-clip">
+              <span className="text-xs text-muted-foreground overflow-clip">
                 @{user.username}
               </span>
             </div>

@@ -46,10 +46,10 @@ const LeaveServerModal = () => {
           Leave Server
         </DialogTitle>
         <DialogDescription className="text-center">
-          Are you sure want to leave server <span className="text-blue-500">{server?.name}</span>?
+          Are you sure want to leave server <span className="text-brand">{server?.name}</span>?
         </DialogDescription>
         <div className="flex items-center justify-around w-full">
-          <Button onClick={onClose} variant="ghost" className="border-red-700">Cancel</Button>
+          <Button onClick={onClose} variant="ghost" className="border-destructive">Cancel</Button>
           <Button disabled={isLoading} onClick={leaveServer} >Confirm</Button>
         </div>
       </DialogContent>

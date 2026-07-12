@@ -13,6 +13,7 @@ import { and, desc, eq, gt, lt } from "drizzle-orm";
 import z from "zod/v4";
 import { cursorSchema, Result } from "./types";
 import { user } from "@/db/schema/auth-schema";
+import { applyProfileToUser, profileService } from "@/services/profile.service";
 import { User } from "better-auth/types";
 
 class MessageService {
@@ -67,7 +68,20 @@ class MessageService {
         return { ok: false, error: "Message not created" };
       }
 
-      return { ok: true, data: newMessage };
+      // Render the author by their profile identity (displayName/avatar).
+      const summaries = await profileService.getProfileSummaries([
+        newMessage.user.id,
+      ]);
+      return {
+        ok: true,
+        data: {
+          ...newMessage,
+          user: applyProfileToUser(
+            newMessage.user,
+            summaries.get(newMessage.user.id),
+          ),
+        },
+      };
     } catch (error) {
       console.error("[createMessage] ", error);
       return { ok: false, error };
@@ -144,7 +158,16 @@ class MessageService {
         return { messagesList: filteredMessagesList, nextCursor };
       });
 
-      return { ok: true, data: { result: messagesList, nextCursor } };
+      // Overlay each author's profile identity onto the auth user.
+      const summaries = await profileService.getProfileSummaries(
+        messagesList.map((m) => m.user?.id).filter((id): id is string => !!id),
+      );
+      const result = messagesList.map((m) => ({
+        ...m,
+        user: applyProfileToUser(m.user, summaries.get(m.user.id)),
+      }));
+
+      return { ok: true, data: { result, nextCursor } };
     } catch (error) {
       // console.error("[getMessagesByChannelId] ", error);
       return { ok: false, error };

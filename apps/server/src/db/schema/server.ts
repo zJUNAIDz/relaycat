@@ -9,6 +9,7 @@ import {
 } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { v7 as uuidv7 } from "uuid";
+import type { Role as WireRole } from "@repo/types";
 import { user } from "./auth-schema";
 import { Channel } from "./channel";
 import { Member } from "./member";
@@ -21,6 +22,10 @@ export const servers = pgTable(
       .primaryKey(),
     name: text("name").notNull(),
     image: text("image"),
+    // The single super-user of the server (implicitly has every permission).
+    ownerId: text("owner_id")
+      .references(() => user.id)
+      .notNull(),
     inviteCode: text("invite_code")
       .notNull()
       .unique()
@@ -39,7 +44,10 @@ export const serverInsertSchema = createInsertSchema(servers);
 export type Server = typeof servers.$inferSelect;
 export type ServerInput = typeof servers.$inferInsert;
 
-export type MemberWithUser = Member & { user: typeof user.$inferSelect };
+export type MemberWithUser = Member & {
+  user: typeof user.$inferSelect;
+  roles: WireRole[];
+};
 export type ServerWithMembersAndUsersAndChannels = Server & {
   members: MemberWithUser[];
   channels: Channel[];

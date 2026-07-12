@@ -42,13 +42,13 @@ const DeleteServerModal = () => {
           Delete Server
         </DialogTitle>
         <DialogDescription className="text-center">
-          Are you sure want to Delete this Server <span className="text-blue-500">{server?.name}</span>?
+          Are you sure want to Delete this Server <span className="text-brand">{server?.name}</span>?
         </DialogDescription>
         <div className="flex items-center justify-around w-full">
           <Button onClick={onClose} variant="ghost" className="border border-white">
             Cancel
           </Button>
-          <Button disabled={deleteServerMutation.isPending} onClick={onDeleteServer} className="bg-red-800 text-white hover:bg-red-600/85">
+          <Button disabled={deleteServerMutation.isPending} onClick={onDeleteServer} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
             Confirm
           </Button>
         </div>
