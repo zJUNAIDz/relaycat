@@ -2,15 +2,15 @@ DEV  := compose.dev.yaml
 PROD := compose.prod.yaml
 
 # ---- Development (infra only; run apps with `bun dev` on the host) ----
-up:
+infra-up:
 	docker compose -f $(DEV) up -d
-down:
+infra-down:
 	docker compose -f $(DEV) down
-stop:
+infra-stop:
 	docker compose -f $(DEV) stop
-logs:
+infra-logs:
 	docker compose -f $(DEV) logs -f
-ps:
+infra-ps:
 	docker compose -f $(DEV) ps
 
 # ---- Production (full container-first stack) ----
