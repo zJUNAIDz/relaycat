@@ -121,6 +121,19 @@ export const auth = betterAuth({
   },
   advanced: {
     cookiePrefix: "auth",
+    // Share the session cookie across all *.zjunaidz.me subdomains. The API
+    // lives on rcapi.zjunaidz.me but the web app (and its Next.js SSR server
+    // components) run on relaycat.zjunaidz.me. Without a parent-domain cookie
+    // the cookie is host-only to rcapi, so SSR requests carry no session and
+    // get 401'd — which surfaced as channel/DM pages bouncing to /channels/me.
+    ...(process.env.COOKIE_DOMAIN
+      ? {
+          crossSubDomainCookies: {
+            enabled: true,
+            domain: process.env.COOKIE_DOMAIN,
+          },
+        }
+      : {}),
     // Secure cookies only in production — over http://localhost a Secure
     // cookie is silently dropped, which would break the session in dev.
     useSecureCookies: isProduction,
