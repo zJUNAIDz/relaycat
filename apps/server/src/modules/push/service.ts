@@ -26,7 +26,7 @@ class PushService {
   async save(
     userId: string,
     sub: WebPushSubscription,
-    userAgent?: string | null,
+    userAgent?: string | null,   
   ): Promise<void> {
     try {
       await db
@@ -109,4 +109,4 @@ class PushService {
   }
 }
 
-export const pushService = new PushService();
+export const  pushService = new PushService();

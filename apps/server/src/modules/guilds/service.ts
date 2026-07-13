@@ -345,10 +345,27 @@ class ServersService {
       return false;
     }
   }
+  /**
+   * The public server directory. Deliberately column-picked rather than
+   * `select()`: the full row carries `inviteCode`, and this endpoint is readable
+   * by any logged-in user — returning it would hand out a working join token for
+   * every public server and make CREATE_INVITE meaningless.
+   */
   async getPublicServers() {
     try {
       const publicServers = await db
-        .select()
+        .select({
+          id: servers.id,
+          name: servers.name,
+          image: servers.image,
+          banner: servers.banner,
+          description: servers.description,
+          memberCount: servers.memberCount,
+          isPublic: servers.isPublic,
+          ownerId: servers.ownerId,
+          createdAt: servers.createdAt,
+          updatedAt: servers.updatedAt,
+        })
         .from(servers)
         .where(eq(servers.isPublic, true));
       return publicServers;
