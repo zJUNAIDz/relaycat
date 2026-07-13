@@ -38,24 +38,6 @@
 
 ---
 
-## 🎬 Walkthrough
-
-> **Video walkthrough coming soon** — a quick tour of servers, real-time chat, presence, and voice/video.
-
-<div align="center">
-
-<!-- Replace the placeholder below with your demo. GitHub auto-embeds an uploaded .mp4 / .mov dragged into the README, or link a YouTube thumbnail. -->
-
-<a href="#">
-  <img src="https://placehold.co/900x500/5865F2/FFFFFF/png?text=%E2%96%B6+RelayCat+Demo+Walkthrough" alt="RelayCat demo walkthrough" width="100%" />
-</a>
-
-<sub>📹 <em>Click to watch the full walkthrough</em></sub>
-
-</div>
-
----
-
 ## ✨ Features
 
 | | Feature | Description |
