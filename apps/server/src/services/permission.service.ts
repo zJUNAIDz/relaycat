@@ -78,6 +78,38 @@ class PermissionService {
   }
 
   /**
+   * The rank of a member — their highest role position, with the server owner
+   * outranking everyone (+∞). Hierarchy rules compare ranks: you may only act on
+   * members and roles *strictly below* your own rank.
+   *
+   * Members with no roles rank 0, the same as @everyone.
+   */
+  async getMemberRank(memberId: string): Promise<number> {
+    const [row] = await db
+      .select({ userId: members.userId, ownerId: servers.ownerId })
+      .from(members)
+      .innerJoin(servers, eq(servers.id, members.serverId))
+      .where(eq(members.id, memberId))
+      .limit(1);
+    if (!row) throw new NotFoundError("Member not found");
+    if (row.userId === row.ownerId) return Number.POSITIVE_INFINITY;
+
+    const rows = await db
+      .select({ position: roles.position })
+      .from(memberRoles)
+      .innerJoin(roles, eq(roles.id, memberRoles.roleId))
+      .where(eq(memberRoles.memberId, memberId));
+
+    return rows.reduce((max, r) => Math.max(max, r.position), 0);
+  }
+
+  /** The acting member's own rank (owner ⇒ +∞). */
+  rankOf(ctx: MemberContext): number {
+    if (ctx.isOwner) return Number.POSITIVE_INFINITY;
+    return ctx.roles.reduce((max, r) => Math.max(max, r.position), 0);
+  }
+
+  /**
    * Batch-load roles for a set of members (for roster payloads). Returns a map
    * of memberId -> wire roles so callers can attach `roles` to each member.
    */
