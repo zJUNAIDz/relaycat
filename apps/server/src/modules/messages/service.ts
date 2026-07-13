@@ -8,24 +8,32 @@ import {
   messages,
   MessageWithMemberWithUser,
 } from "@/db/schema/message";
-import { servers } from "@/db/schema/server";
 import { and, desc, eq, gt, lt } from "drizzle-orm";
 import z from "zod/v4";
 import { cursorSchema, Result } from "./types";
 import { user } from "@/db/schema/auth-schema";
 import { applyProfileToUser, profileService } from "@/services/profile.service";
+import {
+  permissionService,
+  type MemberContext,
+} from "@/services/permission.service";
+import { Permission } from "@repo/types";
 import { User } from "better-auth/types";
 
 class MessageService {
   private MESSAGE_BATCH = 10;
+  /**
+   * Membership and SEND_MESSAGES are enforced by requirePermission at the route;
+   * `ctx` is the already-resolved member context for this channel's server, so
+   * the author is taken from it rather than re-derived here.
+   */
   async createMessage(
     messageInput: z.infer<typeof MessageCreateSchema>,
     channelId: Channel["id"],
-    currentUserId: Member["id"],
+    ctx: MemberContext,
   ): Promise<Result<{ message: Message; member: Member; user: User }>> {
     try {
       const newMessage = await db.transaction(async (tx) => {
-        console.log(channelId, currentUserId);
         const [channel] = await tx
           .select()
           .from(channels)
@@ -34,15 +42,15 @@ class MessageService {
         if (!channel) {
           throw new Error("Channel not found");
         }
+        // The context is resolved from this channel's server by the middleware;
+        // this guards against a channel/server mismatch slipping through.
+        if (channel.serverId !== ctx.serverId) {
+          throw new Error("Channel does not belong to this server");
+        }
         const [currentMember] = await tx
           .select()
           .from(members)
-          .where(
-            and(
-              eq(members.userId, currentUserId),
-              eq(members.serverId, channel.serverId),
-            ),
-          )
+          .where(eq(members.id, ctx.memberId))
           .limit(1);
         if (!currentMember) {
           throw new Error("Member not found in server");
@@ -87,40 +95,18 @@ class MessageService {
       return { ok: false, error };
     }
   }
+  /**
+   * Membership (VIEW_SERVER) is enforced by requirePermission at the route, which
+   * resolves the server from this channel — a non-member never reaches here.
+   */
   async getMessagesByChannelId(
     channelId: Channel["id"],
-    currentUserId: string,
     cursor?: z.infer<typeof cursorSchema>,
   ): Promise<
     Result<{ result: MessageWithMemberWithUser[]; nextCursor: string | null }>
   > {
     try {
       const { messagesList, nextCursor } = await db.transaction(async (tx) => {
-        // Transactional operations can be performed here if needed
-        const [channel] = await tx
-          .select()
-          .from(channels)
-          .where(eq(channels.id, channelId))
-          .limit(1);
-        const [server] = await tx
-          .select()
-          .from(servers)
-          .where(eq(servers.id, channel.serverId))
-          .limit(1);
-        const currentMember = await tx
-          .select()
-          .from(members)
-          .where(
-            and(
-              eq(members.userId, currentUserId),
-              eq(members.serverId, server.id),
-            ),
-          )
-          .limit(1);
-        if (!currentMember) {
-          throw new Error("Member not found in server");
-        }
-
         const cursorCondition =
           cursor?.type === "after"
             ? gt(messages.id, cursor.after)
@@ -173,40 +159,39 @@ class MessageService {
       return { ok: false, error };
     }
   }
+  /**
+   * Editing a message is author-only, by design: MANAGE_MESSAGES lets a moderator
+   * remove someone else's message, never rewrite it under their name.
+   */
   async updateMessage(
     messageId: Message["id"],
-    currentUserId: string,
+    channelId: Channel["id"],
+    ctx: MemberContext,
     updatedMessageInput: z.infer<typeof MessageCreateSchema>,
-  ): Promise<Result<Message[]>> {
+  ): Promise<Result<Message>> {
     try {
       const updatedMessage = await db.transaction(async (tx) => {
+        // Scope by channel too: the channel in the path is what was authorized,
+        // so a message id from another channel must not be reachable here.
         const [message] = await tx
           .select()
           .from(messages)
-          .where(eq(messages.id, messageId))
+          .where(
+            and(eq(messages.id, messageId), eq(messages.channelId, channelId)),
+          )
           .limit(1);
         if (!message) {
           throw new Error("Message not found");
         }
-        const [member] = await tx
-          .select()
-          .from(members)
-          .where(
-            and(
-              eq(members.id, message.memberId),
-              eq(members.userId, currentUserId),
-            ),
-          )
-          .limit(1);
-        if (!member) {
+        if (message.memberId !== ctx.memberId) {
           throw new Error("Unauthorized to update this message");
         }
-        const updatedMessage = await tx
+        const [updated] = await tx
           .update(messages)
-          .set(updatedMessageInput)
+          .set({ ...updatedMessageInput, updatedAt: new Date() })
           .where(eq(messages.id, messageId))
           .returning();
-        return updatedMessage;
+        return updated;
       });
       return { ok: true, data: updatedMessage };
     } catch (error) {
@@ -214,43 +199,39 @@ class MessageService {
       return { ok: false, error };
     }
   }
+
+  /**
+   * Soft-delete a message. Allowed for the message's author, or for any member
+   * holding MANAGE_MESSAGES in the channel's server (owners/ADMINISTRATOR
+   * included, via permissionService.can).
+   */
   async softDeleteMessage(
     id: Message["id"],
-    currentUserId: string,
+    channelId: Channel["id"],
+    ctx: MemberContext,
   ): Promise<Result<Message>> {
     try {
       const result = await db.transaction(async (tx) => {
-        const [currentMember] = await tx
-          .select()
-          .from(members)
-          .where(eq(members.userId, currentUserId))
-          .limit(1);
-        if (!currentMember) {
-          return null;
-        }
-
         const [message] = await tx
           .select()
           .from(messages)
-          .where(
-            and(eq(messages.id, id), eq(messages.memberId, currentMember.id)),
-          )
+          .where(and(eq(messages.id, id), eq(messages.channelId, channelId)))
           .limit(1);
         if (!message) {
           return null;
         }
 
-        const result = await tx
-          .update(messages)
-          .set({ deleted: true })
-          .where(
-            and(eq(messages.id, id), eq(messages.memberId, currentMember.id)),
-          );
-        if (result.rowCount === 0) {
+        const isAuthor = message.memberId === ctx.memberId;
+        if (!isAuthor && !permissionService.can(ctx, Permission.MANAGE_MESSAGES)) {
           return null;
         }
 
-        return message;
+        const [deleted] = await tx
+          .update(messages)
+          .set({ deleted: true, updatedAt: new Date() })
+          .where(eq(messages.id, id))
+          .returning();
+        return deleted ?? null;
       });
       if (!result) {
         return { ok: false, error: "Message not found or unauthorized" };

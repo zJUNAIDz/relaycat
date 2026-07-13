@@ -1,123 +1,163 @@
-import { CreateMessageDTO, EditMessageDTO } from "@repo/types";
+import { CreateMessageDTO, EditMessageDTO, Permission } from "@repo/types";
 import { notify } from "@/lib/notifier";
 import { socketManager } from "@/lib/socket-manager";
+import { channelService } from "@/modules/channels/service";
 import { messageService } from "@/modules/messages/service";
+import { requirePermission, ServerIdResolver } from "@/middlewares/permission";
 import { withResolvedMedia } from "@/utils/media";
 import { ProtectedAppContext, cursorSchema } from "@/types";
 import { Hono } from "hono";
 import z from "zod/v4";
 import { zValidator } from "@hono/zod-validator";
 
+// Mounted at /channels/:channelId/messages — the server is derived from the
+// channel in the path, so every handler below is authorized against it.
 const messageRoute = new Hono<ProtectedAppContext>();
 
-messageRoute.get("/", async (c) => {  
-  const channelId = z
-    .string({ error: "channelId param is missing" })
-    .safeParse(c.req.param("channelId"));
-  if (channelId.success === false) {
-    return c.json({ error: channelId.error.message }, 400);
-  }
-  
-  const cursor = cursorSchema.safeParse(c.req.query());
+const serverIdFromChannel: ServerIdResolver = (c) =>
+  channelService.getServerIdForChannel(c.req.param("channelId"));
 
-  const res = await messageService.getMessagesByChannelId(
-    channelId.data,
-    c.get("user").id,
-    cursor?.data,
-  );
-  if (res.ok === false) {
-    return c.json({ error: res.error }, 400);
-  }
+messageRoute.get(
+  "/",
+  requirePermission(Permission.VIEW_SERVER, serverIdFromChannel),
+  async (c) => {
+    const channelId = z
+      .string({ error: "channelId param is missing" })
+      .safeParse(c.req.param("channelId"));
+    if (channelId.success === false) {
+      return c.json({ error: channelId.error.message }, 400);
+    }
 
-  return c.json(withResolvedMedia(res.data));
-});
+    const cursor = cursorSchema.safeParse(c.req.query());
 
-messageRoute.post("/", zValidator("json", CreateMessageDTO), async (c) => {
-  const messageInput = c.req.valid("json");
+    const res = await messageService.getMessagesByChannelId(
+      channelId.data,
+      cursor?.data,
+    );
+    if (res.ok === false) {
+      return c.json({ error: res.error }, 400);
+    }
 
-  const channelId = z.string().safeParse(c.req.param("channelId"));
-  if (channelId.success === false) {
-    return c.json({ error: channelId.error.message }, 400);
-  }
+    return c.json(withResolvedMedia(res.data));
+  },
+);
 
-  const user = c.get("user");
+messageRoute.post(
+  "/",
+  requirePermission(Permission.SEND_MESSAGES, serverIdFromChannel),
+  zValidator("json", CreateMessageDTO),
+  async (c) => {
+    const messageInput = c.req.valid("json");
 
-  const res = await messageService.createMessage(
-    messageInput,
-    channelId.data,
-    user.id,
-  );
-  if (res.ok === false) {
-    return c.json({ error: res.error }, 400);
-  }
+    const channelId = z.string().safeParse(c.req.param("channelId"));
+    if (channelId.success === false) {
+      return c.json({ error: channelId.error.message }, 400);
+    }
 
-  // Resolve media (overlaid profile avatar key → URL) once for both the live
-  // broadcast and the HTTP response so history and realtime stay identical.
-  const payload = withResolvedMedia(res.data);
-  socketManager.io.emit(`chat:${channelId.data}:messages`, payload);
+    const user = c.get("user");
+    const ctx = c.get("memberContext");
 
-  // Notify @-mentioned users (notifier drops the author if self-mentioned).
-  const mentions = res.data.message.mentions ?? [];
-  if (mentions.length) {
-    const preview = res.data.message.content?.slice(0, 140) ?? null;
-    void Promise.all(
-      mentions.map((mentionedId) =>
-        notify({
-          userId: mentionedId,
-          type: "MENTION",
-          title: `${res.data.user.name} mentioned you`,
-          body: preview,
-          actorId: user.id,
-          channelId: channelId.data,
-          serverId: res.data.member.serverId,
-          messageId: res.data.message.id,
-        }),
-      ),
-    ).catch(() => {});
-  }
+    const res = await messageService.createMessage(
+      messageInput,
+      channelId.data,
+      ctx,
+    );
+    if (res.ok === false) {
+      return c.json({ error: res.error }, 400);
+    }
 
-  return c.json(payload);
-});
+    // Resolve media (overlaid profile avatar key → URL) once for both the live
+    // broadcast and the HTTP response so history and realtime stay identical.
+    const payload = withResolvedMedia(res.data);
+    socketManager.io.emit(`chat:${channelId.data}:messages`, payload);
 
-messageRoute.patch("/:messageId", zValidator("json", EditMessageDTO), async (c) => {
-  const messageId = z.string().safeParse(c.req.param("messageId"));
-  if (messageId.success === false) {
-    return c.json({ error: messageId.error.message }, 400);
-  }
-  const channelId = z.string().safeParse(c.req.query("channelId"));
-  if (channelId.success === false) {
-    return c.json({ error: channelId.error.message }, 400);
-  }
-  const messageInput = c.req.valid("json");
-  const user = c.get("user")!;
-  const message = await messageService.updateMessage(
-    messageId.data,
-    user.id,
-    messageInput,
-  );
-  socketManager.io.emit(`chat:${channelId.data}:messages:update`, message);
-  return c.json(message);
-});
+    // Notify @-mentioned users (notifier drops the author if self-mentioned).
+    const mentions = res.data.message.mentions ?? [];
+    if (mentions.length) {
+      const preview = res.data.message.content?.slice(0, 140) ?? null;
+      void Promise.all(
+        mentions.map((mentionedId) =>
+          notify({
+            userId: mentionedId,
+            type: "MENTION",
+            title: `${res.data.user.name} mentioned you`,
+            body: preview,
+            actorId: user.id,
+            channelId: channelId.data,
+            serverId: res.data.member.serverId,
+            messageId: res.data.message.id,
+          }),
+        ),
+      ).catch(() => {});
+    }
 
-messageRoute.delete("/:messageId", async (c) => {
-  const params = z
-    .object({
-      messageId: z.string(),
-      channelId: z.string(),
-    })
-    .safeParse(c.req.param());
-  if (!params.success) {
-    return c.json({ error: params.error.message }, 400);
-  }
-  const user = c.get("user")!;
-  const message = await messageService.softDeleteMessage(
-    params.data.messageId,
-    user.id,
-  );
-  socketManager.io.emit(
-    `chat:${params.data.channelId}:messages:delete`,
-    message,
-  );
-  return c.json(message);
-});
+    return c.json(payload);
+  },
+);
+
+// Editing is always author-only: MANAGE_MESSAGES lets you remove someone else's
+// message, never rewrite it in their name.
+messageRoute.patch(
+  "/:messageId",
+  requirePermission(Permission.SEND_MESSAGES, serverIdFromChannel),
+  zValidator("json", EditMessageDTO),
+  async (c) => {
+    const params = z
+      .object({ messageId: z.string(), channelId: z.string() })
+      .safeParse(c.req.param());
+    if (!params.success) {
+      return c.json({ error: params.error.message }, 400);
+    }
+    const messageInput = c.req.valid("json");
+    const ctx = c.get("memberContext");
+
+    const res = await messageService.updateMessage(
+      params.data.messageId,
+      params.data.channelId,
+      ctx,
+      messageInput,
+    );
+    if (res.ok === false) {
+      return c.json({ error: res.error }, 403);
+    }
+    socketManager.io.emit(
+      `chat:${params.data.channelId}:messages:update`,
+      res.data,
+    );
+    return c.json(res.data);
+  },
+);
+
+// Deleting is allowed for the author, or for anyone holding MANAGE_MESSAGES
+// (checked inside the service against the resolved member context).
+messageRoute.delete(
+  "/:messageId",
+  requirePermission(Permission.VIEW_SERVER, serverIdFromChannel),
+  async (c) => {
+    const params = z
+      .object({
+        messageId: z.string(),
+        channelId: z.string(),
+      })
+      .safeParse(c.req.param());
+    if (!params.success) {
+      return c.json({ error: params.error.message }, 400);
+    }
+    const ctx = c.get("memberContext");
+
+    const res = await messageService.softDeleteMessage(
+      params.data.messageId,
+      params.data.channelId,
+      ctx,
+    );
+    if (res.ok === false) {
+      return c.json({ error: res.error }, 403);
+    }
+    socketManager.io.emit(
+      `chat:${params.data.channelId}:messages:delete`,
+      res.data,
+    );
+    return c.json(res.data);
+  },
+);
 export default messageRoute;

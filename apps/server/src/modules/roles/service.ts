@@ -1,7 +1,10 @@
 import { db } from "@/db";
 import { members } from "@/db/schema/member";
 import { memberRoles, roles } from "@/db/schema/role";
-import type { MemberContext } from "@/services/permission.service";
+import {
+  permissionService,
+  type MemberContext,
+} from "@/services/permission.service";
 import {
   BadRequestError,
   ForbiddenError,
@@ -57,14 +60,25 @@ class RolesService {
     const requested = parsePermissions(input.permissions);
     this.assertCanGrant(ctx, requested);
 
-    // New roles sit just below the actor's highest role (above @everyone).
     const [top] = await db
       .select({ position: roles.position })
       .from(roles)
       .where(eq(roles.serverId, serverId))
       .orderBy(desc(roles.position))
       .limit(1);
-    const position = (top?.position ?? 0) + 1;
+    const aboveAll = (top?.position ?? 0) + 1;
+
+    // A new role must land strictly below the actor's own rank, otherwise a
+    // MANAGE_ROLES holder could mint a role above themselves — one they could
+    // then never manage, and which outranks the roles they're allowed to touch.
+    // The owner is unbounded and simply gets the top slot.
+    const actorRank = highestPosition(ctx);
+    const position = ctx.isOwner ? aboveAll : Math.min(aboveAll, actorRank - 1);
+    if (position < 1) {
+      throw new ForbiddenError(
+        "You need a role ranked above @everyone to create roles",
+      );
+    }
 
     const [row] = await db
       .insert(roles)
@@ -124,6 +138,15 @@ class RolesService {
       if (role.isDefault) {
         throw new BadRequestError("The @everyone role cannot be moved");
       }
+      // Without this, the hierarchy is trivially escapable: create a role below
+      // yourself, then re-position it above your own rank. Your rank rises with
+      // it, and you can then assign yourself the (previously untouchable)
+      // ADMINISTRATOR role. The new position must stay strictly below your rank.
+      if (!ctx.isOwner && input.position >= highestPosition(ctx)) {
+        throw new ForbiddenError(
+          "You cannot move a role to or above your highest role",
+        );
+      }
       patch.position = input.position;
     }
 
@@ -145,6 +168,29 @@ class RolesService {
     return true;
   }
 
+  /**
+   * You may only change the roles of a member ranked strictly below you — otherwise
+   * a moderator could strip roles from (or pile roles onto) an admin or a peer.
+   */
+  private async assertCanManageMember(ctx: MemberContext, memberId: string) {
+    if (ctx.isOwner) return;
+    const targetRank = await permissionService.getMemberRank(memberId);
+    if (targetRank >= highestPosition(ctx)) {
+      throw new ForbiddenError(
+        "You cannot manage the roles of a member at or above your highest role",
+      );
+    }
+  }
+
+  private async assertMemberInServer(serverId: string, memberId: string) {
+    const [member] = await db
+      .select({ id: members.id })
+      .from(members)
+      .where(and(eq(members.id, memberId), eq(members.serverId, serverId)))
+      .limit(1);
+    if (!member) throw new NotFoundError("Member not found");
+  }
+
   async assignRole(
     serverId: string,
     ctx: MemberContext,
@@ -153,13 +199,8 @@ class RolesService {
   ) {
     const role = await this.getRoleInServer(serverId, roleId);
     this.assertCanManage(ctx, role);
-
-    const [member] = await db
-      .select({ id: members.id })
-      .from(members)
-      .where(and(eq(members.id, memberId), eq(members.serverId, serverId)))
-      .limit(1);
-    if (!member) throw new NotFoundError("Member not found");
+    await this.assertMemberInServer(serverId, memberId);
+    await this.assertCanManageMember(ctx, memberId);
 
     await db
       .insert(memberRoles)
@@ -179,6 +220,9 @@ class RolesService {
       throw new BadRequestError("The @everyone role cannot be removed");
     }
     this.assertCanManage(ctx, role);
+    await this.assertMemberInServer(serverId, memberId);
+    await this.assertCanManageMember(ctx, memberId);
+
     await db
       .delete(memberRoles)
       .where(
