@@ -23,12 +23,14 @@ const ChannelIdPage = async ({ params }: ChannelIdPageProps) => {
     redirect(PAGE_ROUTES.AUTH)
   }
 
-  const { channelId } = await params;
+  const { serverId, channelId } = await params;
   const channel = await channelService.getChannelById(channelId)
   if (!channel) {
     notFound()
   }
-  const member = await memberService.getMemberByUserId(user.id)
+  // Scoped to this server: a user's member id differs per server, and this row
+  // is what the chat compares against to decide which messages are "mine".
+  const member = await memberService.getMyMember(serverId)
   if (!member) {
     notFound()
   }

@@ -12,10 +12,15 @@ class MemberService {
     }
     return member;
   }
-  async getMemberByUserId(userId: string): Promise<Member> {
+  /**
+   * The current user's member row in a given server. Server-scoped: a user has a
+   * distinct member id per server, and the chat UI compares against it to decide
+   * message ownership.
+   */
+  async getMyMember(serverId: string): Promise<Member> {
     const {
       data: { member, error },
-    } = await axiosClient.get(`/members/user/${userId}`);
+    } = await axiosClient.get(`/members/server/${serverId}/me`);
     if (error) {
       throw new Error(error);
     }
