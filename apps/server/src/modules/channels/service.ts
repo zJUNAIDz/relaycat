@@ -107,7 +107,7 @@ class ChannelService {
   /** The server a channel belongs to — used to scope permission checks. */
   async getServerIdForChannel(
     channelId: Channel["id"] | undefined,
-  ): Promise<string | undefined> {
+  ): Promise<string | undefined | null> {
     if (!channelId) return undefined;
     const [channel] = await db
       .select({ serverId: channels.serverId })
