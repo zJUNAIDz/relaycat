@@ -36,6 +36,8 @@ export const profiles = pgTable(
     pronouns: text("pronouns"),
     status: text("status"),
     links: jsonb("links").$type<ProfileLink[]>().default([]).notNull(),
+    //it must be set exactly once, by the dedicated completion endpoint, never from the generic profile PATCH.
+    onboardingCompletedAt: timestamp("onboarding_completed_at"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at")
       .defaultNow()

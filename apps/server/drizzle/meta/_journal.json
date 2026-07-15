@@ -64,6 +64,13 @@
       "when": 1783046529687,
       "tag": "0008_rbac_bitmask_roles",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1783943997612,
+      "tag": "0009_onboarding_flag",
+      "breakpoints": true
     }
   ]
 }
