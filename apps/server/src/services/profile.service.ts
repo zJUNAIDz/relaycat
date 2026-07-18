@@ -9,7 +9,7 @@ import { s3Service } from "@/lib/s3";
 import { USER_PROFILE_POLICY } from "@/config/uploads";
 import { logger } from "@/lib/logger";
 import { toMediaPath } from "@/utils/media";
-import { eq, inArray } from "drizzle-orm";
+import { and, eq, inArray, isNull, sql } from "drizzle-orm";
 
 export type UpdateProfileInput = Partial<
   Pick<
@@ -41,6 +41,27 @@ export type ProfileSummary = {
   pronouns: string | null;
   accentColor: string | null;
 };
+
+/** Raised when a username PATCH loses the race for a handle. Route → 409. */
+export class UsernameTakenError extends Error {
+  constructor() {
+    super("That username is already taken");
+    this.name = "UsernameTakenError";
+  }
+}
+
+/**
+ * Postgres `unique_violation` (only `profiles.username` is unique here).
+ * Drizzle wraps driver errors in a `DrizzleQueryError`, so the pg error — and
+ * its `code` — sits down the `cause` chain rather than on the thrown object.
+ */
+function isUniqueViolation(err: unknown): boolean {
+  for (let e: unknown = err; e != null; e = (e as { cause?: unknown }).cause) {
+    if (typeof e !== "object") break;
+    if ((e as { code?: unknown }).code === "23505") return true;
+  }
+  return false;
+}
 
 /** Minimal auth-user shape an overlay touches (id stays put; name/image swap). */
 type OverlayableUser = { id: string; name: string; image: string | null };
@@ -148,6 +169,60 @@ class ProfileService {
     }
   }
 
+  /**
+   * Is this handle free? Case-insensitive, and a user's own current username
+   * counts as available so re-submitting an unchanged form doesn't self-collide.
+   * Advisory only — the unique index on `profiles.username` is the real guard.
+   */
+  async isUsernameAvailable(
+    username: string,
+    forUserId?: string,
+  ): Promise<boolean> {
+    try {
+      const [taken] = await db
+        .select({ userId: profiles.userId })
+        .from(profiles)
+        .where(eq(sql`lower(${profiles.username})`, username.toLowerCase()))
+        .limit(1);
+      if (!taken) return true;
+      return taken.userId === forUserId;
+    } catch (err) {
+      logger.error({ err, username }, "[profileService/isUsernameAvailable]");
+      // Fail closed: never tell the client a handle is free when we don't know.
+      return false;
+    }
+  }
+
+  /**
+   * Mark onboarding done. Idempotent and one-way — the timestamp is only ever
+   * written if it's still null, so replaying the call can't move it.
+   */
+  async completeOnboarding(userId: string): Promise<Profile | null> {
+    try {
+      const [updated] = await db
+        .update(profiles)
+        .set({ onboardingCompletedAt: new Date(), updatedAt: new Date() })
+        .where(
+          and(
+            eq(profiles.userId, userId),
+            isNull(profiles.onboardingCompletedAt),
+          ),
+        )
+        .returning();
+      if (updated) return updated;
+      // Already onboarded — return the existing row rather than a null "failure".
+      const [existing] = await db
+        .select()
+        .from(profiles)
+        .where(eq(profiles.userId, userId))
+        .limit(1);
+      return existing ?? null;
+    } catch (err) {
+      logger.error({ err, userId }, "[profileService/completeOnboarding]");
+      return null;
+    }
+  }
+
   async updateProfile(
     userId: string,
     data: UpdateProfileInput,
@@ -158,6 +233,9 @@ class ProfileService {
       if ("avatar" in patch) patch.avatar = toMediaPath(patch.avatar);
       if ("banner" in patch) patch.banner = toMediaPath(patch.banner);
 
+      // Handles are stored lowercase so the unique index and lookups agree.
+      if (patch.username) patch.username = patch.username.toLowerCase();
+
       const [updated] = await db
         .update(profiles)
         .set({ ...patch, updatedAt: new Date() })
@@ -165,6 +243,10 @@ class ProfileService {
         .returning();
       return updated ?? null;
     } catch (err) {
+      // A concurrent claim of the same handle races past any pre-check; the
+      // unique index is what actually decides, so translate it into something
+      // the route can turn into a 409 instead of a blind 500.
+      if (isUniqueViolation(err)) throw new UsernameTakenError();
       logger.error({ err, userId }, "[profileService/updateProfile]");
       return null;
     }

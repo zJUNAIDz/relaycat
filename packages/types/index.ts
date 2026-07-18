@@ -26,6 +26,8 @@ export type Profile = {
   pronouns: string | null;
   status: string | null;
   links: ProfileLink[];
+  /** Null until the user finishes the onboarding wizard; gates the app shell. */
+  onboardingCompletedAt: string | null;
   createdAt: Date;
   updatedAt: Date;
 };
@@ -286,6 +288,13 @@ export const UpdateProfileDTO = z.object({
   links: z.array(ProfileLinkDTO).max(5).optional(),
 });
 export type UpdateProfileInput = z.infer<typeof UpdateProfileDTO>;
+
+/** Query for the live handle-availability check used by the onboarding form. */
+export const CheckUsernameDTO = z.object({
+  username: z.string().regex(USERNAME_REGEX),
+});
+export type CheckUsernameInput = z.infer<typeof CheckUsernameDTO>;
+export type UsernameAvailability = { username: string; available: boolean };
 
 // ---------------------------------------------------------------------------
 // Friends Module
