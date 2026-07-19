@@ -3,6 +3,8 @@ export const PAGE_ROUTES = {
   HOME: "/channels/me",
   AUTH: "/auth",
   VERIFY_EMAIL: "/auth/verify-email",
+  ONBOARDING: "/onboarding",
+  DISCOVER: "/discover",
   SETTINGS: "/settings",
   PROFILE_EDIT: "/settings/profile/edit",
   CHANNEL: (channelId: string) => `channels/${channelId}`,
