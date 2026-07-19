@@ -20,18 +20,7 @@ import {
 import { ProfileImageField } from "./profile-image-field";
 import { ProfilePreview } from "./profile-preview";
 
-const ACCENT_SWATCHES = [
-  "#5865F2",
-  "#EB459E",
-  "#ED4245",
-  "#FEE75C",
-  "#57F287",
-  "#3BA55D",
-  "#FAA61A",
-  "#9B59B6",
-];
-
-const FALLBACK_ACCENT = "#5865F2";
+import { ACCENT_SWATCHES, FALLBACK_ACCENT } from "../accent-colors";
 
 interface FormValues {
   username: string;

@@ -17,7 +17,8 @@ const InviteCodePage: React.FC<InviteCodePageProps> = async ({
 
   const { serverId } = await serverService.joinServerByInviteCode(inviteCode)
   if (serverId) {
-    redirect(`/servers/${serverId}`)
+    // /channels/[serverId] resolves the first channel and redirects there.
+    redirect(`/channels/${serverId}`)
   }
   redirect(PAGE_ROUTES.HOME)
 };
