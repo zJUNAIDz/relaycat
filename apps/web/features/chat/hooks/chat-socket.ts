@@ -7,6 +7,7 @@ import {
   chatChannelEventKey,
 } from "@/shared/types";
 import { InfiniteData, useQueryClient } from "@tanstack/react-query";
+import { produce } from "immer";
 import React from "react";
 
 type ChatSocketProps = {
@@ -39,25 +40,21 @@ export const useChatSocket = ({ chatId, queryKey }: ChatSocketProps) => {
 
     // Handle incoming new messages
     const handleAddMessage = (payload: ChatChannelEventPayloads["add"]) => {
-      queryClient.setQueryData<ChatInfiniteData>(cacheKey, (oldData) => {
-        if (!oldData || !oldData.pages || oldData.pages.length === 0) {
-          return {
-            pageParams: [null],
-            pages: [{ result: [payload], nextCursor: null }],
-          };
-        }
-
-        return {
-          ...oldData,
-          pages: oldData.pages.map((page, index) => {
-            // Prepend the new message directly to the first page
-            if (index === 0) {
-              return { ...page, result: [payload, ...page.result] };
+      queryClient.setQueryData<ChatInfiniteData>(
+        cacheKey,
+        (oldData) =>
+          produce(oldData, (draft) => {
+            if (!draft || !draft.pages || draft.pages.length === 0) {
+              return {
+                pageParams: [null],
+                pages: [{ result: [payload], nextCursor: null }],
+              };
             }
-            return page;
+
+            // Prepend the new message directly to the first page
+            draft.pages[0]?.result.unshift(payload);
           }),
-        };
-      });
+      );
     };
 
     // Handle inline updates (like editing text). The server emits the bare
@@ -67,21 +64,20 @@ export const useChatSocket = ({ chatId, queryKey }: ChatSocketProps) => {
     const handleUpdateMessage = (
       updatedMessage: ChatChannelEventPayloads["update"],
     ) => {
-      queryClient.setQueryData<ChatInfiniteData>(cacheKey, (oldData) => {
-        if (!oldData) return oldData;
+      queryClient.setQueryData<ChatInfiniteData>(cacheKey, (oldData) =>
+        produce(oldData, (draft) => {
+          if (!draft) return;
 
-        return {
-          ...oldData,
-          pages: oldData.pages.map((page) => ({
-            ...page,
-            result: page.result.map((item) =>
-              item.message.id === updatedMessage.id
-                ? { ...item, message: { ...item.message, ...updatedMessage } }
-                : item,
-            ),
-          })),
-        };
-      });
+          for (const page of draft.pages) {
+            const item = page.result.find(
+              (item) => item.message.id === updatedMessage.id,
+            );
+            if (item) {
+              Object.assign(item.message, updatedMessage);
+            }
+          }
+        }),
+      );
     };
 
     // Handle soft deletes (flipping the `deleted` flag to true). Payload is the
@@ -89,21 +85,20 @@ export const useChatSocket = ({ chatId, queryKey }: ChatSocketProps) => {
     const handleDeleteMessage = (
       deletedMessage: ChatChannelEventPayloads["delete"],
     ) => {
-      queryClient.setQueryData<ChatInfiniteData>(cacheKey, (oldData) => {
-        if (!oldData) return oldData;
+      queryClient.setQueryData<ChatInfiniteData>(cacheKey, (oldData) =>
+        produce(oldData, (draft) => {
+          if (!draft) return;
 
-        return {
-          ...oldData,
-          pages: oldData.pages.map((page) => ({
-            ...page,
-            result: page.result.map((item) =>
-              item.message.id === deletedMessage.id
-                ? { ...item, message: { ...item.message, deleted: true } }
-                : item,
-            ),
-          })),
-        };
-      });
+          for (const page of draft.pages) {
+            const item = page.result.find(
+              (item) => item.message.id === deletedMessage.id,
+            );
+            if (item) {
+              item.message.deleted = true;
+            }
+          }
+        }),
+      );
     };
 
     // Listeners setup
