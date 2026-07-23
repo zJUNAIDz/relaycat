@@ -360,8 +360,6 @@ flowchart LR
 docker compose -f compose.prod.yaml up -d
 ```
 
-See [`DEPLOYMENT.md`](./DEPLOYMENT.md) for the full production runbook.
-
 ---
 
 ## 📄 License
