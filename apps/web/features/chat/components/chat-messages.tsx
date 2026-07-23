@@ -43,9 +43,6 @@ export const ChatMessages = ({
   type
 }: ChatMessagesProps) => {
   const queryKey = `chat:${chatId}`;
-  const addKey = `chat:${chatId}:messages`;
-  const updateKey = `chat:${chatId}:messages:update`;
-  const deleteKey = `chat:${chatId}:messages:delete`;
 
   const chatRef = React.useRef<HTMLDivElement>(null);
   const bottomRef = React.useRef<HTMLDivElement>(null);
@@ -64,9 +61,7 @@ export const ChatMessages = ({
   });
 
   useChatSocket({
-    addKey,
-    updateKey,
-    deleteKey,
+    chatId,
     queryKey: [queryKey, paramKey, paramValue],
   });
 

@@ -1,4 +1,9 @@
-import { CreateMessageDTO, EditMessageDTO, Permission } from "@repo/types";
+import {
+  CreateMessageDTO,
+  EditMessageDTO,
+  Permission,
+  emitChatChannelEvent,
+} from "@repo/types";
 import { notify } from "@/lib/notifier";
 import { socketManager } from "@/lib/socket-manager";
 import { channelService } from "@/modules/channels/service";
@@ -14,8 +19,9 @@ import { zValidator } from "@hono/zod-validator";
 // channel in the path, so every handler below is authorized against it.
 const messageRoute = new Hono<ProtectedAppContext>();
 
-const serverIdFromChannel: ServerIdResolver = (c) =>
-  channelService.getServerIdForChannel(c.req.param("channelId"));
+const serverIdFromChannel: ServerIdResolver = async (c) =>
+  (await channelService.getServerIdForChannel(c.req.param("channelId"))) ??
+  undefined;
 
 messageRoute.get(
   "/",
@@ -69,7 +75,7 @@ messageRoute.post(
     // Resolve media (overlaid profile avatar key → URL) once for both the live
     // broadcast and the HTTP response so history and realtime stay identical.
     const payload = withResolvedMedia(res.data);
-    socketManager.io.emit(`chat:${channelId.data}:messages`, payload);
+    emitChatChannelEvent(socketManager.io, "add", channelId.data, payload);
 
     // Notify @-mentioned users (notifier drops the author if self-mentioned).
     const mentions = res.data.message.mentions ?? [];
@@ -120,8 +126,10 @@ messageRoute.patch(
     if (res.ok === false) {
       return c.json({ error: res.error }, 403);
     }
-    socketManager.io.emit(
-      `chat:${params.data.channelId}:messages:update`,
+    emitChatChannelEvent(
+      socketManager.io,
+      "update",
+      params.data.channelId,
       res.data,
     );
     return c.json(res.data);
@@ -153,8 +161,10 @@ messageRoute.delete(
     if (res.ok === false) {
       return c.json({ error: res.error }, 403);
     }
-    socketManager.io.emit(
-      `chat:${params.data.channelId}:messages:delete`,
+    emitChatChannelEvent(
+      socketManager.io,
+      "delete",
+      params.data.channelId,
       res.data,
     );
     return c.json(res.data);

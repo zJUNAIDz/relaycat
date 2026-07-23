@@ -2,42 +2,30 @@
 
 import { useSocket } from "@/shared/providers/socket-provider";
 import {
-  Member,
-  Message,
-  MessageWithMemberWithUser,
-  User,
+  ChatChannelEventPayloads,
+  ChatMessageBroadcast,
+  chatChannelEventKey,
 } from "@/shared/types";
 import { InfiniteData, useQueryClient } from "@tanstack/react-query";
 import React from "react";
 
 type ChatSocketProps = {
-  addKey: string;
-  updateKey: string;
-  deleteKey: string;
+  chatId: string;
   queryKey: unknown[];
 };
 
-// 1. A single chat item item structure
-interface ChatItem {
-  message: Message;
-  member: Member;
-  user: User;
-}
-
-// 2. A "Page" is simply an array of these items
+// A cache "page" is a batch of message items plus its pagination cursor. Items
+// carry the wire shape the socket delivers (message row + minimal author); the
+// render layer reads them through the richer MessageWithMemberWithUser view.
 type ChatPage = {
-  result: ChatItem[];
+  result: ChatMessageBroadcast[];
   nextCursor: string | null;
 };
 
-// 3. TanStack Query's internal cache representation
+// TanStack Query's internal cache representation for a channel's message list.
 type ChatInfiniteData = InfiniteData<ChatPage>;
-export const useChatSocket = ({
-  addKey,
-  updateKey,
-  deleteKey,
-  queryKey,
-}: ChatSocketProps) => {
+
+export const useChatSocket = ({ chatId, queryKey }: ChatSocketProps) => {
   const { socket } = useSocket();
   const queryClient = useQueryClient();
 
@@ -45,12 +33,13 @@ export const useChatSocket = ({
     if (!socket) return;
 
     const cacheKey = queryKey;
+    const addKey = chatChannelEventKey.add(chatId);
+    const updateKey = chatChannelEventKey.update(chatId);
+    const deleteKey = chatChannelEventKey.delete(chatId);
 
     // Handle incoming new messages
-    const handleAddMessage = (payload: ChatItem) => {
+    const handleAddMessage = (payload: ChatChannelEventPayloads["add"]) => {
       queryClient.setQueryData<ChatInfiniteData>(cacheKey, (oldData) => {
-        console.log({ oldData, payload });
-
         if (!oldData || !oldData.pages || oldData.pages.length === 0) {
           return {
             pageParams: [null],
@@ -71,44 +60,48 @@ export const useChatSocket = ({
       });
     };
 
-    // Handle inline updates (like editing text)
-    const handleUpdateMessage = (updatedMessage: MessageWithMemberWithUser) => {
+    // Handle inline updates (like editing text). The server emits the bare
+    // updated message row (not the { message, member, user } wrapper the add
+    // path uses), so match on its id and merge its fields into the cached
+    // message, preserving anything the row omits.
+    const handleUpdateMessage = (
+      updatedMessage: ChatChannelEventPayloads["update"],
+    ) => {
       queryClient.setQueryData<ChatInfiniteData>(cacheKey, (oldData) => {
         if (!oldData) return oldData;
 
         return {
           ...oldData,
-          pages: oldData.pages.map((page) =>
-            ({
-              ...page,
-              result: page.result.map((item) =>
-                item.message.id === updatedMessage.message.id
-                  ? { ...item, message: updatedMessage.message }
-                  : item,
-              ),
-            }),
-          ),
+          pages: oldData.pages.map((page) => ({
+            ...page,
+            result: page.result.map((item) =>
+              item.message.id === updatedMessage.id
+                ? { ...item, message: { ...item.message, ...updatedMessage } }
+                : item,
+            ),
+          })),
         };
       });
     };
 
-    // Handle soft deletes (Flipping the `deleted` flag to true)
-    const handleDeleteMessage = (deletedMessage: MessageWithMemberWithUser) => {
+    // Handle soft deletes (flipping the `deleted` flag to true). Payload is the
+    // bare message row, same as the update path.
+    const handleDeleteMessage = (
+      deletedMessage: ChatChannelEventPayloads["delete"],
+    ) => {
       queryClient.setQueryData<ChatInfiniteData>(cacheKey, (oldData) => {
         if (!oldData) return oldData;
 
         return {
           ...oldData,
-          pages: oldData.pages.map((page) =>
-            ({
-              ...page,
-              result: page.result.map((item) =>
-                item.message.id === deletedMessage.message.id
-                  ? { ...item, message: { ...item.message, deleted: true } }
-                  : item,
-              ),
-            }),
-          ),
+          pages: oldData.pages.map((page) => ({
+            ...page,
+            result: page.result.map((item) =>
+              item.message.id === deletedMessage.id
+                ? { ...item, message: { ...item.message, deleted: true } }
+                : item,
+            ),
+          })),
         };
       });
     };
@@ -123,5 +116,5 @@ export const useChatSocket = ({
       socket.off(updateKey, handleUpdateMessage);
       socket.off(deleteKey, handleDeleteMessage);
     };
-  }, [socket, queryKey, addKey, updateKey, deleteKey, queryClient]);
+  }, [socket, queryKey, chatId, queryClient]);
 };

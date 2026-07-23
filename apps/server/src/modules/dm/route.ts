@@ -6,6 +6,7 @@ import {
   CreateMessageDTO,
   EditMessageDTO,
   OpenDmDTO,
+  emitChatChannelEvent,
 } from "@repo/types";
 import { zValidator } from "@hono/zod-validator";
 import { Hono } from "hono";
@@ -65,7 +66,7 @@ dmRoute.post(
     );
     if (!res.ok) return c.json({ error: res.error }, 400);
     const payload = withResolvedMedia(res.data);
-    socketManager.io.emit(`chat:${channelId}:messages`, payload);
+    emitChatChannelEvent(socketManager.io, "add", channelId, payload);
 
     // Notify the other participant(s) of the new DM.
     const sender = c.get("user");
@@ -104,7 +105,7 @@ dmRoute.patch(
       c.req.valid("json").content,
     );
     if (!res.ok) return c.json({ error: res.error }, 400);
-    socketManager.io.emit(`chat:${channelId}:messages:update`, res.data);
+    emitChatChannelEvent(socketManager.io, "update", channelId, res.data);
     return c.json({ message: res.data });
   },
 );
@@ -114,7 +115,7 @@ dmRoute.delete("/:channelId/messages/:messageId", async (c) => {
   const { channelId, messageId } = c.req.param();
   const res = await dmService.deleteMessage(c.get("user").id, messageId);
   if (!res.ok) return c.json({ error: res.error }, 400);
-  socketManager.io.emit(`chat:${channelId}:messages:delete`, res.data);
+  emitChatChannelEvent(socketManager.io, "delete", channelId, res.data);
   return c.json({ message: res.data });
 });
 

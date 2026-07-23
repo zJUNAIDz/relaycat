@@ -163,6 +163,78 @@ export type MessageWithMemberWithUser = {
   user: User & { image: string | null };
 };
 
+/**
+ * The persisted message columns as they travel over realtime socket events.
+ */
+export type ChatMessageRow = {
+  id: string;
+  content: string | null;
+  mentions: string[] | null;
+  mentionRoles: string[] | null;
+  reactions: string[] | null;
+  deleted: boolean;
+  authorId: string;
+  /** Server-member author; null for DM messages. */
+  memberId: string | null;
+  channelId: string;
+  createdAt: Date;
+  updatedAt: Date | null;
+};
+
+/**
+ * A freshly-created message paired with just enough author identity for the
+ * client to render it from scratch. `member`/`user` are structurally minimal on
+ * purpose: server channels attach a real member row, DM channels synthesize a
+ * lightweight one, and only these fields are relied on downstream.
+ */
+export type ChatMessageBroadcast = {
+  message: ChatMessageRow;
+  member: { id: string; userId: string };
+  user: { id: string; name: string; image?: string | null };
+};
+
+/**
+ * Realtime chat events broadcast per channel. Single source of truth for the
+ * server emit sites AND the client socket listeners, so an event's name and its
+ * payload shape can never drift apart — the drift that once made edits/deletes
+ * silently no-op on the client (client read `payload.message.id` while the
+ * server sent a bare message row).
+ *
+ * - `add`    → a brand-new message, wrapped with its author so the client can
+ *              render it from scratch.
+ * - `update` → the edited message row. The client already holds the author, so
+ *              only the message fields are sent and merged into the cache.
+ * - `delete` → the soft-deleted message row (same shape as `update`).
+ */
+export type ChatChannelEventPayloads = {
+  add: ChatMessageBroadcast;
+  update: ChatMessageRow;
+  delete: ChatMessageRow;
+};
+
+export type ChatChannelEventKind = keyof ChatChannelEventPayloads;
+
+/** Builds the socket event name for a given channel + event kind. */
+export const chatChannelEventKey = {
+  add: (channelId: string) => `chat:${channelId}:messages` as const,
+  update: (channelId: string) => `chat:${channelId}:messages:update` as const,
+  delete: (channelId: string) => `chat:${channelId}:messages:delete` as const,
+} satisfies { [K in ChatChannelEventKind]: (channelId: string) => string };
+
+/**
+ * Type-safe broadcast of a chat channel event. Couples the event kind to both
+ * its key and its payload, so passing the wrong payload shape for an event is a
+ * compile error at the emit site instead of a silent runtime mismatch.
+ */
+export function emitChatChannelEvent<K extends ChatChannelEventKind>(
+  io: { emit: (event: string, payload: ChatChannelEventPayloads[K]) => void },
+  kind: K,
+  channelId: string,
+  payload: ChatChannelEventPayloads[K],
+): void {
+  io.emit(chatChannelEventKey[kind](channelId), payload);
+}
+
 export type MemberWithUser = Member & { user: User };
 // Server / Guild Module DTOs
 export const CreateServerDTO = z.object({
